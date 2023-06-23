@@ -1,0 +1,11 @@
+{
+	"name": "sandbox",
+	"version-string": "0.0.1",
+	"dependencies": [
+		"freeglut",
+		"glew",
+		"glm",
+		"stb",
+		"assimp"
+	]
+}

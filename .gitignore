@@ -1,0 +1,8 @@
+/.vscode
+/.vs
+/build
+*.dll
+/models
+
+# temp fix
+/src/texture
