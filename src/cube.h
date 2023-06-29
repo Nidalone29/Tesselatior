@@ -15,7 +15,7 @@ class Cube {
    * Renderizza l'oggetto. Se necessario, l'oggetto viene prima inizializzato
    * chiamando la init().
    */
-  void render(void);
+  void render();
 
   /**
    * Inizializzazione degli oggetti OpenGL. E' fatta in un secondo tempo
