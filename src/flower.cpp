@@ -3,13 +3,15 @@
 
 Flower::Flower() : _initialized(false) {}
 
-void Flower::init(void) {
+void Flower::init() {
   _model.load_mesh("models/flower/flower.obj", aiProcess_Triangulate);
   _initialized = true;
 }
 
-void Flower::render(void) {
-  if (!_initialized) init();
+void Flower::render() {
+  if (!_initialized) {
+    init();
+  }
 
   _model.render();
 }

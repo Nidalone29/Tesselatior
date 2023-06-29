@@ -1,41 +1,39 @@
 /**
-  Questo codice mostra come sfruttare la libreria esterna assimp per impofrtare
-  dei modelli 3D e renderizzarli nella scena. Al momento, il codice è in grado
-  di renderizzare modelli costituiti da una singola mesh e con una singola
-  Texture associata.
+ * Questo codice mostra come sfruttare la libreria esterna assimp per impofrtare
+ * dei modelli 3D e renderizzarli nella scena. Al momento, il codice è in grado
+ * di renderizzare modelli costituiti da una singola mesh e con una singola
+ * Texture associata.
+ *
+ * I modelli 3D sono memorizzato nella cartella models (nella root di questo
+ * codice). Il formato dei file è Wavefront
+ * (https://en.wikipedia.org/wiki/Wavefront_.obj_file), un semplice file di
+ * testo con la lista delle coordinate dei vertici, facce e normali dei
+ * triangoli, e la/le texture associata/e.
+ *
+ * E' stata creata una classe Mesh che gestisce il caricamento e il rendering
+ * dei modelli. Gli oggetti in scena sono incapsulati in classi che permettono
+ * l'inizializzazione del modello e il suo rendering.
+ *
+ * Per comodità, sono state istanziate delle variabili globali che
+ * contengono diversi modelli 3D:
+ *
+ * Modelli singoli:
+ * 'teapot': Una teiera (visualizzabile premendo 't')
+ * 'skull' : Una teschio (visualizzabile premendo 'k')
+ * 'dragon': Una drago (visualizzabile premendo 'g')
+ * 'boot'  : Uno scarpone (visualizzabile premendo 'b')
+ * 'flower': Un fiore (visualizzabile premendo 'f')
+ *
+ * Modello composto
+ * 'marius': Un volto (visualizzabile premendo 'm').
+ * Questo modello è composto da diverse mesh (6) ciascuna definita in un suo
+ * file separato. Una volta caricate le singole mesh, queste sono renderizzate
+ * di seguito all'interno dello stesso ciclo di rendering per avere il volto
+ * completo. Inoltre, per questo modello, alcune texture hanno delle trasparenze
+ * Per poterle usare in modo corretto è necessario impostare in modo appropriato
+ * OpenGL. Vedere la funzione marius.render().
+ */
 
-  I modelli 3D sono memorizzato nella cartella models (nella root di questo
-  codice). Il formato dei file è Wavefront
-  (https://en.wikipedia.org/wiki/Wavefront_.obj_file), un semplice file di testo
-  con la lista delle coordinate dei vertici, facce e normali dei triangoli, e
-  la/le texture associata/e.
-
-  E' stata creata una classe Mesh che gestisce il caricamento e il rendering dei
-  modelli. Gli oggetti in scena sono incapsulati in classi che permettono
-  l'inizializzazione del modello e il suo rendering.
-
-  Per comodità, sono state istanziate delle variabili globali che
-  contengono diversi modelli 3D:
-
-  Modelli singoli:
-  'teapot': Una teiera (visualizzabile premendo 't')
-  'skull' : Una teschio (visualizzabile premendo 'k')
-  'dragon': Una drago (visualizzabile premendo 'g')
-  'boot'  : Uno scarpone (visualizzabile premendo 'b')
-  'flower': Un fiore (visualizzabile premendo 'f')
-
-  Modello composto
-  'marius': Un volto (visualizzabile premendo 'm').
-  Questo modello è composto da diverse mesh (6) ciascuna definita in un suo
-  file separato. Una volta caricate le singole mesh, queste sono renderizzate
-  di seguito all'interno dello stesso ciclo di rendering per avere il volto
-  completo. Inoltre, per questo modello, alcune texture hanno delle trasparenze
-  Per poterle usare in modo corretto è necessario impostare in modo appropriato
-  OpenGL. Vedere la funzione marius.render().
-*/
-
-#include <iostream>
-#include <sstream>
 #include "GL/glew.h"  // prima di freeglut
 #include "GL/freeglut.h"
 #include "glm/glm.hpp"
@@ -52,6 +50,9 @@
 #include "dragon.h"
 #include "marius.h"
 
+#include <iostream>
+#include <sstream>
+
 Teapot teapot;
 Skull skull;
 Flower flower;
@@ -64,8 +65,8 @@ unsigned char MODEL_TO_RENDER = 't';
 GLint MODE = GL_FILL;
 
 /**
-  Struttura di comodo dove sono memorizzate tutte le variabili globali
-*/
+ * Struttura di comodo dove sono memorizzate tutte le variabili globali
+ */
 struct global_struct {
   int WINDOW_WIDTH = 1024;  // Larghezza della finestra
   int WINDOW_HEIGHT = 768;  // Altezza della finestra
@@ -83,18 +84,18 @@ struct global_struct {
   float gradX;
   float gradY;
 
-  global_struct() : gradX(0.0f), gradY(0.0f) {}
+  global_struct() : gradX(0.0F), gradY(0.0F) {}
 
 } global;
 
 /**
-Prototipi della nostre funzioni di callback.
-Sono definite più avanti nel codice.
-*/
-void MyRenderScene(void);
-void MyIdle(void);
+ * Prototipi della nostre funzioni di callback.
+ * Sono definite più avanti nel codice.
+ */
+void MyRenderScene();
+void MyIdle();
 void MyKeyboard(unsigned char key, int x, int y);
-void MyClose(void);
+void MyClose();
 void MySpecialKeyboard(int Key, int x, int y);
 void MyMouse(int x, int y);
 
@@ -106,13 +107,6 @@ void init(int argc, char* argv[]) {
   glutInitWindowPosition(100, 100);
   glutCreateWindow("Informatica Grafica");
 
-  /*
-    // Imposta la modalità a schemo intero e nasconde il cursore
-    std::stringstream game_mode;
-    game_mode << global.WINDOW_WIDTH << "x" << global.WINDOW_HEIGHT << ":32";
-    glutGameModeString(game_mode.str().c_str());
-    glutEnterGameMode();
-  */
   glutSetCursor(GLUT_CURSOR_NONE);
 
   global.camera.set_mouse_init_position(global.WINDOW_WIDTH / 2,
@@ -127,7 +121,7 @@ void init(int argc, char* argv[]) {
     exit(1);
   }
 
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
 
   glutDisplayFunc(MyRenderScene);
 
@@ -149,7 +143,7 @@ void create_scene() {
   global.camera.set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1),
                            glm::vec3(0, 1, 0));
 
-  global.camera.set_perspective(30.0f, global.WINDOW_WIDTH,
+  global.camera.set_perspective(30.0F, global.WINDOW_WIDTH,
                                 global.WINDOW_HEIGHT, 0.1, 100);
 
   global.ambient_light = AmbientLight(glm::vec3(1, 1, 1), 0.2);
@@ -164,7 +158,7 @@ void create_scene() {
 
 void render_marius() {
   LocalTransform modelT;
-  modelT.rotate(global.gradX, 180 + global.gradY, 0.0f);
+  modelT.rotate(global.gradX, 180 + global.gradY, 0.0F);
   modelT.translate(0, -1.7, -0.8);
 
   global.myshaders.set_model_transform(modelT.T());
@@ -174,7 +168,7 @@ void render_marius() {
 
 void render_teapot() {
   LocalTransform modelT;
-  modelT.rotate(global.gradX, global.gradY, 0.0f);
+  modelT.rotate(global.gradX, global.gradY, 0.0F);
   modelT.translate(0, -1.6, -10);
 
   global.myshaders.set_model_transform(modelT.T());
@@ -184,7 +178,7 @@ void render_teapot() {
 
 void render_boot() {
   LocalTransform modelT;
-  modelT.rotate(global.gradX, global.gradY, 0.0f);
+  modelT.rotate(global.gradX, global.gradY, 0.0F);
   modelT.translate(0, -10, -70);
 
   global.myshaders.set_model_transform(modelT.T());
@@ -194,7 +188,7 @@ void render_boot() {
 
 void render_flower() {
   LocalTransform modelT;
-  modelT.rotate(-90 + global.gradX, global.gradY, 0.0f);
+  modelT.rotate(-90 + global.gradX, global.gradY, 0.0F);
   modelT.translate(0, -4, -15);
 
   global.myshaders.set_model_transform(modelT.T());
@@ -204,7 +198,7 @@ void render_flower() {
 
 void render_dragon() {
   LocalTransform modelT;
-  modelT.rotate(global.gradX, global.gradY, 0.0f);
+  modelT.rotate(global.gradX, global.gradY, 0.0F);
   modelT.translate(0, 0, -5);
 
   global.myshaders.set_model_transform(modelT.T());
@@ -214,7 +208,7 @@ void render_dragon() {
 
 void render_skull() {
   LocalTransform modelT;
-  modelT.rotate(global.gradX, global.gradY, 0.0f);
+  modelT.rotate(global.gradX, global.gradY, 0.0F);
   modelT.translate(0, -5, -20);
 
   global.myshaders.set_model_transform(modelT.T());
@@ -335,10 +329,7 @@ void MyKeyboard(unsigned char key, int x, int y) {
       break;
 
     case 'z':
-      if (MODE == GL_FILL)
-        MODE = GL_LINE;
-      else
-        MODE = GL_FILL;
+      MODE = (MODE == GL_FILL) ? GL_LINE : GL_FILL;
 
       glPolygonMode(GL_FRONT_AND_BACK, MODE);
       break;
@@ -361,7 +352,7 @@ void MyMouse(int x, int y) {
 }
 
 // Funzione globale che si occupa di gestire la chiusura della finestra.
-void MyClose(void) {
+void MyClose() {
   std::cout << "Tearing down the system..." << std::endl;
   // Clean up here
 

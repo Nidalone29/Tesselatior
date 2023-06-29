@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "cube.h" 0Ff
 #include "common.h"
 #include "glm/glm.hpp"
 
@@ -6,91 +6,91 @@
 
 Cube::Cube() : _initialized(false) {}
 
-void Cube::init(void) {
+void Cube::init() {
   Vertex Vertices[36] = {
 
       // Davanti
-      Vertex(glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0, 0, 1),
+      Vertex(glm::vec3(-1.0F, -1.0F, 1.0F), glm::vec3(0, 0, 1),
              glm::vec2(0.25, 0.5)),
-      Vertex(glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0, 0, 1),
+      Vertex(glm::vec3(1.0F, -1.0F, 1.0F), glm::vec3(0, 0, 1),
              glm::vec2(0.5, 0.5)),
-      Vertex(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0, 0, 1),
+      Vertex(glm::vec3(-1.0F, 1.0F, 1.0F), glm::vec3(0, 0, 1),
              glm::vec2(0.25, 0.75)),
-      Vertex(glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0, 0, 1),
+      Vertex(glm::vec3(1.0F, -1.0F, 1.0F), glm::vec3(0, 0, 1),
              glm::vec2(0.5, 0.5)),
-      Vertex(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, 0, 1),
+      Vertex(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(0, 0, 1),
              glm::vec2(0.5, 0.75)),
-      Vertex(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0, 0, 1),
+      Vertex(glm::vec3(-1.0F, 1.0F, 1.0F), glm::vec3(0, 0, 1),
              glm::vec2(0.25, 0.75)),
 
       // Destra
-      Vertex(glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(1, 0, 0),
+      Vertex(glm::vec3(1.0F, -1.0F, 1.0F), glm::vec3(1, 0, 0),
              glm::vec2(0.5, 0.5)),
-      Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(1, 0, 0),
+      Vertex(glm::vec3(1.0F, -1.0F, -1.0F), glm::vec3(1, 0, 0),
              glm::vec2(0.75, 0.5)),
-      Vertex(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1, 0, 0),
+      Vertex(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(1, 0, 0),
              glm::vec2(0.5, 0.75)),
-      Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(1, 0, 0),
+      Vertex(glm::vec3(1.0F, -1.0F, -1.0F), glm::vec3(1, 0, 0),
              glm::vec2(0.75, 0.5)),
-      Vertex(glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(1, 0, 0),
+      Vertex(glm::vec3(1.0F, 1.0F, -1.0F), glm::vec3(1, 0, 0),
              glm::vec2(0.75, 0.75)),
-      Vertex(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1, 0, 0),
+      Vertex(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(1, 0, 0),
              glm::vec2(0.5, 0.75)),
 
       // Alto
-      Vertex(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0, 1, 0),
+      Vertex(glm::vec3(-1.0F, 1.0F, 1.0F), glm::vec3(0, 1, 0),
              glm::vec2(0.25, 0.75)),
-      Vertex(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, 1, 0),
+      Vertex(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(0, 1, 0),
              glm::vec2(0.5, 0.75)),
-      Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0, 1, 0),
+      Vertex(glm::vec3(-1.0F, 1.0F, -1.0F), glm::vec3(0, 1, 0),
              glm::vec2(0.25, 1)),
-      Vertex(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, 1, 0),
+      Vertex(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(0, 1, 0),
              glm::vec2(0.5, 0.75)),
-      Vertex(glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0, 1, 0),
+      Vertex(glm::vec3(1.0F, 1.0F, -1.0F), glm::vec3(0, 1, 0),
              glm::vec2(0.5, 1)),
-      Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0, 1, 0),
+      Vertex(glm::vec3(-1.0F, 1.0F, -1.0F), glm::vec3(0, 1, 0),
              glm::vec2(0.25, 1)),
 
       // Sinistra
-      Vertex(glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(-1, 0, 0),
+      Vertex(glm::vec3(-1.0F, -1.0F, 1.0F), glm::vec3(-1, 0, 0),
              glm::vec2(0.25, 0.5)),
-      Vertex(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(-1, 0, 0),
+      Vertex(glm::vec3(-1.0F, 1.0F, 1.0F), glm::vec3(-1, 0, 0),
              glm::vec2(0.25, 0.75)),
-      Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(-1, 0, 0),
+      Vertex(glm::vec3(-1.0F, -1.0F, -1.0F), glm::vec3(-1, 0, 0),
              glm::vec2(0, 0.5)),
-      Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(-1, 0, 0),
+      Vertex(glm::vec3(-1.0F, -1.0F, -1.0F), glm::vec3(-1, 0, 0),
              glm::vec2(0, 0.5)),
-      Vertex(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(-1, 0, 0),
+      Vertex(glm::vec3(-1.0F, 1.0F, 1.0F), glm::vec3(-1, 0, 0),
              glm::vec2(0.25, 0.75)),
-      Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(-1, 0, 0),
+      Vertex(glm::vec3(-1.0F, 1.0F, -1.0F), glm::vec3(-1, 0, 0),
              glm::vec2(0, 0.75)),
 
       // Basso
-      Vertex(glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0, -1, 0),
+      Vertex(glm::vec3(-1.0F, -1.0F, 1.0F), glm::vec3(0, -1, 0),
              glm::vec2(0.25, 0.5)),
-      Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0, -1, 0),
+      Vertex(glm::vec3(-1.0F, -1.0F, -1.0F), glm::vec3(0, -1, 0),
              glm::vec2(0.25, 0.25)),
-      Vertex(glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0, -1, 0),
+      Vertex(glm::vec3(1.0F, -1.0F, 1.0F), glm::vec3(0, -1, 0),
              glm::vec2(0.5, 0.5)),
-      Vertex(glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0, -1, 0),
+      Vertex(glm::vec3(1.0F, -1.0F, 1.0F), glm::vec3(0, -1, 0),
              glm::vec2(0.5, 0.5)),
-      Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0, -1, 0),
+      Vertex(glm::vec3(-1.0F, -1.0F, -1.0F), glm::vec3(0, -1, 0),
              glm::vec2(0.25, 0.25)),
-      Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0, -1, 0),
+      Vertex(glm::vec3(1.0F, -1.0F, -1.0F), glm::vec3(0, -1, 0),
              glm::vec2(0.5, 0.25)),
 
       // Dietro
-      Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0, 0, -1),
+      Vertex(glm::vec3(-1.0F, -1.0F, -1.0F), glm::vec3(0, 0, -1),
              glm::vec2(1, 0.5)),
-      Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0, 0, -1),
+      Vertex(glm::vec3(-1.0F, 1.0F, -1.0F), glm::vec3(0, 0, -1),
              glm::vec2(1, 0.75)),
-      Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0, 0, -1),
+      Vertex(glm::vec3(1.0F, -1.0F, -1.0F), glm::vec3(0, 0, -1),
              glm::vec2(0.75, 0.5)),
-      Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0, 0, -1),
+      Vertex(glm::vec3(1.0F, -1.0F, -1.0F), glm::vec3(0, 0, -1),
              glm::vec2(0.75, 0.5)),
-      Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0, 0, -1),
+      Vertex(glm::vec3(-1.0F, 1.0F, -1.0F), glm::vec3(0, 0, -1),
              glm::vec2(1, 0.75)),
-      Vertex(glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0, 0, -1),
+      Vertex(glm::vec3(1.0F, 1.0F, -1.0F), glm::vec3(0, 0, -1),
              glm::vec2(0.75, 0.75))};
 
   glGenVertexArrays(1, &(_VAO));
@@ -121,8 +121,10 @@ void Cube::init(void) {
   _color_texture.load("cube.png");
 }
 
-void Cube::render(void) {
-  if (!_initialized) init();
+void Cube::render() {
+  if (!_initialized) {
+    init();
+  }
 
   glBindVertexArray(_VAO);
 

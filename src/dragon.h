@@ -7,9 +7,9 @@ class Dragon {
  public:
   Dragon();
 
-  void render(void);
+  void render();
 
-  void init(void);
+  void init();
 
  private:
   Mesh _model;
@@ -19,4 +19,4 @@ class Dragon {
   Dragon(const Dragon& other);
 };
 
-#endif
+#endif  // DRAGON_H

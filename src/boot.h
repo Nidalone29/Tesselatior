@@ -7,9 +7,9 @@ class Boot {
  public:
   Boot();
 
-  void render(void);
+  void render();
 
-  void init(void);
+  void init();
 
  private:
   Mesh _model;
@@ -19,4 +19,4 @@ class Boot {
   Boot(const Boot& other);
 };
 
-#endif
+#endif  // BOOT_H

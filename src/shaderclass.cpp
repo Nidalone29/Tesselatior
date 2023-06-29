@@ -16,10 +16,14 @@ ShaderClass::~ShaderClass() {
   }
 }
 
-void ShaderClass::enable() { glUseProgram(_program); }
+void ShaderClass::enable() {
+  glUseProgram(_program);
+}
 
 bool ShaderClass::init() {
-  if (!load_shaders()) return false;
+  if (!load_shaders()) {
+    return false;
+  }
 
   try {
     _program = CreateProgram(_shaders);

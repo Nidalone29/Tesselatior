@@ -3,7 +3,7 @@
 
 Marius::Marius() : _initialized(false) {}
 
-void Marius::init(void) {
+void Marius::init() {
   _head.load_mesh("models/marius/head.obj", aiProcess_FlipUVs);
   _eyes.load_mesh("models/marius/eyes.obj", aiProcess_FlipUVs);
   _eyebrows.load_mesh("models/marius/eyebrows.obj", aiProcess_FlipUVs);
@@ -15,8 +15,10 @@ void Marius::init(void) {
   _initialized = true;
 }
 
-void Marius::render(void) {
-  if (!_initialized) init();
+void Marius::render() {
+  if (!_initialized) {
+    init();
+  }
 
   _head.render();
 

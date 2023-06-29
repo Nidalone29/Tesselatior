@@ -2,8 +2,6 @@
 #include "GL/freeglut.h"
 #include "transform.h"
 
-#include "camera.h"
-
 #define GLM_FORCE_RADIANS
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -18,10 +16,12 @@ static std::ostream& operator<<(std::ostream& os, const glm::vec3& v) {
   return os;
 }
 
-Camera::Camera() { reset(); }
+Camera::Camera() {
+  reset();
+}
 
 void Camera::reset() {
-  _combined = _projection = _camera = glm::mat4(1.0f);
+  _combined = _projection = _camera = glm::mat4(1.0F);
   _position = glm::vec3(0, 0, 0);
   _lookat_dir = glm::vec3(0, 0, -1);
   _up = glm::vec3(0, 1, 0);
@@ -32,13 +32,17 @@ void Camera::reset() {
   _mouse_lastY = 0;
   _first_mouse_call = true;
 
-  _speed = 0.05f;
+  _speed = 0.05F;
   _mouse_speed = _speed * 2;
 }
 
-void Camera::update() { _combined = _projection * _camera; }
+void Camera::update() {
+  _combined = _projection * _camera;
+}
 
-const glm::mat4& Camera::CP() const { return _combined; }
+const glm::mat4& Camera::CP() const {
+  return _combined;
+}
 
 void Camera::set_camera(const glm::vec3& position, const glm::vec3& lookat,
                         const glm::vec3& up) {
@@ -62,7 +66,9 @@ glm::mat4 Camera::camera_setting(const glm::vec3& position,
   return V;
 }
 
-const glm::mat4& Camera::camera() const { return _camera; }
+const glm::mat4& Camera::camera() const {
+  return _camera;
+}
 
 void Camera::set_perspective(float FOVDeg, float width, float height,
                              float znear, float zfar) {
@@ -83,11 +89,17 @@ glm::mat4 Camera::perspective_projection(float FOVDeg, float width,
   return p;
 }
 
-const glm::mat4& Camera::projection() const { return _projection; }
+const glm::mat4& Camera::projection() const {
+  return _projection;
+}
 
-void Camera::set_speed(float speed) { _speed = speed; }
+void Camera::set_speed(float speed) {
+  _speed = speed;
+}
 
-const float& Camera::speed() const { return _speed; }
+const float& Camera::speed() const {
+  return _speed;
+}
 
 bool Camera::onSpecialKeyboard(int key) {
   glm::vec3 tmp;
@@ -140,22 +152,23 @@ bool Camera::onMouse(int x, int y) {
   float xoffset = x - _mouse_lastX;
   float yoffset = _mouse_lastY - y;
 
-  if (xoffset + yoffset == 0) return false;
+  if (xoffset + yoffset == 0) {
+    return false;
+  }
 
   if (!_lock_mouse_position) {
     _mouse_lastX = x;
     _mouse_lastY = y;
   }
 
-  float sensitivity = 0.1f;
+  float sensitivity = 0.1F;
   xoffset *= sensitivity;
   yoffset *= sensitivity;
 
   _yaw_deg += xoffset;
   _pitch_deg += yoffset;
 
-  if (_pitch_deg > 89.0f) _pitch_deg = 89.0f;
-  if (_pitch_deg < -89.0f) _pitch_deg = -89.0f;
+  _pitch_deg = (_pitch_deg > 89.0F) ? 89.0F : -89.0F;
 
   glm::vec3 direction;
   direction.x = cos(glm::radians(_yaw_deg)) * cos(glm::radians(_pitch_deg));
@@ -174,6 +187,10 @@ void Camera::set_mouse_init_position(int x, int y) {
   _mouse_lastY = y;
 }
 
-void Camera::lock_mouse_position(bool lock) { _lock_mouse_position = lock; }
+void Camera::lock_mouse_position(bool lock) {
+  _lock_mouse_position = lock;
+}
 
-const glm::vec3& Camera::position() const { return _position; }
+const glm::vec3& Camera::position() const {
+  return _position;
+}

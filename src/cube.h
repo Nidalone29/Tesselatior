@@ -7,23 +7,23 @@
 class Cube {
  public:
   /**
-    Costruttore
-  */
+   * Costruttore
+   */
   Cube();
 
   /**
-    Renderizza l'oggetto. Se necessario, l'oggetto viene prima inizializzato
-    chiamando la init().
-  */
+   * Renderizza l'oggetto. Se necessario, l'oggetto viene prima inizializzato
+   * chiamando la init().
+   */
   void render(void);
 
   /**
-    Inizializzazione degli oggetti OpenGL. E' fatta in un secondo tempo
-    poichè è necessario avere inizializzato GLUT prima di qualunque
-    uso delle funzioni di OpenGL. La init è chiamata, se necessario,
-    dalla render().
-  */
-  void init(void);
+   * Inizializzazione degli oggetti OpenGL. E' fatta in un secondo tempo
+   * poichè è necessario avere inizializzato GLUT prima di qualunque
+   * uso delle funzioni di OpenGL. La init è chiamata, se necessario,
+   * dalla render().
+   */
+  void init();
 
  private:
   GLuint _VAO;               // Vertex Array Object
@@ -36,4 +36,4 @@ class Cube {
   Cube(const Cube& other);
 };
 
-#endif
+#endif  // CUBE_H

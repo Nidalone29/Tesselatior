@@ -3,13 +3,15 @@
 
 Teapot::Teapot() : _initialized(false) {}
 
-void Teapot::init(void) {
+void Teapot::init() {
   _model.load_mesh("models/teapot.obj");
   _initialized = true;
 }
 
-void Teapot::render(void) {
-  if (!_initialized) init();
+void Teapot::render() {
+  if (!_initialized) {
+    init();
+  }
 
   _model.render();
 }

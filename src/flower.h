@@ -7,9 +7,9 @@ class Flower {
  public:
   Flower();
 
-  void render(void);
+  void render();
 
-  void init(void);
+  void init();
 
  private:
   Mesh _model;
@@ -19,4 +19,4 @@ class Flower {
   Flower(const Flower& other);
 };
 
-#endif
+#endif  // DRAGON_H

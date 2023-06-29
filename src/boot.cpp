@@ -3,13 +3,15 @@
 
 Boot::Boot() : _initialized(false) {}
 
-void Boot::init(void) {
+void Boot::init() {
   _model.load_mesh("models/boot/boot.obj");
   _initialized = true;
 }
 
-void Boot::render(void) {
-  if (!_initialized) init();
+void Boot::render() {
+  if (!_initialized) {
+    init();
+  }
 
   _model.render();
 }

@@ -70,4 +70,6 @@ void Texture2D::bind(int TextureUnit) const {
   glBindTexture(GL_TEXTURE_2D, _texture);
 }
 
-bool Texture2D::is_valid(void) const { return _valid; }
+bool Texture2D::is_valid() const {
+  return _valid;
+}

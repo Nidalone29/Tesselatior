@@ -3,13 +3,15 @@
 
 Dragon::Dragon() : _initialized(false) {}
 
-void Dragon::init(void) {
+void Dragon::init() {
   _model.load_mesh("models/dragon.obj");
   _initialized = true;
 }
 
-void Dragon::render(void) {
-  if (!_initialized) init();
+void Dragon::render() {
+  if (!_initialized) {
+    init();
+  }
 
   _model.render();
 }

@@ -3,13 +3,15 @@
 
 Skull::Skull() : _initialized(false) {}
 
-void Skull::init(void) {
+void Skull::init() {
   _model.load_mesh("models/skull.obj");
   _initialized = true;
 }
 
-void Skull::render(void) {
-  if (!_initialized) init();
+void Skull::render() {
+  if (!_initialized) {
+    init();
+  }
 
   _model.render();
 }

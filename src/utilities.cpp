@@ -6,7 +6,7 @@
 GLuint CreateShader(GLenum eShaderType, const std::string& strShaderFile) {
   GLuint shader = glCreateShader(eShaderType);
   const char* strFileData = strShaderFile.c_str();
-  glShaderSource(shader, 1, &strFileData, NULL);
+  glShaderSource(shader, 1, &strFileData, nullptr);
 
   glCompileShader(shader);
 
@@ -17,9 +17,9 @@ GLuint CreateShader(GLenum eShaderType, const std::string& strShaderFile) {
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 
     GLchar* strInfoLog = new GLchar[infoLogLength + 1];
-    glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
+    glGetShaderInfoLog(shader, infoLogLength, nullptr, strInfoLog);
 
-    const char* strShaderType = NULL;
+    const char* strShaderType = nullptr;
     switch (eShaderType) {
       case GL_VERTEX_SHADER:
         strShaderType = "vertex";
@@ -44,8 +44,9 @@ GLuint CreateShader(GLenum eShaderType, const std::string& strShaderFile) {
 GLuint CreateProgram(const std::vector<GLuint>& shaderList) {
   GLuint program = glCreateProgram();
 
-  for (size_t iLoop = 0; iLoop < shaderList.size(); iLoop++)
+  for (size_t iLoop = 0; iLoop < shaderList.size(); iLoop++) {
     glAttachShader(program, shaderList[iLoop]);
+  }
 
   glLinkProgram(program);
 
@@ -56,15 +57,18 @@ GLuint CreateProgram(const std::vector<GLuint>& shaderList) {
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
     GLchar* strInfoLog = new GLchar[infoLogLength + 1];
-    glGetProgramInfoLog(program, infoLogLength, NULL, strInfoLog);
+    glGetProgramInfoLog(program, infoLogLength, nullptr, strInfoLog);
     std::cerr << "Linker failure: " << strInfoLog << std::endl;
     delete[] strInfoLog;
   }
 
-  for (size_t iLoop = 0; iLoop < shaderList.size(); iLoop++)
+  for (size_t iLoop = 0; iLoop < shaderList.size(); iLoop++) {
     glDetachShader(program, shaderList[iLoop]);
+  }
 
-  if (status == GL_FALSE) throw ProgramCreationException();
+  if (status == GL_FALSE) {
+    throw ProgramCreationException();
+  }
 
   return program;
 }

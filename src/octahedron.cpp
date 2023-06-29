@@ -6,69 +6,69 @@
 
 Octahedron::Octahedron() : _initialized(false) {}
 
-void Octahedron::init(void) {
+void Octahedron::init() {
   Vertex Vertices[24] = {// Alto Davanti
-                         Vertex(glm::vec3(-1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, 1.0F),
                                 glm::vec3(0, 0.71, 0.71), glm::vec2(0, 0)),
-                         Vertex(glm::vec3(1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, 1.0F),
                                 glm::vec3(0, 0.71, 0.71), glm::vec2(1, 0)),
-                         Vertex(glm::vec3(0.0f, 1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, 1.0F, 0.0F),
                                 glm::vec3(0, 0.71, 0.71), glm::vec2(0.5, 1)),
 
                          // Alto Destra
-                         Vertex(glm::vec3(1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, 1.0F),
                                 glm::vec3(0.71, 0.71, 0), glm::vec2(0, 0)),
-                         Vertex(glm::vec3(1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, -1.0F),
                                 glm::vec3(0.71, 0.71, 0), glm::vec2(1, 0)),
-                         Vertex(glm::vec3(0.0f, 1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, 1.0F, 0.0F),
                                 glm::vec3(0.71, 0.71, 0), glm::vec2(0.5, 1)),
 
                          // Alto Sinistra
-                         Vertex(glm::vec3(-1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, -1.0F),
                                 glm::vec3(-0.71, 0.71, 0), glm::vec2(0, 0)),
-                         Vertex(glm::vec3(-1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, 1.0F),
                                 glm::vec3(-0.71, 0.71, 0), glm::vec2(1, 0)),
-                         Vertex(glm::vec3(0.0f, 1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, 1.0F, 0.0F),
                                 glm::vec3(-0.71, 0.71, 0), glm::vec2(0.5, 1)),
 
                          // Alto Dietro
-                         Vertex(glm::vec3(-1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, -1.0F),
                                 glm::vec3(0, 0.71, -0.71), glm::vec2(1, 0)),
-                         Vertex(glm::vec3(0.0f, 1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, 1.0F, 0.0F),
                                 glm::vec3(0, 0.71, -0.71), glm::vec2(0.5, 1)),
-                         Vertex(glm::vec3(1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, -1.0F),
                                 glm::vec3(0, 0.71, -0.71), glm::vec2(0, 0)),
 
                          // Basso Davanti
-                         Vertex(glm::vec3(-1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, 1.0F),
                                 glm::vec3(0, -0.71, 0.71), glm::vec2(0, 1)),
-                         Vertex(glm::vec3(0.0f, -1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, -1.0F, 0.0F),
                                 glm::vec3(0, -0.71, 0.71), glm::vec2(0.5, 0)),
-                         Vertex(glm::vec3(1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, 1.0F),
                                 glm::vec3(0, -0.71, 0.71), glm::vec2(1, 1)),
 
                          // Basso Destra
-                         Vertex(glm::vec3(1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, 1.0F),
                                 glm::vec3(0.71, -0.71, 0), glm::vec2(0, 1)),
-                         Vertex(glm::vec3(0.0f, -1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, -1.0F, 0.0F),
                                 glm::vec3(0.71, -0.71, 0), glm::vec2(0.5, 0)),
-                         Vertex(glm::vec3(1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, -1.0F),
                                 glm::vec3(0.71, -0.71, 0), glm::vec2(1, 1)),
 
                          // Basso Sinistra
-                         Vertex(glm::vec3(-1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, -1.0F),
                                 glm::vec3(-0.71, -0.71, 0), glm::vec2(0, 1)),
-                         Vertex(glm::vec3(0.0f, -1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, -1.0F, 0.0F),
                                 glm::vec3(-0.71, -0.71, 0), glm::vec2(0.5, 0)),
-                         Vertex(glm::vec3(-1.0f, 0.0f, 1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, 1.0F),
                                 glm::vec3(-0.71, -0.71, 0), glm::vec2(1, 1)),
 
                          // Basso Dietro
-                         Vertex(glm::vec3(-1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(-1.0F, 0.0F, -1.0F),
                                 glm::vec3(0, -0.71, -0.71), glm::vec2(1, 1)),
-                         Vertex(glm::vec3(1.0f, 0.0f, -1.0f),
+                         Vertex(glm::vec3(1.0F, 0.0F, -1.0F),
                                 glm::vec3(0, -0.71, -0.71), glm::vec2(0, 1)),
-                         Vertex(glm::vec3(0.0f, -1.0f, 0.0f),
+                         Vertex(glm::vec3(0.0F, -1.0F, 0.0F),
                                 glm::vec3(0, -0.71, -0.71), glm::vec2(0.5, 0))};
 
   glGenVertexArrays(1, &(_VAO));
@@ -103,8 +103,10 @@ void Octahedron::init(void) {
   _color_texture2.load("gold.png");
 }
 
-void Octahedron::render(void) {
-  if (!_initialized) init();
+void Octahedron::render() {
+  if (!_initialized) {
+    init();
+  }
 
   glBindVertexArray(_VAO);
 

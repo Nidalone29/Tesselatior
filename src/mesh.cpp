@@ -13,17 +13,11 @@ std::ostream& operator<<(std::ostream& os, const Vertex& v) {
   return os;
 }
 
-/*
-Mesh::Vertex::Vertex() {}
-
-Mesh::Vertex::Vertex(const glm::vec3& p, const glm::vec3& n,const glm::vec2& t)
-: position(p), textcoord(t), normal(n) {
-}
-*/
-
 Mesh::Mesh() : _VAO(-1), _VBO(-1), _IBO(-1), _num_indices(0) {}
 
-Mesh::~Mesh() { clear(); }
+Mesh::~Mesh() {
+  clear();
+}
 
 void Mesh::clear() {
   glDeleteBuffers(1, &_VBO);
@@ -72,7 +66,7 @@ bool Mesh::init_from_scene(const aiScene* pScene, const std::string& Filepath) {
   const aiMesh* paiMesh =
       pScene->mMeshes[0];  // consideriamo solo una mesh (mesh 0)
 
-  const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
+  const aiVector3D Zero3D(0.0F, 0.0F, 0.0F);
 
   for (unsigned int i = 0; i < paiMesh->mNumVertices; i++) {
     const aiVector3D* pPos = &(paiMesh->mVertices[i]);
@@ -137,8 +131,9 @@ bool Mesh::init_from_scene(const aiScene* pScene, const std::string& Filepath) {
     if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
       aiString Path;
 
-      if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL,
-                                NULL, NULL, NULL) == AI_SUCCESS) {
+      if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, nullptr,
+                                nullptr, nullptr, nullptr,
+                                nullptr) == AI_SUCCESS) {
         std::string data = Path.data;
 
         std::string FullPath = Filepath + "/" + data;
@@ -177,7 +172,7 @@ std::string Mesh::get_file_path(const std::string& Filename) const {
   return Dir;
 }
 
-void Mesh::render(void) {
+void Mesh::render() {
   glBindVertexArray(_VAO);
 
   _texture.bind(TEXTURE_COLOR);
@@ -186,7 +181,7 @@ void Mesh::render(void) {
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
 
-  glDrawElements(GL_TRIANGLES, _num_indices, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, _num_indices, GL_UNSIGNED_INT, nullptr);
 
   glBindVertexArray(0);
 }

@@ -6,6 +6,8 @@
 		"glew",
 		"glm",
 		"stb",
-		"assimp"
+		"assimp",
+		"imgui",
+		"entt"
 	]
 }

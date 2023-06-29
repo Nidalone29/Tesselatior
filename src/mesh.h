@@ -30,52 +30,35 @@
 #include <assimp/postprocess.h>  // Assimp post processing flags
 
 /**
-    Classe che incapsula la gestione dei modelli 3d caricati da file.
-    La classe usa la lista dei vertici indicizzati.
-    Al momento la classe supporta modelli con una sola texture colore.
-    Se il modello non ha una texture associata, viene usata una texture
-    di default "white.png"
-*/
+ * Classe che incapsula la gestione dei modelli 3d caricati da file.
+ * La classe usa la lista dei vertici indicizzati.
+ * Al momento la classe supporta modelli con una sola texture colore.
+ * Se il modello non ha una texture associata, viene usata una texture
+ * di default "white.png"
+ */
 class Mesh {
  public:
-  /**
-      Struttura dati cpon gli attributi dei vertici
-  */
-  /*
-  struct Vertex
-  {
-      glm::vec3 position; ///< Coordinate spaziali
-      glm::vec3 normal;   ///< Normale
-      glm::vec2 textcoord;///< Coordinate di texture
-
-      Vertex();
-
-      Vertex(const glm::vec3& p, const glm::vec3& n, const glm::vec2& t);
-  };
-*/
-
   Mesh();
-
   ~Mesh();
 
   /**
-      Funzione che carica il modello e lo prepara per il rendering.
-
-      @param filename nome del file
-      @param flags assimp post processing flags
-
-      @return true se il modello è stato caricato correttamente
-  */
+   * Funzione che carica il modello e lo prepara per il rendering.
+   *
+   * @param filename nome del file
+   * @param flags assimp post processing flags
+   *
+   * @return true se il modello è stato caricato correttamente
+   */
   bool load_mesh(const std::string& Filename, unsigned int flags = 0);
 
   /**
-      Renderizza l'oggetto in scena usando per la texture, la TextureUnit
-     indicata.
-
-      @param TextureUnit TextureUnit usata per recuperare i pixel
-
-  */
-  virtual void render(void);
+   * Renderizza l'oggetto in scena usando per la texture, la TextureUnit
+   * indicata.
+   *
+   * @param TextureUnit TextureUnit usata per recuperare i pixel
+   *
+   */
+  virtual void render();
 
  private:
   bool init_from_scene(const aiScene* pScene, const std::string& Filename);
@@ -93,4 +76,4 @@ class Mesh {
 
 std::ostream& operator<<(std::ostream& os, const Vertex& v);
 
-#endif /* MESH_H */
+#endif  // MESH_H

@@ -7,9 +7,9 @@ class Marius {
  public:
   Marius();
 
-  void render(void);
+  void render();
 
-  void init(void);
+  void init();
 
  private:
   Mesh _head, _eyes, _hairplate, _eyebrows;
@@ -20,4 +20,4 @@ class Marius {
   Marius(const Marius& other);
 };
 
-#endif
+#endif  // MARIUS_H

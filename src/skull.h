@@ -7,9 +7,9 @@ class Skull {
  public:
   Skull();
 
-  void render(void);
+  void render();
 
-  void init(void);
+  void init();
 
  private:
   Mesh _model;
@@ -19,4 +19,4 @@ class Skull {
   Skull(const Skull& other);
 };
 
-#endif
+#endif  // SKULL_H

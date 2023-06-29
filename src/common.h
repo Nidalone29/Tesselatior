@@ -1,15 +1,15 @@
-#ifndef common_H
-#define common_H
+#ifndef COMMON_H
+#define COMMON_H
 
 #include "glm/glm.hpp"
 
 /**
-Struttura dati che contiene gli attributi di un vertice.
-*/
+ * Struttura dati che contiene gli attributi di un vertice.
+ */
 struct Vertex {
-  glm::vec3 position;   ///< Coordinate spaziali
-  glm::vec3 normal;     ///< Normale
-  glm::vec2 textcoord;  ///< Coordinate di texture
+  glm::vec3 position;   // Coordinate spaziali
+  glm::vec3 normal;     // Normale
+  glm::vec2 textcoord;  // Coordinate di texture
 
   Vertex();
 
@@ -27,4 +27,4 @@ enum ATTRIB_ID {
 
 enum TEXTURE_UNIT_ID { TEXTURE_COLOR = 0 };
 
-#endif
+#endif  // COMMON_H

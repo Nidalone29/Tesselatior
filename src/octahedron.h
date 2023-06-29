@@ -1,5 +1,5 @@
-#ifndef Octahedron_H
-#define Octahedron_H
+#ifndef OCTAHEDRON_H
+#define OCTAHEDRON_H
 
 #include <string>
 #include "GL/glew.h"  // prima di freeglut
@@ -8,23 +8,23 @@
 class Octahedron {
  public:
   /**
-    Costruttore
-  */
+   * Costruttore
+   */
   Octahedron();
 
   /**
-    Renderizza l'oggetto. Se necessario, l'oggetto viene prima
-    inizializzato chiamando la init().
-  */
-  void render(void);
+   * Renderizza l'oggetto. Se necessario, l'oggetto viene prima
+   * inizializzato chiamando la init().
+   */
+  void render();
 
   /**
-    Inizializzazione degli oggetti OpenGL. E' fatta in un secondo tempo
-    poichè è necessario avere inizializzato GLUT prima di qualunque
-    uso delle funzioni di OpenGL. La init è chiamata, se necessario,
-    dalla render().
-  */
-  void init(void);
+   * Inizializzazione degli oggetti OpenGL. E' fatta in un secondo tempo
+   * poichè è necessario avere inizializzato GLUT prima di qualunque
+   * uso delle funzioni di OpenGL. La init è chiamata, se necessario,
+   * dalla render().
+   */
+  void init();
 
  private:
   GLuint _VAO;  // Vertex Array Object
@@ -40,4 +40,4 @@ class Octahedron {
   Octahedron(const Octahedron& other);
 };
 
-#endif
+#endif  // OCTAHEDRON_H

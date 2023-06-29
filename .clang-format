@@ -4,3 +4,4 @@ Language: Cpp
 DerivePointerAlignment: false
 PointerAlignment: Left
 SortIncludes: false
+AllowShortFunctionsOnASingleLine: Empty

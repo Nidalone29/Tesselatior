@@ -7,9 +7,9 @@ class Teapot {
  public:
   Teapot();
 
-  void render(void);
+  void render();
 
-  void init(void);
+  void init();
 
  private:
   Mesh _model;
@@ -19,4 +19,4 @@ class Teapot {
   Teapot(const Teapot& other);
 };
 
-#endif
+#endif  // TEAPOT_H
