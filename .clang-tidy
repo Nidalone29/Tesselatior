@@ -13,7 +13,11 @@ Checks: "-*,
         -readability-magic-numbers,
         -bugprone-easily-swappable-parameters,
         -cppcoreguidelines-avoid-magic-numbers,
-        -cppcoreguidelines-pro-type-union-access"
+        -cppcoreguidelines-pro-type-union-access,
+        -google-readability-todo,
+        -readability-implicit-bool-conversion,
+        -llvm-include-order,
+        -readability-isolate-declaration"
 
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
