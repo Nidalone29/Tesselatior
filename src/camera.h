@@ -2,22 +2,19 @@
 #define CAMERA_H
 
 #include "glm/glm.hpp"
+#include "camera_controller.h"
 
-/**
- * Classe che incapsula diverse funzioni per calcolare le matrici di
- * trasformazione di camera e prospettica.
- *
- * le funzioni statiche rotation, rotation3, translation, scaling
- * permettono di calcolare e ottenere in output le matrici di trasformazioni
- * richieste. Possono essere usate senza istanziare la classe ma come:
- * LocalTransform::rotation(...)
- */
 class Camera {
  public:
   /**
    * Costruttore. Inizializza le matrici all'identità.
    */
   Camera();
+  ~Camera();
+  Camera(const Camera& other) = delete;
+  Camera& operator=(const Camera& other) = delete;
+  Camera(Camera&& other) = delete;
+  Camera& operator=(Camera&& other) = delete;
 
   /**
    * Imposta la matrice di trasformazione di camera.
@@ -40,7 +37,7 @@ class Camera {
    * Genera la matrice di trasformazione di camera.
    *
    * @param position posizione della camera
-   * @param lookat punto dove guarda la camera
+   * @param lookat punto dove guarda la camera aka target position
    * @param up vettore che indica l'alto della camera
    *
    * @return la matrice di trasformazione di camera
@@ -91,51 +88,18 @@ class Camera {
   const glm::mat4& CP() const;
 
   /**
-   * Ritorna l'intensità degli spostamenti
-   * @return l'intensità degli spostamenti
-   */
-  const float& speed() const;
-
-  /**
-   * Setta l'intensità degli spostamenti
-   * @param speed l'intensità degli spostamenti
-   */
-  void set_speed(float speed);
-
-  /**
-   * Funzione che gestisce i caratteri speciali come KEY_UP, KEY_DOWN,
-   * KEY_RIGHT, KEY_LEFT. A seconda del tasto premuto la camera si muove
-   * in avanti/indietro e destra/sinistra.
-   *
-   * @param key codice del tasto premuto
-   */
-  bool onSpecialKeyboard(int key);
-
-  /**
-   * Funzione che gestisce gli spostamenti del mouse.
-   * @param x coordinata x del mouse
-   * @param y coordinata y del mouse
-   */
-  bool onMouse(int x, int y);
-
-  /**
-   * Setta la posizione iniziale del mouse (es. al centro della finestra).
-   * @param x coordinata x del mouse
-   * @param y coordinata y del mouse
-   */
-  void set_mouse_init_position(int x, int y);
-
-  /**
-   * Blocca la posizione del mouse. Dopo uno spostamento, il mouse viene
-   * riportato alla posizione iniziale impostata.
-   * @param lock true per bloccare la posizione del mouse
-   */
-  void lock_mouse_position(bool lock);
-
-  /**
    * Ritorna la posizione di camera in coordinate mondo
    */
   const glm::vec3& position() const;
+  const glm::vec3& lookAt() const;
+  const glm::vec3& up() const;
+
+  // for now this works i guess
+  CameraController* _cam_controller;
+
+  // TODO this has to be fixed, it should be private and called automatically
+  // after an input
+  void update();
 
  private:
   glm::mat4 _camera;  // matrice di trasformazione di camera
@@ -144,20 +108,9 @@ class Camera {
 
   glm::mat4 _combined;
 
-  float _speed;
   glm::vec3 _up;
   glm::vec3 _position;
   glm::vec3 _lookat_dir;
-
-  float _mouse_lastX;
-  float _mouse_lastY;
-  float _mouse_speed;
-  float _pitch_deg;
-  float _yaw_deg;
-  bool _first_mouse_call;
-  bool _lock_mouse_position;
-
-  void update();
 };
 
 #endif  // CAMERA_H

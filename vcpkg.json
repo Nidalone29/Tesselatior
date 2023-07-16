@@ -1,8 +1,8 @@
 {
-	"name": "sandbox",
+	"name": "tesselatior",
 	"version-string": "0.0.1",
 	"dependencies": [
-		"freeglut",
+		"glfw3",
 		"glew",
 		"glm",
 		"stb",
