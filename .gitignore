@@ -6,3 +6,6 @@
 
 # temp fix
 /src/texture
+
+# still have to configure for MSVC (with a cmakepresets)
+CMakeSettings.json
