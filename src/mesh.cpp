@@ -1,70 +1,45 @@
-
 #include "mesh.h"
 
 #include <assimp/Importer.hpp>  // Assimp Importer object
 #include <iostream>
 
-std::ostream& operator<<(std::ostream& os, const Vertex& v) {
-  os << "[" << v.position.x << ", " << v.position.y << ", " << v.position.z
-     << "] ";
-  os << "(" << v.normal.x << ", " << v.normal.y << ", " << v.normal.z << ") ";
-  os << "<" << v.textcoord.x << ", " << v.textcoord.y << "> ";
+#include "vertex.h"
 
-  return os;
-}
-
-Mesh::Mesh() : _VAO(-1), _VBO(-1), _IBO(-1), _num_indices(0) {}
-
-Mesh::~Mesh() {
-  clear();
-}
-
-void Mesh::clear() {
-  glDeleteBuffers(1, &_VBO);
-  _VBO = -1;
-  glDeleteBuffers(1, &_IBO);
-  _IBO = -1;
-  glDeleteVertexArrays(1, &_VAO);
-  _VAO = -1;
-  _num_indices = 0;
-}
-
-bool Mesh::load_mesh(const std::string& Filename, unsigned int flags) {
-  // Release the previously loaded mesh (if it exists)
-  clear();
-
-  bool Ret = false;
+// TODO finish mesh importer
+// figure out how to deal with textures, because the mess of the filepath is
+// caused by that
+Mesh::Mesh(const std::string& path, unsigned int flags) {
   Assimp::Importer Importer;
 
-  std::cout << "Loading '" << Filename << "'" << std::endl;
-  const aiScene* pScene = Importer.ReadFile(
-      Filename.c_str(),
-      flags);  // aiProcess_Triangulate | aiProcess_GenSmoothNormals);// |
-               // aiProcess_FlipUVs);
+  const aiScene* pScene = Importer.ReadFile(path.c_str(), flags);
+}
+
+void Mesh::load_mesh(const std::string& Filename, unsigned int flags) {
+  Assimp::Importer Importer;
+
+  const aiScene* pScene = Importer.ReadFile(Filename.c_str(), flags);
 
   std::string Filepath = get_file_path(Filename);
 
   if (pScene) {
-    Ret = init_from_scene(pScene, Filepath);
+    init_from_scene(pScene, Filepath);
   } else {
     std::cout << "Error loading " << Filename << " : "
               << Importer.GetErrorString() << std::endl;
   }
-
-  return Ret;
 }
 
-bool Mesh::init_from_scene(const aiScene* pScene, const std::string& Filepath) {
+void Mesh::init_from_scene(const aiScene* pScene, const std::string& Filepath) {
   // Copiamo i dati dal formato Assimp agli array di vertici e indici
-  //
-  // NOTA: CONSIDERIAMO SOLO *UNA* MESH E LA RELATIVA TEXTURE COLORE
 
-  bool Ret = true;
   std::vector<Vertex> Vertices;
   std::vector<unsigned int> Indices;
 
-  const aiMesh* paiMesh =
-      pScene->mMeshes[0];  // consideriamo solo una mesh (mesh 0)
+  std::vector<Mesh> meshes;
+
+  for (int i = 0; i < pScene->mNumMeshes; i++) {
+    const aiMesh* paiMesh = pScene->mMeshes[i];
+  }
 
   const aiVector3D Zero3D(0.0F, 0.0F, 0.0F);
 
@@ -111,6 +86,8 @@ bool Mesh::init_from_scene(const aiScene* pScene, const std::string& Filepath) {
                         (void*)offsetof(struct Vertex, position));
   glVertexAttribPointer(ATTRIB_NORMALS, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)offsetof(struct Vertex, normal));
+
+  // we are talking about the texture color here
   glVertexAttribPointer(ATTRIB_COLOR_TEXTURE_COORDS, 2, GL_FLOAT, GL_FALSE,
                         sizeof(Vertex),
                         (void*)offsetof(struct Vertex, textcoord));
@@ -150,13 +127,12 @@ bool Mesh::init_from_scene(const aiScene* pScene, const std::string& Filepath) {
   }
 
   if (!_texture.is_valid()) {
-    Ret = _texture.load("white.png");
+    _texture.load("./models/default_texture.png");
     std::cout << "  Loaded blank texture." << std::endl;
   }
-
-  return Ret;
 }
 
+// this has to be yeeeted out of earth (i think)
 std::string Mesh::get_file_path(const std::string& Filename) const {
   std::string::size_type SlashIndex = Filename.find_last_of("/");
   std::string Dir;

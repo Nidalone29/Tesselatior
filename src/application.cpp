@@ -11,17 +11,17 @@
 #include "transform.h"
 
 void render_marius() {
-  LocalTransform modelT;
-  modelT.rotate(0.0F, 180.0F, 0.0F);
-  modelT.translate(0.0, -1.7F, -0.8F);
+  Transform modelT;
+  modelT = modelT * Math::rotationMatrix(0.0F, 180.0F, 0.0F);
+  modelT = modelT * Math::translationMatrix(0.0F, -1.7F, -0.8F);
 
-  Application::Instance().GetShader().set_model_transform(modelT.T());
+  Application::Instance().GetShader().set_model_transform(modelT.getMatrix());
 
   Application::Instance()._marius.render();
 }
 
 void render_teapot() {
-  LocalTransform modelT;
+  Transform modelT;
   modelT.rotate(0.0F, 0.0F, 0.0F);
   modelT.translate(0.0F, -1.6F, -10.0F);
 
@@ -31,7 +31,7 @@ void render_teapot() {
 }
 
 void render_boot() {
-  LocalTransform modelT;
+  Transform modelT;
   modelT.rotate(0.0F, 0.0F, 0.0F);
   modelT.translate(0.0F, -10.0F, -70.0F);
 
@@ -41,7 +41,7 @@ void render_boot() {
 }
 
 void render_flower() {
-  LocalTransform modelT;
+  Transform modelT;
   modelT.rotate(-90.0F, 0.0F, 0.0F);
   modelT.translate(0.0F, -4.0F, -15.0F);
 
@@ -51,7 +51,7 @@ void render_flower() {
 }
 
 void render_dragon() {
-  LocalTransform modelT;
+  Transform modelT;
   modelT.rotate(0.0F, 0.0F, 0.0F);
   modelT.translate(0.0F, 0.0F, -5.0F);
 
@@ -61,7 +61,7 @@ void render_dragon() {
 }
 
 void render_skull() {
-  LocalTransform modelT;
+  Transform modelT;
   modelT.rotate(0.0F, 0.0F, 0.0F);
   modelT.translate(0.0F, -5.0F, -20.0F);
 
@@ -69,14 +69,20 @@ void render_skull() {
 
   Application::Instance()._skull.render();
 }
-
+Renderer& Application::GetRenderer() {
+  return Instance()._renderer;
+}
 // handling key inputs
 void InputHandle(GLFWwindow* window, int key, int scancode, int action,
                  int mods) {
-  CameraController* cm = Application::GetCamera()->_cam_controller;
-
+  // camera reset
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-    cm->reset();
+    Application::GetCamera()->_cam_controller->reset();
+  }
+
+  // wireframe mode
+  if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
+    Application::GetRenderer().toggleWireframe();
   }
 
   // this doesn't work at the moment
@@ -163,13 +169,15 @@ void Application::init() {
   // app only works with vsync because of fixed timesteps
   glfwSwapInterval(1);
 
-  // init scene things
+  // init camera
   _main_camera->set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1),
                            glm::vec3(0, 1, 0));
 
   _main_camera->set_perspective(30.0F, static_cast<float>(_properties.Width),
                                 static_cast<float>(_properties.Height), 0.1F,
                                 100);
+  // init scenes
+  // default scene
 
   _ambient_light = AmbientLight(glm::vec3(1, 1, 1), 0.2);
   _directional_light =
@@ -222,7 +230,7 @@ void Application::cameraControl() {
   Application::GetCamera()->_cam_controller->rotate(xpos, ypos, timestep);
 }
 
-void Application::run(/*Renderer& render*/) {
+void Application::run() {
   // double time = 0.0;
 
   while (!glfwWindowShouldClose(_window)) {
@@ -230,6 +238,8 @@ void Application::run(/*Renderer& render*/) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     cameraControl();
+
+    //_renderer.render(scene);
 
     _myshaders.set_camera_transform(_main_camera->CP());
     _myshaders.set_ambient_light(_ambient_light);

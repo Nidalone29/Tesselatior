@@ -1,14 +1,15 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-// #include "scene.h"
-// #include "renderer.h"
+#include "scene.h"
+#include "renderer.h"
 #include "camera.h"
 
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "myshaderclass.h"
+#include <vector>
 
 #include "teapot.h"
 #include "skull.h"
@@ -29,8 +30,9 @@ class Application {
   static GLFWwindow* GetWindow();
   static Camera* GetCamera();
   static MyShaderClass& GetShader();
+  static Renderer& GetRenderer();
 
-  void run(/*Renderer& render*/);
+  void run();
 
   // models
   Teapot _teapot;
@@ -51,20 +53,19 @@ class Application {
     int Width;
     int Height;
 
-    // this is a renderer prop tho....
-    GLint glMode = GL_FILL;
-
     Props(const char* title = "Tesselatior", int width = 1280, int height = 720)
         : Title(title), Width(width), Height(height) {}
   };
 
-  // std::vector<Scene> _scenes;
   Props _properties;
   GLFWwindow* _window;
 
-  // rendering specifig things
-  // camera
+  // rendering specific things
   Camera* _main_camera;
+  Renderer _renderer;
+  Scene Teapot, Skull, Flower, Boot, Dragon, Marius;
+  std::vector<Scene> _scenes = {Teapot, Skull, Flower, Boot, Dragon, Marius};
+  Scene _current_scene = Teapot;
 
   // TODO still have to refactor all of this, i have to test the camera first
   // lights

@@ -1,7 +1,7 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include <string>
 #include <vector>
 #include <stdexcept>

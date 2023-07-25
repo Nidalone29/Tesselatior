@@ -1,21 +1,3 @@
-/*
-
-  Copyright 2011 Etay Meiri
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #ifndef MESH_H
 #define MESH_H
 
@@ -23,33 +5,41 @@
 #include <vector>
 #include <GL/glew.h>
 #include "common.h"
-#include "texture2D.h"
-#include "glm/glm.hpp"
+#include "vertex.h"
+#include "texture.h"
+#include "material.h"
+#include <glm/glm.hpp>
 #include <cstring>
 #include <assimp/scene.h>        // Assimp output data structure
 #include <assimp/postprocess.h>  // Assimp post processing flags
 
 /**
- * Classe che incapsula la gestione dei modelli 3d caricati da file.
- * La classe usa la lista dei vertici indicizzati.
- * Al momento la classe supporta modelli con una sola texture colore.
- * Se il modello non ha una texture associata, viene usata una texture
- * di default "white.png"
+ * @brief A mesh is saved in a renederable state for opengl
+ *
  */
 class Mesh {
  public:
-  Mesh();
-  ~Mesh();
+  Mesh() = delete;  // can't create an empty mesh
+  /**
+   * @brief Construct a new Mesh object
+   *
+   * @param path path to the file of the mesh (obj file) from the current
+   * directory (of the executable) so models/etc...
+   * @param flags ASSIMP flags
+   */
+  Mesh(const std::string& path, unsigned int flags = 0);
+  ~Mesh() = default;
 
   /**
    * Funzione che carica il modello e lo prepara per il rendering.
    *
    * @param filename nome del file
    * @param flags assimp post processing flags
+   * (https://assimp.sourceforge.net/lib_html/postprocess_8h.html#a64795260b95f5a4b3f3dc1be4f52e410)
    *
    * @return true se il modello è stato caricato correttamente
    */
-  bool load_mesh(const std::string& Filename, unsigned int flags = 0);
+  void load_mesh(const std::string& Filename, unsigned int flags = 0);
 
   /**
    * Renderizza l'oggetto in scena usando per la texture, la TextureUnit
@@ -61,17 +51,20 @@ class Mesh {
   virtual void render();
 
  private:
-  bool init_from_scene(const aiScene* pScene, const std::string& Filename);
+  void init_from_scene(const aiScene* pScene, const std::string& Filename);
 
   void clear();
 
   std::string get_file_path(const std::string& Filename) const;
 
   unsigned int _num_indices;
-  Texture2D _texture;
-  GLuint _VAO;
-  GLuint _VBO;
-  GLuint _IBO;
+  GLuint _VAO;  // vertex Array Object
+  GLuint _VBO;  // vertex Buffer Object
+  GLuint _IBO;  // index Buffer Object
+
+  std::vector<Vertex> _vertices;
+  std::vector<unsigned int> _indices;
+  Material _material;
 };
 
 std::ostream& operator<<(std::ostream& os, const Vertex& v);
