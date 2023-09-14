@@ -69,24 +69,24 @@ void main()
 
 	vec3 I_amb =  material_color.rgb * (AmbientLight.color * AmbientLight.intensity);
 
-	vec3 I_dif = vec3(0,0,0);
+	vec3 I_dif = vec3(0, 0, 0);
 
 	vec3 normal = normalize(fragment_normal);
 
-	float cosTheta = dot(normal,-DirectionalLight.direction);
+	float cosTheta = dot(normal, -DirectionalLight.direction);
 
-	if (cosTheta>0) {
+	if (cosTheta > 0) {
 		I_dif = material_color.rgb * (DirectionalLight.color * DiffusiveLight.intensity) * cosTheta;
 	}
 
 	vec3 I_spec = vec3(0,0,0);
 
 	vec3 view_dir    = normalize(CameraPosition - fragment_position);
-	vec3 reflect_dir = normalize(reflect(DirectionalLight.direction,normal));
+	vec3 reflect_dir = normalize(reflect(DirectionalLight.direction, normal));
 
-	float cosAlpha = dot(view_dir,reflect_dir);
-	if (cosAlpha>0) {
-		I_spec = material_color.rgb * (DirectionalLight.color * SpecularLight.intensity) * pow(cosAlpha,SpecularLight.shininess);
+	float cosAlpha = dot(view_dir, reflect_dir);
+	if (cosAlpha > 0) {
+		I_spec = material_color.rgb * (DirectionalLight.color * SpecularLight.intensity) * pow(cosAlpha, SpecularLight.shininess);
 	}
 
 	out_color = vec4(I_amb + I_dif + I_spec, material_color.a);

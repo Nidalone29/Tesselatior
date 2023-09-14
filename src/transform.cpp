@@ -17,6 +17,7 @@ Transform::Transform(const glm::mat4 scale, const glm::mat4 rotation,
  */
 Transform Transform::operator*(const glm::mat4 matrix) {
   _transform *= matrix;
+  return *this;
 }
 
 const glm::mat4& Transform::getMatrix() const {

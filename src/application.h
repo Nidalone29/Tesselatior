@@ -11,13 +11,6 @@
 #include "myshaderclass.h"
 #include <vector>
 
-#include "teapot.h"
-#include "skull.h"
-#include "flower.h"
-#include "boot.h"
-#include "dragon.h"
-#include "marius.h"
-
 class Application {
  public:
   Application(const Application& other) = delete;
@@ -33,14 +26,6 @@ class Application {
   static Renderer& GetRenderer();
 
   void run();
-
-  // models
-  Teapot _teapot;
-  Skull _skull;
-  Flower _flower;
-  Boot _boot;
-  Dragon _dragon;
-  Marius _marius;
 
  private:
   Application();
@@ -63,11 +48,10 @@ class Application {
   // rendering specific things
   Camera* _main_camera;
   Renderer _renderer;
-  Scene Teapot, Skull, Flower, Boot, Dragon, Marius;
-  std::vector<Scene> _scenes = {Teapot, Skull, Flower, Boot, Dragon, Marius};
-  Scene _current_scene = Teapot;
+  Scene _Teapot, _Skull, _Flower, _Boot, _Dragon, _Marius;
+  Scene _current_scene;
 
-  // TODO still have to refactor all of this, i have to test the camera first
+  // TODO still have to refactor all of this
   // lights
   AmbientLight _ambient_light;
   DirectionalLight _directional_light;

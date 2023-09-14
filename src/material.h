@@ -2,6 +2,8 @@
 #define MATERIAL_H
 
 #include <glm/glm.hpp>
+#include "texture.h"
+#include <vector>
 
 class Material {
  public:
@@ -15,17 +17,16 @@ class Material {
   Material(Material&& other) = default;
   Material& operator=(Material&& other) = default;
 
-  const glm::vec3& getAmbientColor() const;
-  const glm::vec3& getDiffuseColor() const;
-  const glm::vec3& getSpecularColor() const;
-  const float& getShininess() const;
+  void addTexture(const Texture& toadd);
+
+  /**
+   * @brief binds all the textures of the material
+   *
+   */
+  void bind() const;
 
  private:
-  glm::vec3 _ambient_color;
-  glm::vec3 _diffuse_color;
-  glm::vec3 _specular_color;
-  //  glm::vec3 emissive; // TODO for a kind of light maybe?
-  float _shininess_exponent;  // 0 not shiny 128 very shiny
+  std::vector<Texture> _textures;
 };
 
 #endif  // MATERIAL_H

@@ -27,9 +27,9 @@ void main()
 
     mat4 Model2WorldTI = transpose(inverse(Model2World));
 
-    fragment_normal = (Model2WorldTI * vec4(normal,0.0)).xyz;
+    fragment_normal = (Model2WorldTI * vec4(normal, 0.0)).xyz;
 
-    fragment_position = (Model2World * vec4(position,1.0)).xyz;
+    fragment_position = (Model2World * vec4(position, 1.0)).xyz;
 
     fragment_textcoord = textcoord;
 }

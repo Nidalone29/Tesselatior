@@ -5,8 +5,25 @@ message("Building with CMake version: ${CMAKE_VERSION}")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# TODO clean this https://stackoverflow.com/questions/32411963/why-is-cmake-file-glob-evil
-file(GLOB_RECURSE Sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp") 
+set(Sources
+	./src/application.cpp
+	./src/camera_controller.cpp
+	./src/camera.cpp
+	./src/light.cpp
+	./src/main.cpp
+	./src/material.cpp
+	./src/mesh.cpp
+	./src/model.cpp
+	./src/myshaderclass.cpp
+	./src/object.cpp
+	./src/renderer.cpp
+	./src/scene.cpp
+	./src/shaderclass.cpp
+	./src/texture.cpp
+	./src/transform.cpp
+	./src/utilities.cpp
+	./src/vertex.cpp
+)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/tools/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
@@ -17,10 +34,8 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 
 find_package(Stb REQUIRED)
 
-
 find_package(assimp CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(EnTT CONFIG REQUIRED)
 
 find_package(glfw3 CONFIG REQUIRED)
 
@@ -38,7 +53,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   glfw 
   GLEW::GLEW 
   glm::glm 
-  EnTT::EnTT 
   imgui::imgui)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})

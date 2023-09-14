@@ -20,14 +20,17 @@
 class Mesh {
  public:
   Mesh() = delete;  // can't create an empty mesh
+
   /**
    * @brief Construct a new Mesh object
    *
-   * @param path path to the file of the mesh (obj file) from the current
-   * directory (of the executable) so models/etc...
-   * @param flags ASSIMP flags
+   * @param vertices
+   * @param indices
+   * @param material
    */
-  Mesh(const std::string& path, unsigned int flags = 0);
+  Mesh(const std::vector<Vertex>& vertices,
+       const std::vector<unsigned int>& indices, const unsigned int num_indices,
+       const Material& material);
   ~Mesh() = default;
 
   /**
@@ -39,32 +42,34 @@ class Mesh {
    *
    * @return true se il modello è stato caricato correttamente
    */
-  void load_mesh(const std::string& Filename, unsigned int flags = 0);
 
   /**
-   * Renderizza l'oggetto in scena usando per la texture, la TextureUnit
-   * indicata.
-   *
-   * @param TextureUnit TextureUnit usata per recuperare i pixel
+   * @brief
    *
    */
-  virtual void render();
+  void load();
+
+  const GLuint& getVAO() const;
+  const GLuint& getVBO() const;
+  const GLuint& getIBO() const;
+  const unsigned int& get_num_indices() const;
+  const Material& getMaterial() const;
+
+  const bool isLoaded() const;
 
  private:
-  void init_from_scene(const aiScene* pScene, const std::string& Filename);
-
   void clear();
 
-  std::string get_file_path(const std::string& Filename) const;
-
-  unsigned int _num_indices;
-  GLuint _VAO;  // vertex Array Object
-  GLuint _VBO;  // vertex Buffer Object
-  GLuint _IBO;  // index Buffer Object
+  GLuint _VAO;  // Vertex Array Object
+  GLuint _VBO;  // Vertex Buffer Object
+  GLuint _IBO;  // Index Buffer Object
 
   std::vector<Vertex> _vertices;
   std::vector<unsigned int> _indices;
+  unsigned int _num_indices;
   Material _material;
+
+  bool _loaded;
 };
 
 std::ostream& operator<<(std::ostream& os, const Vertex& v);

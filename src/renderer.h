@@ -7,13 +7,13 @@
 // che cosa serve a un renderer?
 // vettore(?) di luci
 // quindi un renderer è composto da un vettore di luci ed una camera (btw sono
-// tutte entità xdlolmao) e ha un loop che drawa tutti gli oggetti di una scena
+// tutte entità) e ha un loop che drawa tutti gli oggetti di una scena
 // l'unica cosa che mi manca da capire come gestire sono le shader...?
 class Renderer {
  public:
   Renderer();
-  ~Renderer();
-  void render(Scene scene);
+  ~Renderer() = default;
+  void render(Scene& scene) const;
 
   void toggleWireframe();
 

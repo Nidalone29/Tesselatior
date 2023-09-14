@@ -4,27 +4,26 @@
 #include "mesh.h"
 #include "transform.h"
 
-/**
- * @brief basically a Model?
- *
- */
 class Model {
  public:
   Model() = delete;  // can't create an empty model
-  Model(const std::string& path);
-  const std::vector<Mesh>& getMesh() const;
+  Model(const std::string& path, unsigned int flags = 0);
+  Model(const Model& other) = default;
+  Model& operator=(const Model& other) = default;
+  Model(Model&& other) = default;
+  Model& operator=(Model&& other) = default;
+
+  std::vector<Mesh>& getMeshes();
   const Transform& getTransform() const;
   void setTransform(const Transform& transform);
 
  private:
-  void load_meshes(const std::string& path);
+  void load_meshes(const std::string& path, unsigned int flags);
 
   // 1 to n meshes
-  std::vector<Mesh> _mesh;
+  std::vector<Mesh> _meshes;
   // i think this will be applied to all meshes
   Transform _transform;
-  // they can be different types at the same time (color, normal...)
-  std::vector<Texture> _textures;
 };
 
 #endif  // MODEL_H

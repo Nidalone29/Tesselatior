@@ -7,7 +7,6 @@
 		"glm",
 		"stb",
 		"assimp",
-		"imgui",
-		"entt"
+		"imgui"
 	]
 }

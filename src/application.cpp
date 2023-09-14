@@ -10,6 +10,12 @@
 
 #include "transform.h"
 
+#include "matrix_math.h"
+#include "renderer.h"
+
+#include <glm/gtx/string_cast.hpp>
+
+/*
 void render_marius() {
   Transform modelT;
   modelT = modelT * Math::rotationMatrix(0.0F, 180.0F, 0.0F);
@@ -69,9 +75,11 @@ void render_skull() {
 
   Application::Instance()._skull.render();
 }
+*/
 Renderer& Application::GetRenderer() {
   return Instance()._renderer;
 }
+
 // handling key inputs
 void InputHandle(GLFWwindow* window, int key, int scancode, int action,
                  int mods) {
@@ -87,17 +95,17 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
 
   // this doesn't work at the moment
   if (key == GLFW_KEY_T && action == GLFW_PRESS) {
-    render_teapot();
+    // render_teapot();
   } else if (key == GLFW_KEY_B && action == GLFW_PRESS) {
-    render_boot();
+    // render_boot();
   } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
-    render_skull();
+    // render_skull();
   } else if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-    render_dragon();
+    // render_dragon();
   } else if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-    render_marius();
+    // render_marius();
   } else if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-    render_flower();
+    // render_flower();
   }
 }
 
@@ -176,8 +184,6 @@ void Application::init() {
   _main_camera->set_perspective(30.0F, static_cast<float>(_properties.Width),
                                 static_cast<float>(_properties.Height), 0.1F,
                                 100);
-  // init scenes
-  // default scene
 
   _ambient_light = AmbientLight(glm::vec3(1, 1, 1), 0.2);
   _directional_light =
@@ -187,6 +193,21 @@ void Application::init() {
 
   _myshaders.init();
   _myshaders.enable();
+
+  // init scenes
+  // TODO init all the scenes and add the option to change them (maybe)
+  // default scene is teapot
+  Model teapot("models/flower/flower.obj", aiProcess_Triangulate);
+  Transform teapot_t;
+  teapot_t = teapot_t * Math::translationMatrix(0.0F, -4.0F, -15.0F);
+  teapot_t = teapot_t * Math::rotationMatrix(-90.0F, 0.0F, 0.0F);
+  // TODO this will have to be passed to the shader
+  teapot.setTransform(teapot_t);
+
+  _Teapot.addObject(Object(teapot));
+
+  // NOTE this has to be after shaders are initialized and enabled
+  _myshaders.set_model_transform(teapot_t.getMatrix());
 
   // TODO move this (to the renderer init i think)
   glEnable(GL_CULL_FACE);
@@ -232,14 +253,12 @@ void Application::cameraControl() {
 
 void Application::run() {
   // double time = 0.0;
-
+  glEnable(GL_DEBUG_OUTPUT);
   while (!glfwWindowShouldClose(_window)) {
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     cameraControl();
-
-    //_renderer.render(scene);
 
     _myshaders.set_camera_transform(_main_camera->CP());
     _myshaders.set_ambient_light(_ambient_light);
@@ -248,7 +267,7 @@ void Application::run() {
     _myshaders.set_specular_light(_specular_light);
     _myshaders.set_camera_position(_main_camera->position());
 
-    render_teapot();
+    _renderer.render(_Teapot);
 
     // Swap front and back buffers
     glfwSwapBuffers(_window);

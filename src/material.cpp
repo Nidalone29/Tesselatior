@@ -1,19 +1,25 @@
 #include "material.h"
+#include <gl/glew.h>
+#include <iostream>
 
-Material::Material() {}
-
-const glm::vec3& Material::getAmbientColor() const {
-  return _ambient_color;
+Material::Material() {
+  std::cout << "material created" << std::endl;
 }
 
-const glm::vec3& Material::getDiffuseColor() const {
-  return _diffuse_color;
+void Material::addTexture(const Texture& toadd) {
+  _textures.push_back(toadd);
 }
 
-const glm::vec3& Material::getSpecularColor() const {
-  return _specular_color;
-}
+void Material::bind() const {
+  for (Texture t : _textures) {
+    // (for now it's 0, meaning it's all color texture)
+    // TODO a check for all different types of textures and deal with it
+    GLenum unit = GL_TEXTURE0;
 
-const float& Material::getShininess() const {
-  return _shininess_exponent;
+    // Attiviamo la TextureUnit da usare per il sampling
+    glActiveTexture(unit);
+
+    // Bindiamo la texture
+    glBindTexture(GL_TEXTURE_2D, t.getID());
+  }
 }
