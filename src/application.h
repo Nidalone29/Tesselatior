@@ -4,11 +4,12 @@
 #include "scene.h"
 #include "renderer.h"
 #include "camera.h"
+#include "light.h"
+#include "shader.h"
 
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "myshaderclass.h"
 #include <vector>
 
 class Application {
@@ -22,7 +23,6 @@ class Application {
 
   static GLFWwindow* GetWindow();
   static Camera* GetCamera();
-  static MyShaderClass& GetShader();
   static Renderer& GetRenderer();
 
   void run();
@@ -49,17 +49,12 @@ class Application {
   Camera* _main_camera;
   Renderer _renderer;
   Scene _Teapot, _Skull, _Flower, _Boot, _Dragon, _Marius;
-  Scene _current_scene;
 
   // TODO still have to refactor all of this
   // lights
-  AmbientLight _ambient_light;
-  DirectionalLight _directional_light;
-  DiffusiveLight _diffusive_light;
-  SpecularLight _specular_light;
 
   // shaders
-  MyShaderClass _myshaders;
+  Shader _shader;
 };
 
 #endif  // APPLICATION_H

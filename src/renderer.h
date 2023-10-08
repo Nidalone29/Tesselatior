@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include "scene.h"
+#include "shader.h"
 #include <gl/glew.h>
 
 // che cosa serve a un renderer?
@@ -13,7 +14,7 @@ class Renderer {
  public:
   Renderer();
   ~Renderer() = default;
-  void render(Scene& scene) const;
+  void render(Scene& scene, const Shader& shader) const;
 
   void toggleWireframe();
 

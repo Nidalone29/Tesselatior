@@ -14,14 +14,12 @@ set(Sources
 	./src/material.cpp
 	./src/mesh.cpp
 	./src/model.cpp
-	./src/myshaderclass.cpp
 	./src/object.cpp
 	./src/renderer.cpp
 	./src/scene.cpp
-	./src/shaderclass.cpp
+	./src/shader.cpp
 	./src/texture.cpp
 	./src/transform.cpp
-	./src/utilities.cpp
 	./src/vertex.cpp
 )
 

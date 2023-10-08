@@ -2,6 +2,7 @@
 #define SCENE_H
 
 #include "object.h"
+#include "light.h"
 
 // a scene graph is not needed for this application
 
@@ -17,17 +18,18 @@ class Scene {
   void addObject(const Object& to_add);
   std::vector<Object>& getAllObjects();
 
-  /**
-   * @brief Loads the scene to the OpenGL contex
-   *
-   */
-  // void load();
+  void setAmbientLight(const AmbientLight& to_add);
+  const AmbientLight& getAmbientLight() const;
+  void setDirectionalLight(const DirectionalLight& to_add);
+  const DirectionalLight& getDirectionalLight() const;
 
  private:
   std::vector<Object> _objects;
 
-  // true iff the scene got loaded
-  bool _loaded;
+  // there is only one ambient light
+  AmbientLight _ambient_light;
+  // there could probably be multiple directional lights?
+  DirectionalLight _directional_light;
 };
 
 #endif  // SCENE_H

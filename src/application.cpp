@@ -7,11 +7,12 @@
 #include <GLFW/glfw3.h>
 
 #include "camera.h"
-
+#include "light.h"
+#include "shader.h"
 #include "transform.h"
-
 #include "matrix_math.h"
 #include "renderer.h"
+#include "shader.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -157,10 +158,6 @@ Application& Application::Instance() {
   return _instance;
 }
 
-MyShaderClass& Application::GetShader() {
-  return Instance()._myshaders;
-}
-
 void Application::init() {
   // input settings
   glfwSetKeyCallback(_window, InputHandle);
@@ -185,14 +182,11 @@ void Application::init() {
                                 static_cast<float>(_properties.Height), 0.1F,
                                 100);
 
-  _ambient_light = AmbientLight(glm::vec3(1, 1, 1), 0.2);
-  _directional_light =
-      DirectionalLight(glm::vec3(1, 1, 1), glm::vec3(0, 0, -1));  // 0.5
-  _diffusive_light = DiffusiveLight(0.5);                         // 0.5
-  _specular_light = SpecularLight(0.5, 30);
+  _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
+  _shader.addShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
 
-  _myshaders.init();
-  _myshaders.enable();
+  _shader.init();
+  _shader.enable();
 
   // init scenes
   // TODO init all the scenes and add the option to change them (maybe)
@@ -207,8 +201,10 @@ void Application::init() {
   _Teapot.addObject(Object(teapot));
 
   // NOTE this has to be after shaders are initialized and enabled
-  _myshaders.set_model_transform(teapot_t.getMatrix());
+  _shader.setUnifromSampler("ColorTextSampler", TEXTURE_COLOR);
+  _shader.setUniformMat4("Model2World", teapot_t.getMatrix());
 
+  _shader.setUniformMat4("World2Camera", _main_camera->CP());
   // TODO move this (to the renderer init i think)
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
@@ -259,15 +255,10 @@ void Application::run() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     cameraControl();
+    _shader.setUniformMat4("World2Camera", _main_camera->CP());
+    _shader.setUniformVec3("camera_position", _main_camera->position());
 
-    _myshaders.set_camera_transform(_main_camera->CP());
-    _myshaders.set_ambient_light(_ambient_light);
-    _myshaders.set_directional_light(_directional_light);
-    _myshaders.set_diffusive_light(_diffusive_light);
-    _myshaders.set_specular_light(_specular_light);
-    _myshaders.set_camera_position(_main_camera->position());
-
-    _renderer.render(_Teapot);
+    _renderer.render(_Teapot, _shader);
 
     // Swap front and back buffers
     glfwSwapBuffers(_window);

@@ -2,7 +2,11 @@
 #include <gl/glew.h>
 #include <iostream>
 
-Material::Material() {
+Material::Material()
+    : _ambient_reflectivity(glm::vec3(1, 1, 1)),
+      _diffuse_reflectivity(glm::vec3(0.8, 0.8, 0.8)),
+      _specular_reflectivity(glm::vec3(0.8, 0.8, 0.8)),
+      _specular_glossiness_exponent(30) {
   std::cout << "material created" << std::endl;
 }
 
@@ -22,4 +26,36 @@ void Material::bind() const {
     // Bindiamo la texture
     glBindTexture(GL_TEXTURE_2D, t.getID());
   }
+}
+
+void Material::setAmbientReflectivity(const glm::vec3& in) {
+  _ambient_reflectivity = in;
+}
+
+const glm::vec3& Material::getAmbientReflectivity() const {
+  return _ambient_reflectivity;
+}
+
+void Material::setDiffuseReflectivity(const glm::vec3& in) {
+  _diffuse_reflectivity = in;
+}
+
+const glm::vec3& Material::getDiffuseReflectivity() const {
+  return _diffuse_reflectivity;
+}
+
+void Material::setSpecularReflectivity(const glm::vec3& in) {
+  _specular_reflectivity = in;
+}
+
+const glm::vec3& Material::getSpecularReflectivity() const {
+  return _specular_reflectivity;
+}
+
+void Material::setGlossinessExponent(const float& in) {
+  _specular_glossiness_exponent = in;
+}
+
+const float& Material::getGlossinessExponent() const {
+  return _specular_glossiness_exponent;
 }

@@ -19,17 +19,17 @@ out vec2 fragment_textcoord;
 
 void main()
 {
-    gl_Position = World2Camera * Model2World * vec4(position, 1.0);
+  gl_Position = World2Camera * Model2World * vec4(position, 1.0);
 
-    // I vettori delle normali ricevuti in input sono passati 
-    // in output al fragment shader dopo essere stati trasformati 
-    // con la trasformazione trasposta inversa del modello.
+  // I vettori delle normali ricevuti in input sono passati 
+  // in output al fragment shader dopo essere stati trasformati 
+  // con la trasformazione trasposta inversa del modello.
 
-    mat4 Model2WorldTI = transpose(inverse(Model2World));
+  mat4 Model2WorldTI = transpose(inverse(Model2World));
 
-    fragment_normal = (Model2WorldTI * vec4(normal, 0.0)).xyz;
+  fragment_normal = (Model2WorldTI * vec4(normal, 0.0)).xyz;
 
-    fragment_position = (Model2World * vec4(position, 1.0)).xyz;
+  fragment_position = (Model2World * vec4(position, 1.0)).xyz;
 
-    fragment_textcoord = textcoord;
+  fragment_textcoord = textcoord;
 }
