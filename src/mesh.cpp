@@ -68,6 +68,6 @@ const Material& Mesh::getMaterial() const {
   return _material;
 }
 
-const bool Mesh::isLoaded() const {
+bool Mesh::isLoaded() const {
   return _loaded;
 }

@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "light.h"
 #include "shader.h"
+#include "common.h"
 
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
@@ -24,14 +25,15 @@ class Application {
   static GLFWwindow* GetWindow();
   static Camera* GetCamera();
   static Renderer& GetRenderer();
-
+  static APP_STATE GetAppState();
+  static void SetAppState(const APP_STATE to_add);
   void run();
 
  private:
   Application();
   ~Application();
   void init();
-  void cameraControl();
+  void cameraControl(double& xpos, double& ypos);
 
   struct Props {
     const char* Title;
@@ -55,6 +57,10 @@ class Application {
 
   // shaders
   Shader _shader;
+
+  APP_STATE _app_state;
+
+  unsigned int fbo;
 };
 
 #endif  // APPLICATION_H

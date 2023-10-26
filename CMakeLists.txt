@@ -18,6 +18,7 @@ set(Sources
 	./src/renderer.cpp
 	./src/scene.cpp
 	./src/shader.cpp
+	./src/framebuffer.cpp
 	./src/texture.cpp
 	./src/transform.cpp
 	./src/vertex.cpp

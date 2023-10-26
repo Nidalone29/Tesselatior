@@ -55,7 +55,7 @@ class Mesh {
   const unsigned int& get_num_indices() const;
   const Material& getMaterial() const;
 
-  const bool isLoaded() const;
+  bool isLoaded() const;
 
  private:
   void clear();

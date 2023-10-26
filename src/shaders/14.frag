@@ -33,7 +33,7 @@ uniform vec3 camera_position;
 
 uniform sampler2D ColorTextSampler;
 
-out vec4 out_color;
+layout(location = 0) out vec4 out_color;
 
 void main()
 {

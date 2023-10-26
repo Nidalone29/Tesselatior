@@ -81,6 +81,7 @@ void Model::load_meshes(const std::string& path, unsigned int flags) {
 
     const unsigned int material_i = paiMesh->mMaterialIndex;
     const aiMaterial* material = pScene->mMaterials[material_i];
+    // TODO deal with all material properties
     Material x;
 
     if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
