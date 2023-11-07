@@ -3,7 +3,7 @@
 
 #include "scene.h"
 #include "shader.h"
-#include <gl/glew.h>
+#include <GL/glew.h>
 
 // che cosa serve a un renderer?
 // vettore(?) di luci

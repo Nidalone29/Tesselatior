@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 #include <string>
-#include <gl/glew.h>
+#include <GL/glew.h>
 
 class Texture {
  public:

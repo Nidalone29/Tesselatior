@@ -3,15 +3,15 @@
 #include <iostream>
 #include <map>
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
 #include "camera.h"
 #include "light.h"
-#include "shader.h"
 #include "transform.h"
 #include "matrix_math.h"
 #include "renderer.h"
@@ -161,19 +161,19 @@ Application::Application() : _app_state(VIEWPORT_FOCUS) {
     exit(1);
   }
 
-  glGenFramebuffers(1, &fbo);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  _rtt = new FrameBuffer(_properties.Width, _properties.Height);
+  _rtt->bind();
   glClearColor(0.1F, 0.1F, 0.1F, 0.0F);
 
   _main_camera = new Camera();
   init();
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  _rtt->unbind();
 }
 
 Application::~Application() {
   delete _main_camera;
+  delete _rtt;
   // Cleanup
 
   ImGui_ImplOpenGL3_Shutdown();
@@ -245,7 +245,7 @@ void Application::init() {
   glFrontFace(GL_CCW);
   glEnable(GL_DEPTH_TEST);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  _rtt->unbind();
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -300,43 +300,6 @@ void Application::run() {
   double xpos, ypos;
   glfwGetCursorPos(_window, &xpos, &ypos);
 
-  int viewport_width = 1280;
-  int viewport_height = 720;
-
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-  // Create an OpenGL texture to render the frame to
-  GLuint texture_id;
-  glGenTextures(1, &texture_id);
-  glBindTexture(GL_TEXTURE_2D, texture_id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, viewport_width, viewport_height, 0,
-               GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  // attach the texture to the framebuffer
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                         texture_id, 0);
-
-  GLuint texture_depth;
-  glGenTextures(1, &texture_depth);
-  glBindTexture(GL_TEXTURE_2D, texture_depth);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, viewport_width,
-               viewport_height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
-               nullptr);
-
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                         GL_TEXTURE_2D, texture_depth, 0);
-
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-    std::cout << "easy" << std::endl;
-  } else {
-    std::cout << "fuckup" << std::endl;
-    std::exit(-1);
-  }
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
   // imgui
   bool opt_fullscreen = true;
   bool opt_padding = false;
@@ -345,7 +308,8 @@ void Application::run() {
   bool* p_open = &open;
 
   while (!glfwWindowShouldClose(_window)) {
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    _rtt->bind();
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //  Poll for and process events
@@ -487,17 +451,27 @@ void Application::run() {
 
     ImGui::ShowDemoWindow();
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
+
     ImGui::Begin("viewport");
 
-    // TODO: deal with viewportpanelsize so that we have the viewport sized not
     // scrolled and correct.
-    ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    // TODO fix float to int comparison
+    if (viewportPanelSize != _rtt->getSize()) {
+      _rtt->resize(viewportPanelSize.x, viewportPanelSize.y);
+      _main_camera->set_perspective(30.0F, viewportPanelSize.x,
+                                    viewportPanelSize.y, 0.1F, 100);
+    }
+
     // Update the ImGui image with the new texture data
-    ImGui::Image(reinterpret_cast<void*>(texture_id),
-                 ImVec2(viewport_width, viewport_height), ImVec2{0, 1},
+    ImGui::Image(reinterpret_cast<void*>(_rtt->getTexture()),
+                 ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2{0, 1},
                  ImVec2{1, 0});
 
     ImGui::End();  // "viewport"
+    _rtt->unbind();
+    ImGui::PopStyleVar();
 
     ImGui::End();  // "DockSpace Demo"
 
@@ -505,7 +479,6 @@ void Application::run() {
 
     // *NOTE: this line has to be before ImGui_ImplOpenGL3_RenderDrawData
     // otherwise black screen
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

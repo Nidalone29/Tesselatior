@@ -24,6 +24,13 @@ set(Sources
 	./src/vertex.cpp
 )
 
+set(Headers 
+	./src/my_imguiconfig.h 
+)
+
+#define IMGUI_USER_CONFIG "my_imguiconfig.h"
+add_compile_definitions(IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/my_imguiconfig.h")
+
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/tools/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 project(Tesselatior LANGUAGES CXX VERSION 0.0.1)
@@ -46,7 +53,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL  "GLFW lib only")
 
-add_executable(${PROJECT_NAME} ${Sources})
+add_executable(${PROJECT_NAME} ${Sources} ${Headers})
 target_link_libraries(${PROJECT_NAME} PRIVATE 
   assimp::assimp 
   glfw 

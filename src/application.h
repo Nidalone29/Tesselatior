@@ -7,8 +7,9 @@
 #include "light.h"
 #include "shader.h"
 #include "common.h"
+#include "framebuffer.h"
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <vector>
@@ -60,7 +61,8 @@ class Application {
 
   APP_STATE _app_state;
 
-  unsigned int fbo;
+  // render target texture
+  FrameBuffer* _rtt;
 };
 
 #endif  // APPLICATION_H

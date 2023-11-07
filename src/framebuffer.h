@@ -1,42 +1,15 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
 
-#include <map>
-#include <gl/glew.h>
-
-class Attachment {
- public:
-  const GLuint& getAttachmentID() const;
-  virtual const GLuint& bind();
-
- protected:
-  Attachment();
-  GLuint _attachment_id;
-
- private:
-};
-
-class ColorAttachment : public Attachment {
- public:
-  const GLuint& bind();
-
- private:
-  // poossible texture values
-};
-
-class DepthStencilAttachment : public Attachment {
- public:
-  const GLuint& bind();
-
- private:
-  // poossible texture values
-};
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 
 /**
  * @brief the opengl framebuffer that we will submit to a render target (the
  * screen, an image for imgui viewport...)
  *
- * it can contain multiple attachments (Colorbuffer, Depthbuffer....)
+ * Class used to render a 3D scene to a _single_ Texture. It supports resizing
+ * of the viewport
  *
  */
 class FrameBuffer {
@@ -45,28 +18,31 @@ class FrameBuffer {
   ~FrameBuffer();
 
   /**
-   * @brief
+   * @brief bind the framebuffer
    *
-   * @param type GL_COLOR_ATTACHMENT0 | GL_DEPTH24_STENCIL8 (only supported for
-   * now)
-   * @param to_add
    */
-  void addAttachment(const GLenum type, const Attachment& to_add);
-  // void removeAttachment(const Attachment& to_add);
+  void bind() const;
+  void unbind() const;
 
   /**
-   * @brief bind the framebuffer and all it's attachments?
+   * @brief Retrieved the texture where the framebuffer has rendered to
    *
+   * @return const GLuint
    */
-  void bind();
-  void unbind();
+  GLuint getTexture() const;
 
-  bool check();
+  glm::vec2 getSize() const;
   void resize(const int new_width, const int new_height);
 
  private:
+  bool check() const;
+  void reset();
+  void create();
+
   int _width, _height;
-  std::map<GLenum, Attachments> _attachments;
+
+  GLuint _color_attachment;
+  GLuint _depth_stencil_attachment;
 
   // Frame Buffer Object
   GLuint _fbo;
