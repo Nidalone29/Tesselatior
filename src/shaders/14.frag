@@ -37,21 +37,21 @@ layout(location = 0) out vec4 out_color;
 
 void main()
 {
-	// La funzione texture ritorna un vec4. Nel codice noi rappresentiamo
-	// i colori con vec3 e dobbiamo quindi estrarre solo 3 componenti.
-	vec4 material_color = texture(ColorTextSampler, fragment_textcoord);
-	
-	vec3 view_dir = normalize(camera_position - fragment_position);
+  // La funzione texture ritorna un vec4. Nel codice noi rappresentiamo
+  // i colori con vec3 e dobbiamo quindi estrarre solo 3 componenti.
+  vec4 material_color = texture(ColorTextSampler, fragment_textcoord);
+  
+  vec3 view_dir = normalize(camera_position - fragment_position);
 
-	vec3 normal = normalize(fragment_normal);
-	// reflect() https://registry.khronos.org/OpenGL-Refpages/gl4/html/reflect.xhtml 
-	vec3 reflect_dir = normalize(reflect(directional_light_direction, normal));
+  vec3 normal = normalize(fragment_normal);
+  // reflect() https://registry.khronos.org/OpenGL-Refpages/gl4/html/reflect.xhtml 
+  vec3 reflect_dir = normalize(reflect(directional_light_direction, normal));
 
   vec3 ambient_reflection = material_color.rgb * material_ambient_reflectivity * ambient_light_intensity * ambient_light_color;
   vec3 diffuse_reflection = material_color.rgb * directional_light_intensity * material_diffuse_reflectivity * max(dot(normal, -directional_light_direction), 0.0);
   vec3 specular_reflection = material_color.rgb * material_specular_reflectivity * pow(max(dot(reflect_dir, view_dir), 0.0), material_specular_glossiness_exponent);
   vec3 final_color = ambient_reflection + ((diffuse_reflection + specular_reflection) * directional_light_color);
-
-	// material_color.a is the transparency (.a ==> alpha)
-	out_color = vec4(final_color, material_color.a);
+  
+  // material_color.a is the transparency (.a ==> alpha)
+  out_color = vec4(final_color, material_color.a);
 }
