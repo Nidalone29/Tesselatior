@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(Sources
 	./src/application.cpp
-	./src/camera_controller.cpp
 	./src/camera.cpp
 	./src/light.cpp
 	./src/main.cpp

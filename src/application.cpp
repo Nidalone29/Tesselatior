@@ -97,7 +97,7 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
                  int mods) {
   // camera reset
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-    Application::GetCamera()->_cam_controller->reset();
+    Application::GetCamera().reset();
   }
 
   // wireframe mode
@@ -133,7 +133,7 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
   }
 }
 
-Camera* Application::GetCamera() {
+Camera& Application::GetCamera() {
   return Instance()._main_camera;
 }
 
@@ -161,18 +161,17 @@ Application::Application() : _app_state(VIEWPORT_FOCUS) {
     exit(1);
   }
 
+  // TODO fix with std::make_unique and smart pointers
   _rtt = new FrameBuffer(_properties.Width, _properties.Height);
   _rtt->bind();
   glClearColor(0.1F, 0.1F, 0.1F, 0.0F);
 
-  _main_camera = new Camera();
   init();
 
   _rtt->unbind();
 }
 
 Application::~Application() {
-  delete _main_camera;
   delete _rtt;
   // Cleanup
 
@@ -209,12 +208,12 @@ void Application::init() {
   glfwSwapInterval(1);
 
   // init camera
-  _main_camera->set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1),
-                           glm::vec3(0, 1, 0));
+  _main_camera.set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1),
+                          glm::vec3(0, 1, 0));
 
-  _main_camera->set_perspective(30.0F, static_cast<float>(_properties.Width),
-                                static_cast<float>(_properties.Height), 0.1F,
-                                100);
+  _main_camera.set_perspective(30.0F, static_cast<float>(_properties.Width),
+                               static_cast<float>(_properties.Height), 0.1F,
+                               100);
 
   _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
   _shader.addShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
@@ -238,7 +237,7 @@ void Application::init() {
   _shader.setUnifromSampler("ColorTextSampler", TEXTURE_COLOR);
   _shader.setUniformMat4("Model2World", teapot_t.getMatrix());
 
-  _shader.setUniformMat4("World2Camera", _main_camera->CP());
+  _shader.setUniformMat4("World2Camera", _main_camera.CP());
   // TODO move this (to the renderer init i think)
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
@@ -262,9 +261,8 @@ void Application::init() {
 }
 
 void Application::cameraControl(double& xpos, double& ypos) {
-  double timestep =
-      1.0 / glfwGetVideoMode(glfwGetPrimaryMonitor())->refreshRate;
-  CameraController* cm = GetCamera()->_cam_controller;
+  float timestep =
+      1.0F / glfwGetVideoMode(glfwGetPrimaryMonitor())->refreshRate;
   int stateA = glfwGetKey(_window, GLFW_KEY_A);
   int stateD = glfwGetKey(_window, GLFW_KEY_D);
   int stateS = glfwGetKey(_window, GLFW_KEY_S);
@@ -273,25 +271,25 @@ void Application::cameraControl(double& xpos, double& ypos) {
   int stateLSHIFT = glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT);
 
   if (stateA == GLFW_PRESS) {
-    cm->move(CameraMovements::LEFT, timestep);
+    _main_camera.move(CameraMovements::LEFT, timestep);
   }
   if (stateD == GLFW_PRESS) {
-    cm->move(CameraMovements::RIGHT, timestep);
+    _main_camera.move(CameraMovements::RIGHT, timestep);
   }
   if (stateW == GLFW_PRESS) {
-    cm->move(CameraMovements::FORWARD, timestep);
+    _main_camera.move(CameraMovements::FORWARD, timestep);
   }
   if (stateS == GLFW_PRESS) {
-    cm->move(CameraMovements::BACK, timestep);
+    _main_camera.move(CameraMovements::BACK, timestep);
   }
   if (stateSPACE == GLFW_PRESS) {
-    cm->move(CameraMovements::UP, timestep);
+    _main_camera.move(CameraMovements::UP, timestep);
   }
   if (stateLSHIFT == GLFW_PRESS) {
-    cm->move(CameraMovements::DOWN, timestep);
+    _main_camera.move(CameraMovements::DOWN, timestep);
   }
 
-  Application::GetCamera()->_cam_controller->rotate(xpos, ypos, timestep);
+  _main_camera.rotate(xpos, ypos, timestep);
 }
 
 void Application::run() {
@@ -302,14 +300,12 @@ void Application::run() {
 
   // imgui
   bool opt_fullscreen = true;
-  bool opt_padding = false;
   ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
   bool open = true;
   bool* p_open = &open;
 
   while (!glfwWindowShouldClose(_window)) {
     _rtt->bind();
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //  Poll for and process events
@@ -319,11 +315,6 @@ void Application::run() {
       glfwGetCursorPos(_window, &xpos, &ypos);
       cameraControl(xpos, ypos);
     }
-
-    _shader.setUniformMat4("World2Camera", _main_camera->CP());
-    _shader.setUniformVec3("camera_position", _main_camera->position());
-
-    _renderer.render(_Teapot, _shader);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -360,8 +351,8 @@ void Application::run() {
       ImGui::SetNextWindowPos(viewport->WorkPos);
       ImGui::SetNextWindowSize(viewport->WorkSize);
       ImGui::SetNextWindowViewport(viewport->ID);
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
       window_flags |= ImGuiWindowFlags_NoTitleBar |
                       ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
                       ImGuiWindowFlags_NoMove;
@@ -374,9 +365,9 @@ void Application::run() {
     // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will
     // render our background and handle the pass-thru hole, so we ask Begin() to
     // not render a background.
-    if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+    if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) {
       window_flags |= ImGuiWindowFlags_NoBackground;
-
+    }
     // Important: note that we proceed even if Begin() returns false (aka window
     // is collapsed). This is because we want to keep our DockSpace() active. If
     // a DockSpace() is inactive, all active windows docked into it will lose
@@ -384,14 +375,10 @@ void Application::run() {
     // relationship between an active window and an inactive docking, otherwise
     // any change of dockspace/settings would lead to windows being stuck in
     // limbo and never being visible.
-    if (!opt_padding) {
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    }
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0F, 0.0F));
     ImGui::Begin("DockSpace Demo", p_open, window_flags);
-    if (!opt_padding) {
-      ImGui::PopStyleVar();
-    }
+    ImGui::PopStyleVar();
 
     if (opt_fullscreen) {
       ImGui::PopStyleVar(2);
@@ -410,7 +397,6 @@ void Application::run() {
         // of other windows, which we can't undo at the moment without finer
         // window depth/z control.
         ImGui::MenuItem("Fullscreen", nullptr, &opt_fullscreen);
-        ImGui::MenuItem("Padding", nullptr, &opt_padding);
         ImGui::Separator();
 
         if (ImGui::MenuItem(
@@ -441,8 +427,9 @@ void Application::run() {
         }
         ImGui::Separator();
 
-        if (ImGui::MenuItem("Close", nullptr, false, p_open != nullptr))
+        if (ImGui::MenuItem("Close", nullptr, false, p_open != nullptr)) {
           *p_open = false;
+        }
         ImGui::EndMenu();
       }
 
@@ -454,14 +441,13 @@ void Application::run() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 
     ImGui::Begin("viewport");
-
     // scrolled and correct.
     glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     // TODO fix float to int comparison
     if (viewportPanelSize != _rtt->getSize()) {
       _rtt->resize(viewportPanelSize.x, viewportPanelSize.y);
-      _main_camera->set_perspective(30.0F, viewportPanelSize.x,
-                                    viewportPanelSize.y, 0.1F, 100);
+      _main_camera.set_perspective(30.0F, viewportPanelSize.x,
+                                   viewportPanelSize.y, 0.1F, 100);
     }
 
     // Update the ImGui image with the new texture data
@@ -470,16 +456,16 @@ void Application::run() {
                  ImVec2{1, 0});
 
     ImGui::End();  // "viewport"
+    _shader.setUniformMat4("World2Camera", _main_camera.CP());
+    _shader.setUniformVec3("camera_position", _main_camera.position());
+
+    _renderer.render(_Teapot, _shader);
     _rtt->unbind();
     ImGui::PopStyleVar();
 
     ImGui::End();  // "DockSpace Demo"
 
     ImGui::Render();
-
-    // *NOTE: this line has to be before ImGui_ImplOpenGL3_RenderDrawData
-    // otherwise black screen
-
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Swap front and back buffers

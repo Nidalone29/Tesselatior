@@ -4,18 +4,21 @@
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera() {
-  _cam_controller = new CameraController();
+Camera::Camera()
+    : _yaw_deg(-90.0F),
+      _pitch_deg(0.0F),
+      _sensitivity(1.0F),
+      _movement_speed(5.0F) {
   reset();
 }
 
-Camera::~Camera() {
-  delete _cam_controller;
-}
+Camera::~Camera() {}
 
 // la camera viene reimpostata alla posizione iniziale
 // solo il cameracontroller può chiamare questa funzione
 void Camera::reset() {
+  _yaw_deg = -90.0F;
+  _pitch_deg = 0.0F;
   //_combined = _projection = _camera = glm::mat4(1.0F);
   set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
   // TODO FIX
@@ -104,4 +107,80 @@ const glm::vec3& Camera::lookAt() const {
 // getter camera up
 const glm::vec3& Camera::up() const {
   return _up;
+}
+
+void Camera::move(const CameraMovements movement, const float timestep) {
+  glm::vec3 tmp, new_position;
+  // TODO narrowing conversion
+  float speed = _movement_speed * timestep;
+  switch (movement) {
+    case CameraMovements::LEFT:
+      tmp = glm::cross(up(), lookAt());
+      tmp = glm::normalize(tmp);
+      new_position = position() + (tmp * speed);
+      break;
+    case CameraMovements::RIGHT:
+      tmp = glm::cross(lookAt(), up());
+      tmp = glm::normalize(tmp);
+      new_position = position() + (speed * tmp);
+      break;
+    case CameraMovements::FORWARD:
+      new_position = position() + (lookAt() * speed);
+      break;
+    case CameraMovements::BACK:
+      new_position = position() - (lookAt() * speed);
+      break;
+
+    // these are independent from the mouse
+    case CameraMovements::UP:
+      new_position = position() + (glm::vec3(0.0F, 1.0F, 0.0F) * speed);
+      break;
+    case CameraMovements::DOWN:
+      new_position = position() - (glm::vec3(0.0F, 1.0F, 0.0F) * speed);
+      break;
+  }
+
+  set_camera(new_position, new_position + lookAt(), up());
+}
+
+void Camera::rotate(const double newx, const double newy,
+                    const float timestep) {
+  double speed = _sensitivity * timestep;
+
+  double xoffset = newx - _mouse_position.xpos;
+  double yoffset = _mouse_position.ypos - newy;
+
+  _mouse_position.xpos = newx;
+  _mouse_position.ypos = newy;
+
+  xoffset *= speed;
+  yoffset *= speed;
+
+  // TODO narrowing conversion
+  _yaw_deg += xoffset;
+  _pitch_deg += yoffset;
+
+  // for not rotating backwards indefinetly
+  if (_pitch_deg > 89.0F) {
+    _pitch_deg = 89.0F;
+  } else if (_pitch_deg < -89.0F) {
+    _pitch_deg = -89.0F;
+  }
+
+  glm::vec3 direction;
+  direction.x = cos(glm::radians(_yaw_deg)) * cos(glm::radians(_pitch_deg));
+  direction.y = sin(glm::radians(_pitch_deg));
+  direction.z = sin(glm::radians(_yaw_deg)) * cos(glm::radians(_pitch_deg));
+  direction = glm::normalize(direction);
+
+  set_camera(position(), position() + direction, up());
+}
+
+// it will be controlled by imgui
+void Camera::set_speed(float speed) {
+  //_speed = speed;
+}
+
+const float& Camera::speed() const {
+  return _movement_speed;
 }

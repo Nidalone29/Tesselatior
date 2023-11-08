@@ -1,14 +1,16 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "glm/glm.hpp"
-#include "camera_controller.h"
+#include <glm/glm.hpp>
+
+// similar to minecraft
+enum class CameraMovements { LEFT, RIGHT, FORWARD, BACK, UP, DOWN };
+struct MousePosition {
+  double xpos, ypos;
+};
 
 class Camera {
  public:
-  /**
-   * Costruttore. Inizializza le matrici all'identità.
-   */
   Camera();
   ~Camera();
   Camera(const Camera& other) = delete;
@@ -94,14 +96,29 @@ class Camera {
   const glm::vec3& lookAt() const;
   const glm::vec3& up() const;
 
-  // for now this works i guess
-  CameraController* _cam_controller;
+  void HandleInput(int key);
 
-  // TODO this has to be fixed, it should be private and called automatically
-  // after an input
+  /**
+   * Ritorna l'intensità degli spostamenti
+   * @return l'intensità degli spostamenti
+   */
+  const float& speed() const;
+
+  /**
+   * Setta l'intensità degli spostamenti
+   * @param speed l'intensità degli spostamenti
+   */
+  void set_speed(float speed);
+
+  void move(const CameraMovements movement, const float timestep);
+  void rotate(const double newx, const double newy, const float timestep);
+
+  // TODO this has to be fixed, it should be private and called
+  // automatically after an input
   void update();
 
  private:
+  // defining the camera
   glm::mat4 _camera;  // matrice di trasformazione di camera
 
   glm::mat4 _projection;  // matrice di trasformazione di proiezione
@@ -111,6 +128,14 @@ class Camera {
   glm::vec3 _up;
   glm::vec3 _position;
   glm::vec3 _lookat_dir;
+
+  // controlling the camera
+  MousePosition _mouse_position;
+  double _sensitivity;  // mouse movement speed
+  float _pitch_deg;
+  float _yaw_deg;
+
+  float _movement_speed;  // keyboard movement speed
 };
 
 #endif  // CAMERA_H

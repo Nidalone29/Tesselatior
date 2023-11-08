@@ -24,7 +24,7 @@ class Application {
   static Application& Instance();
 
   static GLFWwindow* GetWindow();
-  static Camera* GetCamera();
+  static Camera& GetCamera();
   static Renderer& GetRenderer();
   static APP_STATE GetAppState();
   static void SetAppState(const APP_STATE to_add);
@@ -49,7 +49,7 @@ class Application {
   GLFWwindow* _window;
 
   // rendering specific things
-  Camera* _main_camera;
+  Camera _main_camera;
   Renderer _renderer;
   Scene _Teapot, _Skull, _Flower, _Boot, _Dragon, _Marius;
 
