@@ -1,5 +1,7 @@
 /.vscode
 /.vs
+/.idea
+
 /build
 *.dll
 /models
