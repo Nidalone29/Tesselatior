@@ -1,6 +1,7 @@
 /.vscode
 /.vs
 /.idea
+cmake-build-*/
 
 /build
 *.dll
