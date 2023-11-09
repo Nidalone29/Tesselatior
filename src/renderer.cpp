@@ -34,11 +34,11 @@ void Renderer::render(Scene& scene, const Shader& shader) const {
       glEnableVertexAttribArray(2);  // IBO
 
       // clang-format off
-	  AmbientLight ambient_light = scene.getAmbientLight();
+      AmbientLight ambient_light = scene.getAmbientLight();
       shader.setUniformVec3("ambient_light_color", ambient_light.getColor());
       shader.setUniformVec3("ambient_light_intensity", ambient_light.getIntensity());
 
-	  DirectionalLight directional_light = scene.getDirectionalLight();
+      DirectionalLight directional_light = scene.getDirectionalLight();
       shader.setUniformVec3("directional_light_color", directional_light.getColor());
       shader.setUniformVec3("directional_light_intensity", directional_light.getIntensity());
       shader.setUniformVec3("directional_light_direction", directional_light.getDirection());
