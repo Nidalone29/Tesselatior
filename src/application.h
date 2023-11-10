@@ -50,7 +50,7 @@ class Application {
 
   // rendering specific things
   Camera _main_camera;
-  Renderer _renderer;
+  Renderer* _renderer;
   Scene _Teapot, _Skull, _Flower, _Boot, _Dragon, _Marius;
 
   // shaders
@@ -58,9 +58,6 @@ class Application {
 
   // for mouse toggle
   APP_STATE _app_state;
-
-  // render target texture
-  FrameBuffer* _rtt;
 };
 
 #endif  // APPLICATION_H

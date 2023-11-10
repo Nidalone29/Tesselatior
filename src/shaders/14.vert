@@ -6,7 +6,9 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 textcoord;  
 
 uniform mat4 Model2World;
-uniform mat4 World2Camera;
+
+uniform mat4 camera_view_matrix;
+uniform mat4 camera_projection_matrix;
 
 // Passiamo al fragment shader le informazioni sulle normali dei vertici  
 out vec3 fragment_normal;
@@ -19,7 +21,7 @@ out vec2 fragment_textcoord;
 
 void main()
 {
-  gl_Position = World2Camera * Model2World * vec4(position, 1.0);
+  gl_Position = camera_projection_matrix * camera_view_matrix * Model2World * vec4(position, 1.0);
 
   // I vettori delle normali ricevuti in input sono passati 
   // in output al fragment shader dopo essere stati trasformati 

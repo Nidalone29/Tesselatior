@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 
-// similar to minecraft
 enum class CameraMovements { LEFT, RIGHT, FORWARD, BACK, UP, DOWN };
 struct MousePosition {
   double xpos, ypos;
@@ -19,36 +18,7 @@ class Camera {
   Camera& operator=(Camera&& other) = delete;
 
   /**
-   * Imposta la matrice di trasformazione di camera.
-   *
-   * @param position posizione della camera
-   * @param lookat punto dove guarda la camera
-   * @param up vettore che indica l'alto della camera
-   */
-  void set_camera(const glm::vec3& position, const glm::vec3& lookat,
-                  const glm::vec3& up);
-
-  /**
-   * Ritorna la matrice di trasformazione di camera.
-   *
-   * @return la matrice di trasformazione di camera.
-   */
-  const glm::mat4& camera() const;
-
-  /**
-   * Genera la matrice di trasformazione di camera.
-   *
-   * @param position posizione della camera
-   * @param lookat punto dove guarda la camera aka target position
-   * @param up vettore che indica l'alto della camera
-   *
-   * @return la matrice di trasformazione di camera
-   */
-  static glm::mat4 camera_setting(const glm::vec3& position,
-                                  const glm::vec3& lookat, const glm::vec3& up);
-
-  /**
-   * Imposta la matrice di trasformazione di proiezione prospettica.
+   * sets the perspective projection matrix
    *
    * @param FOVDeg Angolo del field of view in gradi
    * @param width larghezza della window
@@ -56,73 +26,54 @@ class Camera {
    * @param znear coordinata z del near plane
    * @param zfar coordinate z del far plane
    */
-  void set_perspective(float FOVDeg, float width, float height, float znear,
-                       float zfar);
+  void set_projection(const float FOVDeg, const float width, const float height,
+                      const float znear, const float zfar);
 
   /**
-   * Ritorna la matrice di trasformazione prospettica.
-   * @return la matrice di trasformazione prospettica
+   * Returns the current view_matrix
+   * @return view_matrix
    */
-  const glm::mat4& projection() const;
+  const glm::mat4& view_matrix() const;
 
   /**
-   * Ritorna la matrice di trasformazione di proiezione prospettica.
-   *
-   * @param FOVDeg Angolo del field of view in gradi
-   * @param width larghezza della window
-   * @param height altezza della window
-   * @param znear coordinata z del near plane
-   * @param zfar coordinate z del far plane
-   * @return la matrice di trasformazione di proiezione prospettica
+   * Returns the current projection_matrix
+   * @return projection_matrix
    */
-  glm::mat4 perspective_projection(float FOVDeg, float width, float height,
-                                   float znear, float zfar);
+  const glm::mat4& projection_matrix() const;
 
   /**
-   * Reimposta le matrici di trasformazione all'identità
+   * Resets the view the yaw to -90deg, the pitch to 0deg and the view matrix
+   * (and everything that makes it up) to the initial value
    */
-  void reset();
+  void reset_view();
 
-  /**
-   * Ritorna la matrice di trasformazione completa.
-   * @return la matrice di trasformazione completa.
-   */
-  const glm::mat4& CP() const;
-
-  /**
-   * Ritorna la posizione di camera in coordinate mondo
-   */
   const glm::vec3& position() const;
   const glm::vec3& lookAt() const;
   const glm::vec3& up() const;
 
-  void HandleInput(int key);
-
-  /**
-   * Ritorna l'intensità degli spostamenti
-   * @return l'intensità degli spostamenti
-   */
   const float& speed() const;
-
-  /**
-   * Setta l'intensità degli spostamenti
-   * @param speed l'intensità degli spostamenti
-   */
   void set_speed(float speed);
 
   void move(const CameraMovements movement, const float timestep);
   void rotate(const double newx, const double newy, const float timestep);
 
-  // TODO this has to be fixed, it should be private and called
-  // automatically after an input
-  void update();
-
  private:
+  /**
+   * Sets the view matrix of the camera
+   *
+   * This is private because move() and rotate() modify the view based on user
+   * input.
+   *
+   * @param position position of the camera
+   * @param lookat point where the camera is looking at
+   * @param up the vector pointing up for the camera
+   */
+  void set_camera(const glm::vec3& position, const glm::vec3& lookat,
+                  const glm::vec3& up);
+
   // defining the camera
-  glm::mat4 _camera;  // matrice di trasformazione di camera
-
-  glm::mat4 _projection;  // matrice di trasformazione di proiezione
-
+  glm::mat4 _view_matrix;        // view transofrm matrix
+  glm::mat4 _projection_matrix;  // camera pojection matrix (perspective)
   glm::mat4 _combined;
 
   glm::vec3 _up;

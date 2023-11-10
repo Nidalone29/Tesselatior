@@ -81,7 +81,7 @@ void render_skull() {
 }
 */
 Renderer& Application::GetRenderer() {
-  return Instance()._renderer;
+  return *(Instance()._renderer);
 }
 
 APP_STATE Application::GetAppState() {
@@ -97,7 +97,7 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
                  int mods) {
   // camera reset
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-    Application::GetCamera().reset();
+    Application::GetCamera().reset_view();
   }
 
   // wireframe mode
@@ -162,19 +162,15 @@ Application::Application() : _app_state(VIEWPORT_FOCUS) {
   }
 
   // TODO fix with std::make_unique and smart pointers
-  _rtt = new FrameBuffer(_properties.Width, _properties.Height);
-  _rtt->bind();
-  glClearColor(0.1F, 0.1F, 0.1F, 0.0F);
+  _renderer = new Renderer();
 
   init();
-
-  _rtt->unbind();
 }
 
 Application::~Application() {
-  delete _rtt;
-  // Cleanup
+  delete _renderer;
 
+  // Cleanup
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
@@ -207,14 +203,6 @@ void Application::init() {
   // app only works with vsync because of fixed timesteps
   glfwSwapInterval(1);
 
-  // init camera
-  _main_camera.set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1),
-                          glm::vec3(0, 1, 0));
-
-  _main_camera.set_perspective(30.0F, static_cast<float>(_properties.Width),
-                               static_cast<float>(_properties.Height), 0.1F,
-                               100);
-
   _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
   _shader.addShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
 
@@ -232,19 +220,7 @@ void Application::init() {
   teapot.setTransform(teapot_t);
 
   _Teapot.addObject(Object(teapot));
-
-  // NOTE this has to be after shaders are initialized and enabled
   _shader.setUnifromSampler("ColorTextSampler", TEXTURE_COLOR);
-  _shader.setUniformMat4("Model2World", teapot_t.getMatrix());
-
-  _shader.setUniformMat4("World2Camera", _main_camera.CP());
-  // TODO move this (to the renderer init i think)
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  glFrontFace(GL_CCW);
-  glEnable(GL_DEPTH_TEST);
-
-  _rtt->unbind();
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -302,10 +278,7 @@ void Application::run() {
   constexpr ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
   while (!glfwWindowShouldClose(_window)) {
-    _rtt->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //  Poll for and process events
+    // Poll for and process events
     glfwPollEvents();
 
     if (_app_state == VIEWPORT_FOCUS) {
@@ -328,29 +301,25 @@ void Application::run() {
       // Creating the Viewport imgui window
       ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
       ImGui::Begin("viewport");
-      // scrolled and correct.
+
       glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
       // TODO fix float to int comparison
-      if (viewportPanelSize != _rtt->getSize()) {
-        _rtt->resize(viewportPanelSize.x, viewportPanelSize.y);
-        _main_camera.set_perspective(30.0F, viewportPanelSize.x,
-                                     viewportPanelSize.y, 0.1F, 100);
+      if (viewportPanelSize != _renderer->target().getSize()) {
+        _renderer->resizeTarget(viewportPanelSize.x, viewportPanelSize.y);
+        _main_camera.set_projection(30.0F, viewportPanelSize.x,
+                                    viewportPanelSize.y, 0.1F, 100);
       }
 
+      _renderer->render(_Teapot, _main_camera, _shader);
+
       // Update the ImGui image with the new texture data
-      ImGui::Image(reinterpret_cast<void*>(_rtt->getTexture()),
+      ImGui::Image(reinterpret_cast<void*>(_renderer->target().getTexture()),
                    ImVec2(viewportPanelSize.x, viewportPanelSize.y),
                    ImVec2{0, 1}, ImVec2{1, 0});
 
       ImGui::End();  // "viewport"
       ImGui::PopStyleVar();
     }
-
-    _shader.setUniformMat4("World2Camera", _main_camera.CP());
-    _shader.setUniformVec3("camera_position", _main_camera.position());
-
-    _renderer.render(_Teapot, _shader);
-    _rtt->unbind();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
