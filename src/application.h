@@ -53,12 +53,10 @@ class Application {
   Renderer _renderer;
   Scene _Teapot, _Skull, _Flower, _Boot, _Dragon, _Marius;
 
-  // TODO still have to refactor all of this
-  // lights
-
   // shaders
   Shader _shader;
 
+  // for mouse toggle
   APP_STATE _app_state;
 
   // render target texture

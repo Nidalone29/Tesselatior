@@ -61,8 +61,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   imgui::imgui)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
-# Dirty way
-# TODO improve (for install for example...)
+
 add_custom_target(copy_assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/models ${CMAKE_CURRENT_BINARY_DIR}/models
 )

@@ -10,14 +10,14 @@
 
 namespace Math {
 
-const constexpr float g2r = M_PI / 180.0;
-const constexpr float r2g = 180.0 / M_PI;
+constexpr float g2r = M_PI / 180.0;
+constexpr float r2g = 180.0 / M_PI;
 
-static constexpr float to_radiant(float deg) {
+static constexpr float to_radiant(const float deg) {
   return deg * g2r;
 }
 
-static constexpr float to_degree(float rad) {
+static constexpr float to_degree(const float rad) {
   return rad * r2g;
 }
 
@@ -29,8 +29,9 @@ static constexpr float to_degree(float rad) {
  * @param z offsetZ di traslazione rispetto all'asse Z
  * @return la matrice 4x4 di traslazione
  */
-static constexpr glm::mat4 translationMatrix(float offsetX, float offsetY,
-                                             float offsetZ) {
+static constexpr glm::mat4 translationMatrix(const float offsetX,
+                                             const float offsetY,
+                                             const float offsetZ) {
   glm::mat4 t(1.0F);
   t[3] = glm::vec4(offsetX, offsetY, offsetZ, 1.0F);
   return t;
@@ -44,8 +45,9 @@ static constexpr glm::mat4 translationMatrix(float offsetX, float offsetY,
  * @param factorZ fattore di scaling rispetto all'asse Z
  * @return la matrice 4x4 di scaling
  */
-static constexpr glm::mat4 scalingMatrix(float factorX, float factorY,
-                                         float factorZ) {
+static constexpr glm::mat4 scalingMatrix(const float factorX,
+                                         const float factorY,
+                                         const float factorZ) {
   assert(factorX > 0);
   assert(factorY > 0);
   assert(factorZ > 0);
@@ -65,12 +67,13 @@ static constexpr glm::mat4 scalingMatrix(float factorX, float factorY,
  * @param degZ angolo di rotazione rispetto all'asse Z
  * @return la matrice 4x4 di rotazione
  */
-static constexpr glm::mat4 rotationMatrix(float degX, float degY, float degZ) {
+static constexpr glm::mat4 rotationMatrix(const float degX, const float degY,
+                                          const float degZ) {
   glm::mat4 rx(1.0F), ry(1.0F), rz(1.0F);
 
-  float thetaX = to_radiant(degX);
-  float thetaY = to_radiant(degY);
-  float thetaZ = to_radiant(degZ);
+  const float thetaX = to_radiant(degX);
+  const float thetaY = to_radiant(degY);
+  const float thetaZ = to_radiant(degZ);
 
   rx[1][1] = cosf(thetaX);
   rx[2][1] = -sinf(thetaX);
@@ -104,16 +107,16 @@ static constexpr glm::mat4 rotationMatrix(float degX, float degY, float degZ) {
  * @param axis vettore che contiene l'asse di rotazione
  * @return la matrice 3x3 di rotazione
  */
-static glm::mat3 rotation3Matrix(float deg, const glm::vec3& axis) {
-  glm::vec3 n = glm::normalize(axis);
+static glm::mat3 rotation3Matrix(const float deg, const glm::vec3& axis) {
+  const glm::vec3 n = glm::normalize(axis);
 
   glm::mat3 out(1.0F);
 
-  float t = to_radiant(deg);
+  const float t = to_radiant(deg);
 
-  float sine = sin(t);
-  float cosine = cos(t);
-  float acosine = 1.0F - cosine;
+  const float sine = sin(t);
+  const float cosine = cos(t);
+  const float acosine = 1.0F - cosine;
 
   out[0][0] = n.x * n.x + (1.0F - n.x * n.x) * cosine;
   out[0][1] = n.x * n.y * acosine + n.z * sine;
