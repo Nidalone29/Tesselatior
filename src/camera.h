@@ -52,7 +52,9 @@ class Camera {
   const glm::vec3& up() const;
 
   const float& speed() const;
-  void set_speed(float speed);
+  void set_speed(const float speed);
+  const double& sensitivity() const;
+  void set_sensitivity(const double sensitivity);
 
   void move(const CameraMovements movement, const float timestep);
   void rotate(const double newx, const double newy, const float timestep);

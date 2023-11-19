@@ -272,10 +272,19 @@ void Application::run() {
   glEnable(GL_DEBUG_OUTPUT);
 
   double xpos, ypos;
-  glfwGetCursorPos(_window, &xpos, &ypos);
+
+  AmbientLight scene_ambient = _Teapot.getAmbientLight();
+  DirectionalLight scene_directional = _Teapot.getDirectionalLight();
+
+  glm::vec3 ambient = scene_ambient.getColor();
+  glm::vec3 directional = scene_directional.getColor();
+
+  float camera_sens = _main_camera.sensitivity();
+  float camera_speed = _main_camera.speed();
 
   // imgui
   constexpr ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+  ImGuiIO& io = ImGui::GetIO();
 
   while (!glfwWindowShouldClose(_window)) {
     // Poll for and process events
@@ -291,11 +300,74 @@ void Application::run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2);
+
     // Making the window a dosckpace
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspace_flags);
 
-    // Creating a demo window
-    ImGui::ShowDemoWindow();
+    // the menu bar
+    if (ImGui::BeginMainMenuBar()) {
+      if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("Open")) {
+        }
+        if (ImGui::MenuItem("Quit")) {
+        }
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("View")) {
+        if (ImGui::MenuItem("Lights control")) {
+        }
+        if (ImGui::MenuItem("Stats")) {
+        }
+
+        ImGui::EndMenu();
+      }
+      ImGui::EndMainMenuBar();
+    }
+
+    // ImGui::ShowDemoWindow();
+
+    {
+      ImGui::Begin("stats");
+      ImGui::Text("dear imgui says hello! (%s) (%d)", IMGUI_VERSION,
+                  IMGUI_VERSION_NUM);
+      if (ImGui::CollapsingHeader("Lights")) {
+        ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoAlpha |
+                                    ImGuiColorEditFlags_PickerHueBar |
+                                    ImGuiColorEditFlags_DisplayRGB;
+
+        ImGui::Text("Ambient Light");
+        ImGui::ColorPicker3("ambient color", &ambient.x, flags);
+        scene_ambient.setColor(ambient);
+
+        ImGui::Text("Directional Light");
+        ImGui::ColorPicker3("directional color", &directional.x, flags);
+        scene_directional.setColor(directional);
+
+        _Teapot.setAmbientLight(scene_ambient);
+        _Teapot.setDirectionalLight(scene_directional);
+      }
+      if (ImGui::CollapsingHeader("Camera")) {
+        const glm::vec3 cam_pos = _main_camera.position();
+        ImGui::Text("Position (X: %.2f, Y: %.2f, Z: %.2f)", cam_pos.x,
+                    cam_pos.y, cam_pos.z);
+
+        ImGui::Text("Camera sensitivity (0.01 -> 10)");
+        ImGui::SliderFloat("sens", &camera_sens, 0.1F, 10.0F, "%.2f",
+                           ImGuiSliderFlags_None);
+        ImGui::Text("Movement speed (1 -> 25)");
+        ImGui::SliderFloat("speed", &camera_speed, 1.0F, 25.0F, "%.2f",
+                           ImGuiSliderFlags_None);
+
+        _main_camera.set_sensitivity(camera_sens);
+        _main_camera.set_speed(camera_speed);
+      }
+
+      ImGui::Separator();
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                  1000.0F / io.Framerate, io.Framerate);
+      ImGui::End();  // "stats"
+    }
 
     {
       // Creating the Viewport imgui window
@@ -317,10 +389,11 @@ void Application::run() {
                    ImVec2(viewportPanelSize.x, viewportPanelSize.y),
                    ImVec2{0, 1}, ImVec2{1, 0});
 
-      ImGui::End();  // "viewport"
-      ImGui::PopStyleVar();
+      ImGui::End();          // "viewport"
+      ImGui::PopStyleVar();  // window padding
     }
 
+    ImGui::PopStyleVar();  // frame rounding
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

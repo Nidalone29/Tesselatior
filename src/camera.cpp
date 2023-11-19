@@ -136,10 +136,18 @@ void Camera::rotate(const double newx, const double newy,
 }
 
 // it will be controlled by imgui
-void Camera::set_speed(float speed) {
-  //_speed = speed;
+void Camera::set_speed(const float speed) {
+  _movement_speed = speed;
 }
 
 const float& Camera::speed() const {
   return _movement_speed;
+}
+
+void Camera::set_sensitivity(const double sensitivity) {
+  _sensitivity = sensitivity;
+}
+
+const double& Camera::sensitivity() const {
+  return _sensitivity;
 }
