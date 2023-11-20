@@ -120,15 +120,18 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
     // render_flower();
   }
 
+  ImGuiIO& io = ImGui::GetIO();
   // Mouse toggle
   if (key == GLFW_KEY_O && action == GLFW_PRESS) {
     if (Application::GetAppState() == VIEWPORT_FOCUS) {
       Application::SetAppState(MENU_CONTROL);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
     } else {
       Application::SetAppState(VIEWPORT_FOCUS);
       // glfwSetCursorPos(window, xpos, ypos);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
     }
   }
 }
@@ -233,7 +236,11 @@ void Application::init() {
 
   std::string glsl_version = "#version 330";
   ImGui_ImplOpenGL3_Init(glsl_version.c_str());
-  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  io.IniFilename = "imgui-layout.ini";
 }
 
 void Application::cameraControl(double& xpos, double& ypos) {
@@ -284,6 +291,13 @@ void Application::run() {
 
   // imgui
   constexpr ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+  constexpr ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoAlpha |
+                                              ImGuiColorEditFlags_PickerHueBar |
+                                              ImGuiColorEditFlags_DisplayRGB;
+
+  constexpr ImGuiWindowFlags window_flags =
+      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+
   ImGuiIO& io = ImGui::GetIO();
 
   while (!glfwWindowShouldClose(_window)) {
@@ -304,7 +318,6 @@ void Application::run() {
 
     // Making the window a dosckpace
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspace_flags);
-
     // the menu bar
     if (ImGui::BeginMainMenuBar()) {
       if (ImGui::BeginMenu("File")) {
@@ -314,34 +327,22 @@ void Application::run() {
         }
         ImGui::EndMenu();
       }
-      if (ImGui::BeginMenu("View")) {
-        if (ImGui::MenuItem("Lights control")) {
-        }
-        if (ImGui::MenuItem("Stats")) {
-        }
-
-        ImGui::EndMenu();
-      }
       ImGui::EndMainMenuBar();
     }
 
     // ImGui::ShowDemoWindow();
 
     {
-      ImGui::Begin("stats");
+      ImGui::Begin("stats", nullptr, window_flags);
       ImGui::Text("dear imgui says hello! (%s) (%d)", IMGUI_VERSION,
                   IMGUI_VERSION_NUM);
       if (ImGui::CollapsingHeader("Lights")) {
-        ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoAlpha |
-                                    ImGuiColorEditFlags_PickerHueBar |
-                                    ImGuiColorEditFlags_DisplayRGB;
-
         ImGui::Text("Ambient Light");
-        ImGui::ColorPicker3("ambient color", &ambient.x, flags);
+        ImGui::ColorPicker3("ambient color", &ambient.x, color_flags);
         scene_ambient.setColor(ambient);
 
         ImGui::Text("Directional Light");
-        ImGui::ColorPicker3("directional color", &directional.x, flags);
+        ImGui::ColorPicker3("directional color", &directional.x, color_flags);
         scene_directional.setColor(directional);
 
         _Teapot.setAmbientLight(scene_ambient);
@@ -372,7 +373,7 @@ void Application::run() {
     {
       // Creating the Viewport imgui window
       ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
-      ImGui::Begin("viewport");
+      ImGui::Begin("viewport", nullptr, window_flags);
 
       glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
       // TODO fix float to int comparison
