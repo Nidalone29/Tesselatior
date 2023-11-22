@@ -59,6 +59,8 @@ class Camera {
   void move(const CameraMovements movement, const float timestep);
   void rotate(const double newx, const double newy, const float timestep);
 
+  void set_mouseposition(const double x, const double y);
+
  private:
   /**
    * Sets the view matrix of the camera

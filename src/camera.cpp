@@ -1,6 +1,8 @@
 #include "camera.h"
 #include "transform.h"
 
+#include <iostream>
+
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -150,4 +152,9 @@ void Camera::set_sensitivity(const double sensitivity) {
 
 const double& Camera::sensitivity() const {
   return _sensitivity;
+}
+
+void Camera::set_mouseposition(const double x, const double y) {
+  _mouse_position.xpos = x;
+  _mouse_position.ypos = y;
 }

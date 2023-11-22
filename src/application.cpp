@@ -92,6 +92,8 @@ void Application::SetAppState(const APP_STATE to_add) {
   Instance()._app_state = to_add;
 }
 
+static double x_pos, y_pos;
+
 // handling key inputs
 void InputHandle(GLFWwindow* window, int key, int scancode, int action,
                  int mods) {
@@ -122,15 +124,20 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
 
   ImGuiIO& io = ImGui::GetIO();
   // Mouse toggle
-  if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+  // we only want to toggle the mouse when the window is hovered, otherwise
+  // there is a "werid bug" with glfw self-centering a cursor ouside a window
+  // that causes the camera to jump
+  if (key == GLFW_KEY_O && action == GLFW_PRESS &&
+      glfwGetWindowAttrib(window, GLFW_HOVERED)) {
     if (Application::GetAppState() == VIEWPORT_FOCUS) {
       Application::SetAppState(MENU_CONTROL);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
     } else {
       Application::SetAppState(VIEWPORT_FOCUS);
-      // glfwSetCursorPos(window, xpos, ypos);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      glfwGetCursorPos(window, &x_pos, &y_pos);
+      Application::GetCamera().set_mouseposition(x_pos, y_pos);
       io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
     }
   }
