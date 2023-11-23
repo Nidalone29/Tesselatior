@@ -250,15 +250,15 @@ void Application::init() {
   io.IniFilename = "imgui-layout.ini";
 }
 
-void Application::cameraControl(double& xpos, double& ypos) {
-  float timestep =
+void Application::cameraControl(const double xpos, const double ypos) {
+  const float timestep =
       1.0F / glfwGetVideoMode(glfwGetPrimaryMonitor())->refreshRate;
-  int stateA = glfwGetKey(_window, GLFW_KEY_A);
-  int stateD = glfwGetKey(_window, GLFW_KEY_D);
-  int stateS = glfwGetKey(_window, GLFW_KEY_S);
-  int stateW = glfwGetKey(_window, GLFW_KEY_W);
-  int stateSPACE = glfwGetKey(_window, GLFW_KEY_SPACE);
-  int stateLSHIFT = glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT);
+  const int stateA = glfwGetKey(_window, GLFW_KEY_A);
+  const int stateD = glfwGetKey(_window, GLFW_KEY_D);
+  const int stateS = glfwGetKey(_window, GLFW_KEY_S);
+  const int stateW = glfwGetKey(_window, GLFW_KEY_W);
+  const int stateSPACE = glfwGetKey(_window, GLFW_KEY_SPACE);
+  const int stateLSHIFT = glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT);
 
   if (stateA == GLFW_PRESS) {
     _main_camera.move(CameraMovements::LEFT, timestep);

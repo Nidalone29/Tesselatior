@@ -34,7 +34,7 @@ class Application {
   Application();
   ~Application();
   void init();
-  void cameraControl(double& xpos, double& ypos);
+  void cameraControl(const double xpos,const double ypos);
 
   struct Props {
     const char* Title;

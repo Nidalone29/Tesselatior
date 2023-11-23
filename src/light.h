@@ -34,7 +34,7 @@ class AmbientLight : public Light {
 
 class DirectionalLight : public Light {
  public:
-  DirectionalLight(const glm::vec3& direction);
+  explicit DirectionalLight(const glm::vec3& direction);
 
   DirectionalLight(const glm::vec3& color, const glm::vec3& intensity,
                    const glm::vec3& direction);

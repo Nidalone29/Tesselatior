@@ -6,7 +6,7 @@
 class Object {
  public:
   Object() = delete;  // TODO TEMP
-  Object(const Model& model);
+  explicit Object(const Model& model);
   ~Object();
   Object(const Object& other) = default;
   Object& operator=(const Object& other) = default;
