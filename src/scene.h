@@ -10,10 +10,10 @@ class Scene {
  public:
   Scene();
   // temp
-  Scene(const Scene& other) = delete;
-  Scene& operator=(const Scene& other) = delete;
-  Scene(Scene&& other) = delete;
-  Scene& operator=(Scene&& other) = delete;
+  Scene(const Scene& other) = default;
+  Scene& operator=(const Scene& other) = default;
+  Scene(Scene&& other) = default;
+  Scene& operator=(Scene&& other) = default;
 
   void addObject(const Object& to_add);
   std::vector<Object>& getAllObjects();
@@ -23,7 +23,11 @@ class Scene {
   void setDirectionalLight(const DirectionalLight& to_add);
   const DirectionalLight& getDirectionalLight() const;
 
+  void setName(const std::string& to_add);
+  const std::string& getName() const;
+
  private:
+  std::string _name;
   std::vector<Object> _objects;
 
   // there is only one ambient light

@@ -13,6 +13,7 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <string>
 
 class Application {
  public:
@@ -34,14 +35,14 @@ class Application {
   Application();
   ~Application();
   void init();
-  void cameraControl(const double xpos,const double ypos);
+  void cameraControl(const double xpos, const double ypos);
 
   struct Props {
-    const char* Title;
+    std::string Title;
     int Width;
     int Height;
 
-    Props(const char* title = "Tesselatior", int width = 1280, int height = 720)
+    Props(std::string title = "Tesselatior", int width = 1280, int height = 720)
         : Title(title), Width(width), Height(height) {}
   };
 
@@ -51,7 +52,8 @@ class Application {
   // rendering specific things
   Camera _main_camera;
   Renderer* _renderer;
-  Scene _Teapot, _Skull, _Flower, _Boot, _Dragon, _Marius;
+  std::vector<Scene> _scenes;
+  int _current_scene_index;
 
   // shaders
   Shader _shader;

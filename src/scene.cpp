@@ -4,7 +4,8 @@
 #include <glm/gtx/string_cast.hpp>
 
 Scene::Scene()
-    : _ambient_light(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2))),
+    : _name("unnamed scene"),
+      _ambient_light(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2))),
       _directional_light(DirectionalLight(
           glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(0, 0, -1))) {
   std::cout << "scene created" << std::endl;
@@ -33,4 +34,11 @@ void Scene::setDirectionalLight(const DirectionalLight& to_add) {
 
 const DirectionalLight& Scene::getDirectionalLight() const {
   return _directional_light;
+}
+
+void Scene::setName(const std::string& to_add) {
+  _name = to_add;
+}
+const std::string& Scene::getName() const {
+  return _name;
 }
