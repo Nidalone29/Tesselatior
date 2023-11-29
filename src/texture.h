@@ -1,7 +1,10 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
-#include <string>
+
 #include <GL/glew.h>
+
+#include <string>
+#include <filesystem>
 
 class Texture {
  public:
@@ -10,7 +13,7 @@ class Texture {
    *
    * @param path
    */
-  Texture(const std::string& path, const std::string& type);
+  Texture(const std::filesystem::path& path, const std::string& type);
   ~Texture() = default;
   Texture(const Texture& other) = default;
   Texture& operator=(const Texture& other) = default;

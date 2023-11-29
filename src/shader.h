@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 // this actually rappresents a shader program (that can have multiple shaders
 // files maybe)
@@ -19,7 +20,7 @@ class Shader {
    * @param type Vertex or Fragment shader
    * @param path path to the source code of the shader
    */
-  void addShader(const GLenum type, const std::string path);
+  void addShader(const GLenum type, const std::filesystem::path& path);
 
   /**
    * @brief compiling and linking all the added shaders to a program
@@ -43,7 +44,7 @@ class Shader {
   void setUnifromSampler(const std::string uniform_name, int id) const;
 
  private:
-  static GLuint compileShader(const GLenum type, const std::string src);
+  static GLuint compileShader(const GLenum type, const std::string& src);
   GLint getUniformLocation(const std::string& uniform_name) const;
 
   struct ShaderSource {

@@ -9,7 +9,7 @@
 
 Shader::Shader() {}
 
-void Shader::addShader(const GLenum type, const std::string path) {
+void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
   ShaderSource res;
   switch (type) {
     case GL_VERTEX_SHADER:
@@ -36,7 +36,7 @@ void Shader::addShader(const GLenum type, const std::string path) {
   _shaders.push_back(res);
 }
 
-GLuint Shader::compileShader(const GLenum type, const std::string src) {
+GLuint Shader::compileShader(const GLenum type, const std::string& src) {
   GLuint shader = glCreateShader(type);
   const GLchar* source = (const GLchar*)src.c_str();
   glShaderSource(shader, 1, &source, nullptr);

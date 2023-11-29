@@ -4,10 +4,12 @@
 #include "mesh.h"
 #include "transform.h"
 
+#include <filesystem>
+
 class Model {
  public:
   Model() = delete;  // can't create an empty model
-  Model(const std::string& path, unsigned int flags = 0);
+  Model(const std::filesystem::path& path, unsigned int flags = 0);
   Model(const Model& other) = default;
   Model& operator=(const Model& other) = default;
   Model(Model&& other) = default;
@@ -18,12 +20,14 @@ class Model {
   void setTransform(const Transform& transform);
 
  private:
-  void load_meshes(const std::string& path, unsigned int flags);
+  void load_meshes(unsigned int flags);
 
   // 1 to n meshes
   std::vector<Mesh> _meshes;
   // i think this will be applied to all meshes
   Transform _transform;
+
+  std::filesystem::path _model_path;
 };
 
 #endif  // MODEL_H

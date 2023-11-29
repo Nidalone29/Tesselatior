@@ -3,8 +3,9 @@
 #include <stb_image.h>
 
 #include <iostream>
+#include <filesystem>
 
-Texture::Texture(const std::string& path, const std::string& type)
+Texture::Texture(const std::filesystem::path& path, const std::string& type)
     : _type(type), _id(-1) {
   int width, height, channels;
   unsigned char* image = nullptr;
@@ -18,11 +19,15 @@ Texture::Texture(const std::string& path, const std::string& type)
 
   // std::cout << width << " " << height << " " << channels < std::endl;
 
+  // TODO refactor
   if (image == nullptr) {
-    // TODO it should load the default texture "./models/default_texture.png"
+    std::cerr << " Failed to load texture " << path.string() << std::endl;
 
-    std::cerr << " Failed to load texture " << path << std::endl;
-    exit(0);
+    image = stbi_load("white.png", &width, &height, &channels, 4);
+    if (image == nullptr) {
+      std::cerr << "Failed to load default texture" << std::endl;
+      std::exit(0);
+    }
   }
 
   _data = *image;

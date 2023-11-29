@@ -3,38 +3,26 @@
 #include <assimp/Importer.hpp>
 
 #include <iostream>
+#include <filesystem>
 
-std::string get_file_path(const std::string& Filename) {
-  std::string::size_type SlashIndex = Filename.find_last_of("/");
-  std::string Dir;
-
-  if (SlashIndex == std::string::npos) {
-    Dir = ".";
-  } else if (SlashIndex == 0) {
-    Dir = "/";
-  } else {
-    Dir = Filename.substr(0, SlashIndex);
-  }
-
-  return Dir;
-}
-
-Model::Model(const std::string& path, unsigned int flags) {
+Model::Model(const std::filesystem::path& path, unsigned int flags)
+    : _model_path(path) {
   // ASSIMP imports the mesh
-  load_meshes(path, flags);
+  load_meshes(flags);
   std::cout << "model created" << std::endl;
 }
 
 /**
  * @brief we load the meshes in the file
- * @param path 3D model file location
+ * @param flags ASSIMP flags
+ * https://assimp.sourceforge.net/lib_html/postprocess_8h.html#a64795260b95f5a4b3f3dc1be4f52e410
  */
-void Model::load_meshes(const std::string& path, unsigned int flags) {
+void Model::load_meshes(unsigned int flags) {
   Assimp::Importer Importer;
 
   // flags set to 0 for now, probably have to set them at some point if ASSIMP
   // doesnt deal with different file formats
-  const aiScene* pScene = Importer.ReadFile(path.c_str(), flags);
+  const aiScene* pScene = Importer.ReadFile(_model_path.c_str(), flags);
 
   std::vector<Mesh> meshes;
 
@@ -90,12 +78,11 @@ void Model::load_meshes(const std::string& path, unsigned int flags) {
       if (material->GetTexture(aiTextureType_DIFFUSE, 0, &Path, nullptr,
                                nullptr, nullptr, nullptr,
                                nullptr) == AI_SUCCESS) {
-        std::string data = Path.data;
-        std::string Filepath = get_file_path(path);
-        std::string FullPath = Filepath + "/" + data;
         // e mo si carica la texture con stb_image
         // TODO the type will become an enum eventually
-        Texture texture(FullPath, "diffusive");
+        std::filesystem::path texture_path = _model_path;
+        texture_path.replace_filename(Path.data);  // Path.data
+        Texture texture(texture_path, "diffusive");
         x.addTexture(texture);
       }
     } else {
