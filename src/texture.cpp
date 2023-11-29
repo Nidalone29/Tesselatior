@@ -13,7 +13,7 @@ Texture::Texture(const std::filesystem::path& path, const std::string& type)
   stbi_set_flip_vertically_on_load(true);
 
   // Usa la libreria lodepng per caricare l'immagine png
-  image = stbi_load(path.c_str(), &width, &height, &channels, 4);
+  image = stbi_load(path.string().c_str(), &width, &height, &channels, 4);
 
   stbi_set_flip_vertically_on_load(false);
 

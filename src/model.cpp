@@ -22,7 +22,8 @@ void Model::load_meshes(unsigned int flags) {
 
   // flags set to 0 for now, probably have to set them at some point if ASSIMP
   // doesnt deal with different file formats
-  const aiScene* pScene = Importer.ReadFile(_model_path.c_str(), flags);
+  const aiScene* pScene =
+      Importer.ReadFile(_model_path.string().c_str(), flags);
 
   std::vector<Mesh> meshes;
 
