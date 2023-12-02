@@ -29,9 +29,8 @@ static constexpr float to_degree(const float rad) {
  * @param z offsetZ di traslazione rispetto all'asse Z
  * @return la matrice 4x4 di traslazione
  */
-static constexpr glm::mat4 translationMatrix(const float offsetX,
-                                             const float offsetY,
-                                             const float offsetZ) {
+static glm::mat4 translationMatrix(const float offsetX, const float offsetY,
+                                   const float offsetZ) {
   glm::mat4 t(1.0F);
   t[3] = glm::vec4(offsetX, offsetY, offsetZ, 1.0F);
   return t;
@@ -45,9 +44,8 @@ static constexpr glm::mat4 translationMatrix(const float offsetX,
  * @param factorZ fattore di scaling rispetto all'asse Z
  * @return la matrice 4x4 di scaling
  */
-static constexpr glm::mat4 scalingMatrix(const float factorX,
-                                         const float factorY,
-                                         const float factorZ) {
+static glm::mat4 scalingMatrix(const float factorX, const float factorY,
+                               const float factorZ) {
   assert(factorX > 0);
   assert(factorY > 0);
   assert(factorZ > 0);
@@ -67,8 +65,8 @@ static constexpr glm::mat4 scalingMatrix(const float factorX,
  * @param degZ angolo di rotazione rispetto all'asse Z
  * @return la matrice 4x4 di rotazione
  */
-static constexpr glm::mat4 rotationMatrix(const float degX, const float degY,
-                                          const float degZ) {
+static glm::mat4 rotationMatrix(const float degX, const float degY,
+                                const float degZ) {
   glm::mat4 rx(1.0F), ry(1.0F), rz(1.0F);
 
   const float thetaX = to_radiant(degX);

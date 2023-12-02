@@ -197,6 +197,16 @@ void Application::init() {
   Boot.addObject(Object(boot));
   _scenes.push_back(Boot);
 
+  Scene Katana;
+  Katana.setName("Katana");
+  Model katana("models/dragon_katana_oni_koroshi.glb");
+  Transform katana_t;
+  katana_t = katana_t * Math::translationMatrix(0.0F, 0.0F, 0.0F);
+  katana_t = katana_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  katana.setTransform(katana_t);
+  Katana.addObject(Object(katana));
+  _scenes.push_back(Katana);
+
   _shader.setUnifromSampler("ColorTextSampler", TEXTURE_COLOR);
 
   IMGUI_CHECKVERSION();
