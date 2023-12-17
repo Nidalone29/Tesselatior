@@ -141,7 +141,7 @@ void Application::init() {
   glfwSetCursorPos(_window, 0, 0);
 
   // app only works with vsync because of fixed timesteps
-  glfwSwapInterval(vsync);
+  glfwSwapInterval(_vsync);
 
   _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
   _shader.addShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
