@@ -1,6 +1,12 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include <vector>
+#include <string>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "scene.h"
 #include "renderer.h"
 #include "camera.h"
@@ -8,12 +14,6 @@
 #include "shader.h"
 #include "common.h"
 #include "framebuffer.h"
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <vector>
-#include <string>
 
 class Application {
  public:
@@ -35,7 +35,8 @@ class Application {
   Application();
   ~Application();
   void init();
-  void cameraControl(const double xpos, const double ypos);
+  void cameraControl(const double xpos, const double ypos,
+                     const float delta_time);
 
   struct Props {
     std::string Title;
@@ -48,6 +49,7 @@ class Application {
 
   Props _properties;
   GLFWwindow* _window;
+  bool _vsync;
 
   // rendering specific things
   Camera _main_camera;

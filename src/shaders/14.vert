@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 // Il vertex shader riceve in input gli attributi dei vertici
 layout (location = 0) in vec3 position;
@@ -19,8 +19,7 @@ out vec3 fragment_position;
 // Passiamo al fragment shader le coordinate mondo dei vertici
 out vec2 fragment_textcoord;
 
-void main()
-{
+void main() {
   gl_Position = camera_projection_matrix * camera_view_matrix * Model2World * vec4(position, 1.0);
 
   // I vettori delle normali ricevuti in input sono passati 

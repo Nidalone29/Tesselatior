@@ -1,10 +1,11 @@
 #include "camera.h"
-#include "transform.h"
 
 #include <iostream>
 
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "transform.h"
 
 Camera::Camera()
     : _yaw_deg(-90.0F),
@@ -104,18 +105,12 @@ void Camera::move(const CameraMovements movement, const float timestep) {
   set_camera(new_position, new_position + _lookat_dir, _up);
 }
 
-void Camera::rotate(const double newx, const double newy,
-                    const float timestep) {
-  double speed = _sensitivity * timestep;
-
-  double xoffset = newx - _mouse_position.xpos;
-  double yoffset = _mouse_position.ypos - newy;
+void Camera::rotate(const double newx, const double newy) {
+  double xoffset = (newx - _mouse_position.xpos) * _sensitivity / 100;
+  double yoffset = (_mouse_position.ypos - newy) * _sensitivity / 100;
 
   _mouse_position.xpos = newx;
   _mouse_position.ypos = newy;
-
-  xoffset *= speed;
-  yoffset *= speed;
 
   // TODO narrowing conversion
   _yaw_deg += xoffset;
@@ -146,11 +141,11 @@ const float& Camera::speed() const {
   return _movement_speed;
 }
 
-void Camera::set_sensitivity(const double sensitivity) {
+void Camera::set_sensitivity(const float sensitivity) {
   _sensitivity = sensitivity;
 }
 
-const double& Camera::sensitivity() const {
+const float& Camera::sensitivity() const {
   return _sensitivity;
 }
 

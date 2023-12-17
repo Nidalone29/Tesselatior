@@ -1,8 +1,9 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
-#include <GL/glew.h>
 #include <stdexcept>
+
+#include <GL/glew.h>
 
 /**
  * Semplici strutture che raprresnetano delle eccezioni

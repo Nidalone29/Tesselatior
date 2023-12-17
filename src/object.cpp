@@ -1,4 +1,5 @@
 #include "object.h"
+
 #include <iostream>
 
 Object::Object(const Model& model) : _model(model) {

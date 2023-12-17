@@ -1,10 +1,10 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include <filesystem>
+
 #include "mesh.h"
 #include "transform.h"
-
-#include <filesystem>
 
 class Model {
  public:

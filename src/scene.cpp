@@ -1,6 +1,8 @@
 #include "scene.h"
+
 #include <vector>
 #include <iostream>
+
 #include <glm/gtx/string_cast.hpp>
 
 Scene::Scene()

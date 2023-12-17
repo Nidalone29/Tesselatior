@@ -3,15 +3,17 @@
 
 #include <ostream>
 #include <vector>
+#include <cstring>
+
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <assimp/scene.h>        // Assimp output data structure
+#include <assimp/postprocess.h>  // Assimp post processing flags
+
 #include "common.h"
 #include "vertex.h"
 #include "texture.h"
 #include "material.h"
-#include <glm/glm.hpp>
-#include <cstring>
-#include <assimp/scene.h>        // Assimp output data structure
-#include <assimp/postprocess.h>  // Assimp post processing flags
 
 /**
  * @brief A mesh is saved in a renederable state for opengl
@@ -50,8 +52,6 @@ class Mesh {
   void load();
 
   const GLuint& getVAO() const;
-  const GLuint& getVBO() const;
-  const GLuint& getIBO() const;
   const unsigned int& get_num_indices() const;
   const Material& getMaterial() const;
 

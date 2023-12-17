@@ -1,9 +1,9 @@
 #include "model.h"
 
-#include <assimp/Importer.hpp>
-
 #include <iostream>
 #include <filesystem>
+
+#include <assimp/Importer.hpp>
 
 Model::Model(const std::filesystem::path& path, unsigned int flags)
     : _model_path(path) {

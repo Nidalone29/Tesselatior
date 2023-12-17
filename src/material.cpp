@@ -1,6 +1,8 @@
 #include "material.h"
-#include <GL/glew.h>
+
 #include <iostream>
+
+#include <GL/glew.h>
 
 Material::Material()
     : _ambient_reflectivity(glm::vec3(1, 1, 1)),

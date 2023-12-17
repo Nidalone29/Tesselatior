@@ -1,11 +1,12 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include <GL/glew.h>
+
 #include "scene.h"
 #include "shader.h"
 #include "framebuffer.h"
 #include "camera.h"
-#include <GL/glew.h>
 
 class Renderer {
  public:

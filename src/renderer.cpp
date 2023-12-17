@@ -1,8 +1,9 @@
 #include "renderer.h"
 
+#include <iostream>
+
 #include "mesh.h"
 #include "shader.h"
-#include <iostream>
 
 Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
   std::cout << "renderer created" << std::endl;
@@ -29,6 +30,7 @@ void Renderer::toggleWireframe() {
 
 void Renderer::render(Scene& scene, const Camera& camera,
                       const Shader& shader) const {
+  shader.enable();
   _render_target.bind();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -47,18 +49,13 @@ void Renderer::render(Scene& scene, const Camera& camera,
                           o.getModel().getTransform().getMatrix());
 
     for (Mesh& mesh : *meshes) {
-      // this load should be done when we set the scene...
-      if (!mesh.isLoaded()) {
-        mesh.load();
-      }
-
       glBindVertexArray(mesh.getVAO());
 
       mesh.getMaterial().bind();
 
-      glEnableVertexAttribArray(0);  // VAO
-      glEnableVertexAttribArray(1);  // VBO
-      glEnableVertexAttribArray(2);  // IBO
+      glEnableVertexAttribArray(ATTRIB_POSITIONS);
+      glEnableVertexAttribArray(ATTRIB_NORMALS);
+      glEnableVertexAttribArray(ATTRIB_COLOR_TEXTURE_COORDS);
 
       // clang-format off
       AmbientLight ambient_light = scene.getAmbientLight();

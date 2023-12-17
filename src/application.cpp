@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <map>
+#include <chrono>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,6 +11,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "camera.h"
 #include "light.h"
 #include "transform.h"
@@ -17,7 +20,7 @@
 #include "renderer.h"
 #include "shader.h"
 
-#include <glm/gtx/string_cast.hpp>
+using namespace std::chrono_literals;
 
 Renderer& Application::GetRenderer() {
   return *(Instance()._renderer);
@@ -72,13 +75,15 @@ Camera& Application::GetCamera() {
 }
 
 Application::Application()
-    : _app_state(VIEWPORT_FOCUS), _current_scene_index(0) {
+    : _app_state(VIEWPORT_FOCUS), _current_scene_index(0), _vsync(false) {
   // Initialize the window library
   if (!glfwInit()) {
     std::cerr << "GLFW Init fail" << std::endl;
     exit(1);
   }
 
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   // Create a windowed mode window and its OpenGL context
   _window = glfwCreateWindow(_properties.Width, _properties.Height,
                              _properties.Title.c_str(), nullptr, nullptr);
@@ -136,7 +141,7 @@ void Application::init() {
   glfwSetCursorPos(_window, 0, 0);
 
   // app only works with vsync because of fixed timesteps
-  glfwSwapInterval(1);
+  glfwSwapInterval(vsync);
 
   _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
   _shader.addShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
@@ -161,52 +166,54 @@ void Application::init() {
   Teapot.setName("Teapot");
   Model teapot("models/teapot.obj");
   Transform teapot_t;
-  teapot_t = teapot_t * Math::translationMatrix(0.0F, -1.6F, -10.0F);
+  teapot_t = teapot_t * Math::translationMatrix(0.0F, -1.6F, -9.0F);
   teapot_t = teapot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
   teapot.setTransform(teapot_t);
   Teapot.addObject(Object(teapot));
   _scenes.push_back(Teapot);
+  Flower.addObject(Object(teapot));
 
-  Scene Dragon;
-  Dragon.setName("Dragon");
-  Model dragon("models/dragon.obj");
-  Transform dragon_t;
-  dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
-  dragon_t = dragon_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  dragon.setTransform(dragon_t);
-  Dragon.addObject(Object(dragon));
-  _scenes.push_back(Dragon);
+  /*
+    Scene Dragon;
+    Dragon.setName("Dragon");
+    Model dragon("models/dragon.obj");
+    Transform dragon_t;
+    dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
+    dragon_t = dragon_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+    dragon.setTransform(dragon_t);
+    Dragon.addObject(Object(dragon));
+    _scenes.push_back(Dragon);
 
-  Scene Skull;
-  Skull.setName("Skull");
-  Model skull("models/skull.obj");
-  Transform skull_t;
-  skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
-  skull_t = skull_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  skull.setTransform(skull_t);
-  Skull.addObject(Object(skull));
-  _scenes.push_back(Skull);
+    Scene Skull;
+    Skull.setName("Skull");
+    Model skull("models/skull.obj");
+    Transform skull_t;
+    skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
+    skull_t = skull_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+    skull.setTransform(skull_t);
+    Skull.addObject(Object(skull));
+    _scenes.push_back(Skull);
 
-  Scene Boot;
-  Boot.setName("Boot");
-  Model boot("models/boot/boot.obj");
-  Transform boot_t;
-  boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
-  boot_t = boot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  boot.setTransform(boot_t);
-  Boot.addObject(Object(boot));
-  _scenes.push_back(Boot);
+    Scene Boot;
+    Boot.setName("Boot");
+    Model boot("models/boot/boot.obj");
+    Transform boot_t;
+    boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
+    boot_t = boot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+    boot.setTransform(boot_t);
+    Boot.addObject(Object(boot));
+    _scenes.push_back(Boot);
 
-  Scene Katana;
-  Katana.setName("Katana");
-  Model katana("models/dragon_katana_oni_koroshi.glb");
-  Transform katana_t;
-  katana_t = katana_t * Math::translationMatrix(0.0F, 0.0F, 0.0F);
-  katana_t = katana_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  katana.setTransform(katana_t);
-  Katana.addObject(Object(katana));
-  _scenes.push_back(Katana);
-
+    Scene Katana;
+    Katana.setName("Katana");
+    Model katana("models/dragon_katana_oni_koroshi.glb");
+    Transform katana_t;
+    katana_t = katana_t * Math::translationMatrix(0.0F, 0.0F, 0.0F);
+    katana_t = katana_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+    katana.setTransform(katana_t);
+    Katana.addObject(Object(katana));
+    _scenes.push_back(Katana);
+  */
   _shader.setUnifromSampler("ColorTextSampler", TEXTURE_COLOR);
 
   IMGUI_CHECKVERSION();
@@ -218,7 +225,7 @@ void Application::init() {
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(_window, true);
 
-  std::string glsl_version = "#version 330";
+  std::string glsl_version = "#version 420";
   ImGui_ImplOpenGL3_Init(glsl_version.c_str());
 
   ImGuiIO& io = ImGui::GetIO();
@@ -227,9 +234,8 @@ void Application::init() {
   io.IniFilename = "imgui-layout.ini";
 }
 
-void Application::cameraControl(const double xpos, const double ypos) {
-  const float timestep =
-      1.0F / glfwGetVideoMode(glfwGetPrimaryMonitor())->refreshRate;
+void Application::cameraControl(const double xpos, const double ypos,
+                                const float delta_time) {
   const int stateA = glfwGetKey(_window, GLFW_KEY_A);
   const int stateD = glfwGetKey(_window, GLFW_KEY_D);
   const int stateS = glfwGetKey(_window, GLFW_KEY_S);
@@ -238,25 +244,25 @@ void Application::cameraControl(const double xpos, const double ypos) {
   const int stateLSHIFT = glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT);
 
   if (stateA == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::LEFT, timestep);
+    _main_camera.move(CameraMovements::LEFT, delta_time);
   }
   if (stateD == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::RIGHT, timestep);
+    _main_camera.move(CameraMovements::RIGHT, delta_time);
   }
   if (stateW == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::FORWARD, timestep);
+    _main_camera.move(CameraMovements::FORWARD, delta_time);
   }
   if (stateS == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::BACK, timestep);
+    _main_camera.move(CameraMovements::BACK, delta_time);
   }
   if (stateSPACE == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::UP, timestep);
+    _main_camera.move(CameraMovements::UP, delta_time);
   }
   if (stateLSHIFT == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::DOWN, timestep);
+    _main_camera.move(CameraMovements::DOWN, delta_time);
   }
 
-  _main_camera.rotate(xpos, ypos, timestep);
+  _main_camera.rotate(xpos, ypos);
 }
 
 void Application::run() {
@@ -283,6 +289,10 @@ void Application::run() {
   glm::vec3 ambient;
   glm::vec3 directional;
 
+  std::chrono::duration<float, std::chrono::seconds::period> delta_time{16ms};
+  std::chrono::time_point<std::chrono::high_resolution_clock> begin_time =
+      std::chrono::high_resolution_clock::now();
+
   int number_of_scenes = _scenes.size();
   while (!glfwWindowShouldClose(_window)) {
     // very temp
@@ -297,7 +307,7 @@ void Application::run() {
 
     if (_app_state == VIEWPORT_FOCUS) {
       glfwGetCursorPos(_window, &xpos, &ypos);
-      cameraControl(xpos, ypos);
+      cameraControl(xpos, ypos, delta_time.count());
     }
 
     // Start the Dear ImGui frame
@@ -379,10 +389,14 @@ void Application::run() {
       }
 
       ImGui::Separator();
+      if (ImGui::Button("Toggle Vsync")) {
+        _vsync = !_vsync;
+        glfwSwapInterval(_vsync);
+      }
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                   1000.0F / io.Framerate, io.Framerate);
-      ImGui::End();  // "stats"
-    }
+      ImGui::End();
+    }  // "stats"
 
     {
       // Creating the Viewport imgui window
@@ -396,7 +410,6 @@ void Application::run() {
         _main_camera.set_projection(30.0F, viewportPanelSize.x,
                                     viewportPanelSize.y, 0.1F, 100);
       }
-
       _renderer->render(_scenes[_current_scene_index], _main_camera, _shader);
 
       // Update the ImGui image with the new texture data
@@ -414,5 +427,11 @@ void Application::run() {
 
     // Swap front and back buffers
     glfwSwapBuffers(_window);
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> end_time =
+        std::chrono::high_resolution_clock::now();
+    delta_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - begin_time);
+    begin_time = end_time;
   }
 }

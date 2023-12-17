@@ -1,11 +1,12 @@
 #include "shader.h"
-#include "utilities.h"  // FileNotFoundException
 
 #define INVALID_UNIFORM_LOCATION 0xffffffff
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#include "utilities.h"  // FileNotFoundException
 
 Shader::Shader() {}
 
@@ -36,9 +37,16 @@ void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
   _shaders.push_back(res);
 }
 
+std::ostream& operator<<(std::ostream& stream, const std::vector<GLchar>& in) {
+  for (const GLchar& x : in) {
+    stream << x;
+  }
+  return stream;
+}
+
 GLuint Shader::compileShader(const GLenum type, const std::string& src) {
   GLuint shader = glCreateShader(type);
-  const GLchar* source = (const GLchar*)src.c_str();
+  const GLchar* source = src.c_str();
   glShaderSource(shader, 1, &source, nullptr);
   glCompileShader(shader);
 
@@ -51,7 +59,9 @@ GLuint Shader::compileShader(const GLenum type, const std::string& src) {
 
     // The maxLength includes the NULL character
     std::vector<GLchar> infoLog(maxLength);
-    glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+    glGetShaderInfoLog(shader, maxLength, &maxLength, infoLog.data());
+
+    std::cerr << infoLog << std::endl;
 
     // We don't need the shader anymore.
     // TODO delete all the shader
@@ -94,7 +104,9 @@ void Shader::init() {
 
     // The maxLength includes the NULL character
     std::vector<GLchar> infoLog(maxLength);
-    glGetProgramInfoLog(_program, maxLength, &maxLength, &infoLog[0]);
+    glGetProgramInfoLog(_program, maxLength, &maxLength, infoLog.data());
+
+    std::cerr << infoLog << std::endl;
 
     // We don't need the program anymore.
     glDeleteProgram(_program);
@@ -103,8 +115,6 @@ void Shader::init() {
     for (const GLuint x : compiled_shaders) {
       glDeleteShader(x);
     }
-
-    // Use the infoLog as you see fit.
 
     // In this simple program, we'll just leave
     return;
@@ -118,6 +128,10 @@ void Shader::init() {
 
 void Shader::enable() const {
   glUseProgram(_program);
+}
+
+void Shader::disable() const {
+  glUseProgram(0);
 }
 
 GLint Shader::getUniformLocation(const std::string& uniform_name) const {
@@ -134,7 +148,7 @@ GLint Shader::getUniformLocation(const std::string& uniform_name) const {
 
 void Shader::setUniformMat4(const std::string uniform_name,
                             const glm::mat4& matrix) const {
-  GLuint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniformMatrix4fv(uniform_location, 1, GL_FALSE,
                        const_cast<float*>(&matrix[0][0]));
@@ -145,7 +159,7 @@ void Shader::setUniformMat4(const std::string uniform_name,
 
 void Shader::setUniformFloat(const std::string uniform_name,
                              const float value) const {
-  GLuint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1f(uniform_location, value);
   } else {
@@ -155,7 +169,7 @@ void Shader::setUniformFloat(const std::string uniform_name,
 
 void Shader::setUniformVec3(const std::string uniform_name,
                             const glm::vec3& vec) const {
-  GLuint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform3fv(uniform_location, 1, const_cast<float*>(&vec[0]));
   } else {
@@ -164,7 +178,7 @@ void Shader::setUniformVec3(const std::string uniform_name,
 }
 
 void Shader::setUnifromSampler(const std::string uniform_name, int id) const {
-  GLuint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1i(uniform_location, id);
   } else {

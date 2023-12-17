@@ -1,9 +1,10 @@
 #include "texture.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include <iostream>
 #include <filesystem>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 Texture::Texture(const std::filesystem::path& path, const std::string& type)
     : _type(type), _id(-1) {

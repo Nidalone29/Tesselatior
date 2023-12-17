@@ -1,7 +1,8 @@
 #include "mesh.h"
 
-#include <assimp/Importer.hpp>  // Assimp Importer object
 #include <iostream>
+
+#include <assimp/Importer.hpp>  // Assimp Importer object
 
 #include "vertex.h"
 
@@ -14,25 +15,18 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
     : _vertices(vertices),
       _indices(indices),
       _num_indices(num_indices),
-      _material(material),
-      _loaded(false) {
+      _material(material) {
   std::cout << "mesh created" << std::endl;
-}
-
-void Mesh::load() {
-  // impostiamo il contex OpenGL
   glGenVertexArrays(1, &_VAO);
   glBindVertexArray(_VAO);
-
+  // Vertex Buffer Object is NOT bounf to the Vertex Array Object
+  // the actual association between an attribute index and a buffer is made
+  // by glVertexAttribPointer
+  // (https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object)
   glGenBuffers(1, &_VBO);
   glBindBuffer(GL_ARRAY_BUFFER, _VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(),
-               &_vertices[0], GL_STATIC_DRAW);
-
-  glGenBuffers(1, &_IBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * _indices.size(),
-               &_indices[0], GL_STATIC_DRAW);
+               _vertices.data(), GL_STATIC_DRAW);
 
   glVertexAttribPointer(ATTRIB_POSITIONS, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)offsetof(struct Vertex, _position));
@@ -44,20 +38,16 @@ void Mesh::load() {
                         sizeof(Vertex),
                         (void*)offsetof(struct Vertex, _text_coords));
 
+  glGenBuffers(1, &_IBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * _indices.size(),
+               _indices.data(), GL_STATIC_DRAW);
+
   glBindVertexArray(0);
-  _loaded = true;
 }
 
 const GLuint& Mesh::getVAO() const {
   return _VAO;
-}
-
-const GLuint& Mesh::getVBO() const {
-  return _VBO;
-}
-
-const GLuint& Mesh::getIBO() const {
-  return _IBO;
 }
 
 const unsigned int& Mesh::get_num_indices() const {

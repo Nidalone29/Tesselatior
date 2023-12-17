@@ -1,12 +1,12 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-
 #include <string>
 #include <vector>
 #include <filesystem>
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 
 // this actually rappresents a shader program (that can have multiple shaders
 // files maybe)
@@ -33,6 +33,7 @@ class Shader {
    *
    */
   void enable() const;
+  void disable() const;
 
   // TODO deal with uniforms, and change the old code in app
   // and after this i should have "finished"

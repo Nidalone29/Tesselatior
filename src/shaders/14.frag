@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 // Questa variabile di input ha lo stesso nome di quella nel Vertex Shader
 // E' importante che i nomi siano uguali perchè solo in questo modo si ha
@@ -35,8 +35,7 @@ uniform sampler2D ColorTextSampler;
 
 layout(location = 0) out vec4 out_color;
 
-void main()
-{
+void main() {
   // La funzione texture ritorna un vec4. Nel codice noi rappresentiamo
   // i colori con vec3 e dobbiamo quindi estrarre solo 3 componenti.
   vec4 material_color = texture(ColorTextSampler, fragment_textcoord);

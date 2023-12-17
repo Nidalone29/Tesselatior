@@ -53,11 +53,13 @@ class Camera {
 
   const float& speed() const;
   void set_speed(const float speed);
-  const double& sensitivity() const;
-  void set_sensitivity(const double sensitivity);
+  const float& sensitivity() const;
+  void set_sensitivity(const float sensitivity);
 
   void move(const CameraMovements movement, const float timestep);
-  void rotate(const double newx, const double newy, const float timestep);
+  // the timestep is not needed because of how the rotation is calculated (glfw
+  // mouse offset)
+  void rotate(const double newx, const double newy);
 
   void set_mouseposition(const double x, const double y);
 
@@ -86,7 +88,7 @@ class Camera {
 
   // controlling the camera
   MousePosition _mouse_position;
-  double _sensitivity;  // mouse movement speed
+  float _sensitivity;  // mouse movement speed (deg/sec)
   float _pitch_deg;
   float _yaw_deg;
 

@@ -1,9 +1,11 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include <glm/glm.hpp>
-#include "texture.h"
 #include <vector>
+
+#include <glm/glm.hpp>
+
+#include "texture.h"
 
 class Material {
  public:
