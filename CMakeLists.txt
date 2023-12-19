@@ -58,7 +58,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   glfw 
   GLEW::GLEW 
   glm::glm 
-  imgui::imgui)
+  imgui::imgui
+)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 
@@ -79,3 +80,9 @@ add_custom_target(copy_imgui_layout
 )
 
 add_dependencies(${PROJECT_NAME} copy_assets copy_shaders copy_textures copy_imgui_layout)
+
+if(MSVC)
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused -Wno-unused-parameter -Wno-sign-compare)
+endif()

@@ -51,6 +51,9 @@ class Application {
   GLFWwindow* _window;
   bool _vsync;
 
+  // for mouse toggle
+  APP_STATE _app_state;
+
   // rendering specific things
   Camera _main_camera;
   Renderer* _renderer;
@@ -59,9 +62,6 @@ class Application {
 
   // shaders
   Shader _shader;
-
-  // for mouse toggle
-  APP_STATE _app_state;
 };
 
 #endif  // APPLICATION_H

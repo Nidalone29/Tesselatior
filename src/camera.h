@@ -80,7 +80,6 @@ class Camera {
   // defining the camera
   glm::mat4 _view_matrix;        // view transofrm matrix
   glm::mat4 _projection_matrix;  // camera pojection matrix (perspective)
-  glm::mat4 _combined;
 
   glm::vec3 _up;
   glm::vec3 _position;

@@ -28,7 +28,7 @@ void Model::load_meshes(unsigned int flags) {
   std::vector<Mesh> meshes;
 
   // dealing with every mesh in the model
-  for (int i = 0; i < pScene->mNumMeshes; i++) {
+  for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
     // -- Dealing with a Mesh
     const aiMesh* paiMesh = pScene->mMeshes[i];
 

@@ -7,7 +7,7 @@
 #include <stb_image.h>
 
 Texture::Texture(const std::filesystem::path& path, const std::string& type)
-    : _type(type), _id(-1) {
+    : _id(-1), _type(type) {
   int width, height, channels;
   unsigned char* image = nullptr;
 

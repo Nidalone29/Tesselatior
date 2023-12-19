@@ -84,7 +84,7 @@ void Shader::init() {
 
   std::vector<GLuint> compiled_shaders;
 
-  for (const ShaderSource x : _shaders) {
+  for (const ShaderSource& x : _shaders) {
     GLuint currentShader = compileShader(x.type, x.source);
     compiled_shaders.push_back(currentShader);
 
@@ -177,7 +177,8 @@ void Shader::setUniformVec3(const std::string uniform_name,
   }
 }
 
-void Shader::setUnifromSampler(const std::string uniform_name, int id) const {
+void Shader::setUnifromSampler(const std::string uniform_name,
+                               const int id) const {
   GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1i(uniform_location, id);

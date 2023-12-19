@@ -8,9 +8,9 @@
 #include "transform.h"
 
 Camera::Camera()
-    : _yaw_deg(-90.0F),
+    : _sensitivity(1.0F),
       _pitch_deg(0.0F),
-      _sensitivity(1.0F),
+      _yaw_deg(-90.0F),
       _movement_speed(5.0F) {
   reset_view();
 }

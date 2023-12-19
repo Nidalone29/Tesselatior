@@ -75,7 +75,7 @@ Camera& Application::GetCamera() {
 }
 
 Application::Application()
-    : _app_state(VIEWPORT_FOCUS), _current_scene_index(0), _vsync(false) {
+    : _vsync(false), _app_state(VIEWPORT_FOCUS), _current_scene_index(0) {
   // Initialize the window library
   if (!glfwInit()) {
     std::cerr << "GLFW Init fail" << std::endl;

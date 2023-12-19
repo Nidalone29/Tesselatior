@@ -35,7 +35,7 @@ AmbientLight::AmbientLight(const glm::vec3& color, const glm::vec3& intensity)
 }
 
 DirectionalLight::DirectionalLight()
-    : _direction_vector(0.0F, 0.0F, 0.0F), Light() {
+    : Light(), _direction_vector(0.0F, 0.0F, 0.0F) {
   //
 }
 
