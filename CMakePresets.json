@@ -19,7 +19,7 @@
     },
     {
       "name": "conf-windows-common",
-      "description": "Windows settings for MSBuild toolchain that apply to msvc and clang",
+      "description": "Windows settings for MSBuild toolchain that apply to MSVC and Clang",
       "hidden": true,
       "inherits": "base",
       "condition": {
@@ -34,15 +34,11 @@
       "toolset": {
         "value": "host=x64",
         "strategy": "external"
-      },
-      "cacheVariables": {
-        "ENABLE_CPPCHECK_DEFAULT": "FALSE",
-        "ENABLE_CLANG_TIDY_DEFAULT": "FALSE"
       }
     },
     {
       "name": "conf-unixlike-common",
-      "description": "Unix-like OS settings for gcc and clang toolchains",
+      "description": "Unix-like OS settings for GCC and Clang toolchains",
       "hidden": true,
       "inherits": "base",
       "condition": {
@@ -56,7 +52,7 @@
     },
     {
       "name": "conf-mingw",
-      "description": "MinGW triplets",
+      "description": "Settings for MinGW (vcpkg triplets and generator)",
       "hidden": true,
       "generator": "MinGW Makefiles",
       "cacheVariables": {
@@ -88,8 +84,8 @@
     },
     {
       "name": "windows-clangcl-debug",
-      "displayName": "clang-cl Debug",
-      "description": "Target Windows with the clang compiler, debug build type",
+      "displayName": "Clang-cl Debug",
+      "description": "Target Windows with the clang-cl compiler, debug build type",
       "inherits": "conf-windows-common",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang-cl",
@@ -99,8 +95,8 @@
     },
     {
       "name": "windows-clangcl-release",
-      "displayName": "clang-cl Release",
-      "description": "Target Windows with the clang compiler, release build type",
+      "displayName": "Clang-cl Release",
+      "description": "Target Windows with the clang-cl compiler, release build type",
       "inherits": "conf-windows-common",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang-cl",
@@ -109,23 +105,9 @@
       }
     },
     {
-      "name": "windows-mingw-release",
-      "displayName": "MinGW Release",
-      "description": "Target Windows with the MinGW compiler, release build type",
-      "inherits": [
-        "conf-windows-common",
-        "conf-mingw"
-      ],
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-      }
-    },
-    {
       "name": "windows-mingw-debug",
       "displayName": "MinGW Debug",
-      "description": "Target Windows with the MinGW compiler, debug build type",
+      "description": "Target Windows with the GCC (via MinGW) compiler, debug build type",
       "inherits": [
         "conf-windows-common",
         "conf-mingw"
@@ -137,8 +119,22 @@
       }
     },
     {
+      "name": "windows-mingw-release",
+      "displayName": "MinGW Release",
+      "description": "Target Windows with the GCC (via MinGW) compiler, release build type",
+      "inherits": [
+        "conf-windows-common",
+        "conf-mingw"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
       "name": "unixlike-gcc-debug",
-      "displayName": "gcc Debug",
+      "displayName": "GCC Debug",
       "description": "Target Unix-like OS with the gcc compiler, debug build type",
       "inherits": "conf-unixlike-common",
       "cacheVariables": {
@@ -149,7 +145,7 @@
     },
     {
       "name": "unixlike-gcc-release",
-      "displayName": "gcc Release",
+      "displayName": "GCC Release",
       "description": "Target Unix-like OS with the gcc compiler, release build type",
       "inherits": "conf-unixlike-common",
       "cacheVariables": {
@@ -160,8 +156,8 @@
     },
     {
       "name": "unixlike-clang-debug",
-      "displayName": "clang Debug",
-      "description": "Target Unix-like OS with the clang compiler, debug build type",
+      "displayName": "Clang Debug",
+      "description": "Target Unix-like OS with the Clang compiler, debug build type",
       "inherits": "conf-unixlike-common",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
@@ -171,8 +167,8 @@
     },
     {
       "name": "unixlike-clang-release",
-      "displayName": "clang Release",
-      "description": "Target Unix-like OS with the clang compiler, release build type",
+      "displayName": "Clang Release",
+      "description": "Target Unix-like OS with the Clang compiler, release build type",
       "inherits": "conf-unixlike-common",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
