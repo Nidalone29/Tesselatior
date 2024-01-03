@@ -77,7 +77,9 @@ add_custom_target(copy_imgui_layout
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/imgui-layout.ini ${CMAKE_CURRENT_BINARY_DIR}/${PRESET_NAME}
 )
 
-add_dependencies(${PROJECT_NAME} copy_assets copy_shaders copy_textures copy_imgui_layout)
+if(NOT CI)
+  add_dependencies(${PROJECT_NAME} copy_assets copy_shaders copy_textures copy_imgui_layout)
+endif()
 
 #TODO: refactor
 if(MSVC)
