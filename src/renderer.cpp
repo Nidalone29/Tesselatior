@@ -35,7 +35,7 @@ void Renderer::toggleWireframe() {
   _render_target.unbind();
 }
 
-void Renderer::render(Scene& scene, const Camera& camera,
+void Renderer::render(const Scene& scene, const Camera& camera,
                       const Shader& shader) const {
   shader.enable();
   _render_target.bind();
@@ -48,14 +48,12 @@ void Renderer::render(Scene& scene, const Camera& camera,
   // this is for the fragment shader
   shader.setUniformVec3("camera_position", camera.position());
 
-  std::vector<Object>* scene_objects = &scene.getAllObjects();
-
-  for (Object& o : *scene_objects) {
-    std::vector<Mesh>* meshes = &o.getModModel().getMeshes();
+  for (const Object& o : scene.getAllObjects()) {
     shader.setUniformMat4("Model2World",
                           o.getModel().getTransform().getMatrix());
 
-    for (Mesh& mesh : *meshes) {
+    const std::vector<Mesh>& meshes = o.getModel().getMeshes();
+    for (const Mesh& mesh : meshes) {
       glBindVertexArray(mesh.getVAO());
 
       mesh.getMaterial().bind();
@@ -65,16 +63,16 @@ void Renderer::render(Scene& scene, const Camera& camera,
       glEnableVertexAttribArray(ATTRIB_COLOR_TEXTURE_COORDS);
 
       // clang-format off
-      AmbientLight ambient_light = scene.getAmbientLight();
+      const AmbientLight& ambient_light = scene.getAmbientLight();
       shader.setUniformVec3("ambient_light_color", ambient_light.getColor());
       shader.setUniformVec3("ambient_light_intensity", ambient_light.getIntensity());
 
-      DirectionalLight directional_light = scene.getDirectionalLight();
+      const DirectionalLight& directional_light = scene.getDirectionalLight();
       shader.setUniformVec3("directional_light_color", directional_light.getColor());
       shader.setUniformVec3("directional_light_intensity", directional_light.getIntensity());
       shader.setUniformVec3("directional_light_direction", directional_light.getDirection());
 	  
-      Material material = mesh.getMaterial();
+      const Material& material = mesh.getMaterial();
       shader.setUniformVec3("material_ambient_reflectivity", material.getAmbientReflectivity());  
       shader.setUniformVec3("material_diffuse_reflectivity", material.getDiffuseReflectivity());	  
       shader.setUniformVec3("material_specular_reflectivity", material.getSpecularReflectivity());

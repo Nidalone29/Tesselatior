@@ -104,7 +104,7 @@ void Model::load_meshes(unsigned int flags) {
   }
 }
 
-std::vector<Mesh>& Model::getMeshes() {
+const std::vector<Mesh>& Model::getMeshes() const {
   return _meshes;
 }
 

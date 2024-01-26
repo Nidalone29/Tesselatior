@@ -17,7 +17,7 @@ class Scene {
   Scene& operator=(Scene&& other) = default;
 
   void addObject(const Object& to_add);
-  std::vector<Object>& getAllObjects();
+  const std::vector<Object>& getAllObjects() const;
 
   void setAmbientLight(const AmbientLight& to_add);
   const AmbientLight& getAmbientLight() const;

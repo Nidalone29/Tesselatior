@@ -12,7 +12,8 @@ class Renderer {
  public:
   Renderer();
   ~Renderer();
-  void render(Scene& scene, const Camera& camera, const Shader& shader) const;
+  void render(const Scene& scene, const Camera& camera,
+              const Shader& shader) const;
 
   void toggleWireframe();
   const FrameBuffer& target();

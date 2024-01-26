@@ -15,7 +15,6 @@ class Object {
 
   const Model& getModel() const;
   void setModel(const Model& model);
-  Model& getModModel();
 
  private:
   Model _model;

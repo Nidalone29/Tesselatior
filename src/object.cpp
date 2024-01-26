@@ -16,10 +16,6 @@ const Model& Object::getModel() const {
   return _model;
 }
 
-Model& Object::getModModel() {
-  return _model;
-}
-
 void Object::setModel(const Model& model) {
   _model = model;
 }

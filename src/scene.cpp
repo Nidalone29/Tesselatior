@@ -25,7 +25,7 @@ void Scene::addObject(const Object& to_add) {
 }
 
 // TODO improve by making this return a const reference
-std::vector<Object>& Scene::getAllObjects() {
+const std::vector<Object>& Scene::getAllObjects() const {
   return _objects;
 }
 

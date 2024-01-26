@@ -16,7 +16,7 @@ class Model {
   Model(Model&& other) = default;
   Model& operator=(Model&& other) = default;
 
-  std::vector<Mesh>& getMeshes();
+  const std::vector<Mesh>& getMeshes() const;
   const Transform& getTransform() const;
   void setTransform(const Transform& transform);
 
