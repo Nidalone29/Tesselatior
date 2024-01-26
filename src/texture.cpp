@@ -6,8 +6,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include "logger.h"
+
 Texture::Texture(const std::filesystem::path& path, const std::string& type)
     : _id(-1), _type(type) {
+  LOG_TRACE("Texture(const std::filesystem::path&, const std::string&)");
+
+  LOG_INFO("Loading texture from \"{}\" ", path.string());
   int width, height, channels;
   unsigned char* image = nullptr;
 
@@ -22,12 +27,14 @@ Texture::Texture(const std::filesystem::path& path, const std::string& type)
 
   // TODO refactor
   if (image == nullptr) {
-    std::cerr << " Failed to load texture " << path.string() << std::endl;
+    LOG_WARN("Failed to load texture \"{}\"", path.string());
 
+    // TODO this "white.png" should be the path argument
+    // path = white.png
     image = stbi_load("white.png", &width, &height, &channels, 4);
     if (image == nullptr) {
-      std::cerr << "Failed to load default texture" << std::endl;
-      std::exit(0);
+      LOG_ERROR("Failed to load default texture");
+      std::exit(2);
     }
   }
 
@@ -62,6 +69,12 @@ Texture::Texture(const std::filesystem::path& path, const std::string& type)
   glBindTexture(GL_TEXTURE_2D, 0);
 
   stbi_image_free(image);
+  LOG_INFO("Texture of type {} has been created from \"{}\"", type,
+           path.string());
+}
+
+Texture::~Texture() {
+  LOG_TRACE("~Texture()");
 }
 
 GLuint Texture::getID() const {

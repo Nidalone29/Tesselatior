@@ -5,13 +5,17 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "logger.h"
+
 FrameBuffer::FrameBuffer(const int width, const int height)
     : _width(width), _height(height) {
+  LOG_TRACE("FrameBuffer(const int, const int)");
   create();
   check();
 }
 
 FrameBuffer::~FrameBuffer() {
+  LOG_TRACE("~FrameBuffer()");
   reset();
 }
 
@@ -45,10 +49,10 @@ bool FrameBuffer::check() const {
 
   // TODO error handle with exception
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-    std::cout << "easy" << std::endl;
+    //
   } else {
-    std::cout << "fuckup" << std::endl;
-    std::exit(-1);
+    LOG_ERROR("Framebuffer status error");
+    std::exit(3);
   }
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -4,6 +4,8 @@
 #include <map>
 #include <chrono>
 
+#include <spdlog/spdlog.h>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -19,6 +21,7 @@
 #include "matrix_math.h"
 #include "renderer.h"
 #include "shader.h"
+#include "logger.h"
 
 using namespace std::chrono_literals;
 
@@ -76,10 +79,19 @@ Camera& Application::GetCamera() {
 
 Application::Application()
     : _vsync(false), _app_state(VIEWPORT_FOCUS), _current_scene_index(0) {
+#ifndef NDEBUG
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+  spdlog::set_level(spdlog::level::trace);
+#endif  // NDEBUG
+
+  LOG_TRACE("Application()");
+
   // Initialize the window library
   if (!glfwInit()) {
-    std::cerr << "GLFW Init fail" << std::endl;
+    LOG_ERROR("GLFW Init fail");
     exit(1);
+  } else {
+    LOG_INFO("Initialized GLFW");
   }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -89,7 +101,7 @@ Application::Application()
                              _properties.Title.c_str(), nullptr, nullptr);
   if (!_window) {
     glfwTerminate();
-    std::cerr << "GLFW Window fail" << std::endl;
+    LOG_ERROR("GLFW Window creation fail");
   }
   // Make the window's context current
   glfwMakeContextCurrent(_window);
@@ -97,17 +109,22 @@ Application::Application()
   // initialize everything else
   GLenum res = glewInit();
   if (res != GLEW_OK) {
-    std::cerr << "Error : " << glewGetErrorString(res) << std::endl;
+    LOG_ERROR("GLEW Init fail");
     exit(1);
+  } else {
+    LOG_INFO("Initialized GLEW");
   }
 
   // TODO fix with std::make_unique and smart pointers
   _renderer = new Renderer();
 
+  LOG_INFO("Created Application");
   init();
 }
 
 Application::~Application() {
+  LOG_TRACE("~Application()");
+
   delete _renderer;
 
   // Cleanup
@@ -134,6 +151,7 @@ void Application::init() {
   // cursor settings
   glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   if (glfwRawMouseMotionSupported()) {
+    LOG_INFO("Raw mouse input detected -> enabled raw mouse input");
     glfwSetInputMode(_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
   }
 

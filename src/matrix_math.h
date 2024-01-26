@@ -1,12 +1,10 @@
 #ifndef MATRIX_MATH_H
 #define MATRIX_MATH_H
 
-#include <glm/glm.hpp>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
-// because some compilers does not have it
-#ifndef M_PI
-#define M_PI (3.14159265358979323846)
-#endif
+#include <glm/glm.hpp>
 
 namespace Math {
 

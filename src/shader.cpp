@@ -7,8 +7,15 @@
 #include <sstream>
 
 #include "utilities.h"  // FileNotFoundException
+#include "logger.h"
 
-Shader::Shader() {}
+Shader::Shader() {
+  LOG_TRACE("Shader()");
+}
+
+Shader::~Shader() {
+  LOG_TRACE("~Shader()");
+}
 
 void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
   ShaderSource res;
@@ -19,13 +26,13 @@ void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
       break;
     default:
       // TODO: error handling wrong shader type
-      std::cerr << "Wrong/Unsupported shader type" << std::endl;
+      LOG_ERROR("Wrong/Unsupported shader type");
       break;
   }
 
   std::ifstream shaderFile(path.c_str());
   if (!shaderFile) {
-    std::cerr << "File not found: " << path << std::endl;
+    LOG_ERROR("File not found: {}", path.string());
     throw FileNotFoundException();
   }
   std::stringstream shaderData;
@@ -35,13 +42,6 @@ void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
 
   // DEBUG call to say that a shader has been loaded
   _shaders.push_back(res);
-}
-
-std::ostream& operator<<(std::ostream& stream, const std::vector<GLchar>& in) {
-  for (const GLchar& x : in) {
-    stream << x;
-  }
-  return stream;
 }
 
 GLuint Shader::compileShader(const GLenum type, const std::string& src) {
@@ -61,15 +61,12 @@ GLuint Shader::compileShader(const GLenum type, const std::string& src) {
     std::vector<GLchar> infoLog(maxLength);
     glGetShaderInfoLog(shader, maxLength, &maxLength, infoLog.data());
 
-    std::cerr << infoLog << std::endl;
-
     // We don't need the shader anymore.
     // TODO delete all the shader
     glDeleteShader(shader);
 
-    // Use the infoLog as you see fit.
+    LOG_ERROR("Shader compilation fail: {}", infoLog.data());
 
-    // In this simple program, we'll just leave
     throw ShaderCreationException();
   }
 
@@ -106,12 +103,12 @@ void Shader::init() {
     std::vector<GLchar> infoLog(maxLength);
     glGetProgramInfoLog(_program, maxLength, &maxLength, infoLog.data());
 
-    std::cerr << infoLog << std::endl;
+    LOG_ERROR("Shader compilation fail: {}", infoLog.data());
 
     // We don't need the program anymore.
     glDeleteProgram(_program);
-    // Don't leak shaders either.
 
+    // Don't leak shaders either.
     for (const GLuint x : compiled_shaders) {
       glDeleteShader(x);
     }
@@ -138,8 +135,7 @@ GLint Shader::getUniformLocation(const std::string& uniform_name) const {
   GLint Location = glGetUniformLocation(_program, uniform_name.c_str());
 
   if (Location == -1) {
-    std::cerr << "Warning! Unable to get the location of uniform '"
-              << uniform_name << "'" << std::endl;
+    LOG_WARN("Unable to get uniform location {}", uniform_name);
     return INVALID_UNIFORM_LOCATION;
   }
 
@@ -153,7 +149,7 @@ void Shader::setUniformMat4(const std::string uniform_name,
     glUniformMatrix4fv(uniform_location, 1, GL_FALSE,
                        const_cast<float*>(&matrix[0][0]));
   } else {
-    std::cerr << "Error setting " << uniform_name << " uniform" << std::endl;
+    LOG_WARN("Error setting {} uniform", uniform_name);
   }
 }
 
@@ -163,7 +159,7 @@ void Shader::setUniformFloat(const std::string uniform_name,
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1f(uniform_location, value);
   } else {
-    std::cerr << "Error setting " << uniform_name << " uniform" << std::endl;
+    LOG_WARN("Error setting {} uniform", uniform_name);
   }
 }
 
@@ -173,7 +169,7 @@ void Shader::setUniformVec3(const std::string uniform_name,
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform3fv(uniform_location, 1, const_cast<float*>(&vec[0]));
   } else {
-    std::cerr << "Error setting " << uniform_name << " uniform" << std::endl;
+    LOG_WARN("Error setting {} uniform", uniform_name);
   }
 }
 
@@ -183,6 +179,6 @@ void Shader::setUnifromSampler(const std::string uniform_name,
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1i(uniform_location, id);
   } else {
-    std::cerr << "Error setting " << uniform_name << " uniform" << std::endl;
+    LOG_WARN("Error setting {} uniform", uniform_name);
   }
 }

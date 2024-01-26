@@ -44,6 +44,8 @@ find_package(imgui CONFIG REQUIRED)
 
 find_package(Stb REQUIRED)
 
+find_package(spdlog CONFIG REQUIRED)
+
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "GLFW lib only")
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -57,6 +59,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   glm::glm 
   imgui::imgui
   assimp::assimp
+  spdlog::spdlog
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
@@ -82,8 +85,8 @@ if(NOT $ENV{CI})
 endif()
 
 #TODO: refactor
-if(MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE /W4)
-else()
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused -Wno-unused-parameter -Wno-sign-compare)
-endif()
+# if(MSVC)
+#   target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+# else()
+#   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused -Wno-unused-parameter -Wno-sign-compare)
+# endif()

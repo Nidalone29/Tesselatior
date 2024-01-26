@@ -4,12 +4,18 @@
 
 #include <GL/glew.h>
 
+#include "logger.h"
+
 Material::Material()
     : _ambient_reflectivity(glm::vec3(1, 1, 1)),
-      _diffuse_reflectivity(glm::vec3(0.8, 0.8, 0.8)),
-      _specular_reflectivity(glm::vec3(0.8, 0.8, 0.8)),
+      _diffuse_reflectivity(glm::vec3(0.8F, 0.8F, 0.8F)),
+      _specular_reflectivity(glm::vec3(0.8F, 0.8F, 0.8F)),
       _specular_glossiness_exponent(30) {
-  std::cout << "material created" << std::endl;
+  LOG_TRACE("Material()");
+}
+
+Material::~Material() {
+  LOG_TRACE("~Material()");
 }
 
 void Material::addTexture(const Texture& toadd) {
@@ -17,7 +23,7 @@ void Material::addTexture(const Texture& toadd) {
 }
 
 void Material::bind() const {
-  for (Texture t : _textures) {
+  for (const Texture& t : _textures) {
     // (for now it's 0, meaning it's all color texture)
     // TODO a check for all different types of textures and deal with it
     GLenum unit = GL_TEXTURE0;

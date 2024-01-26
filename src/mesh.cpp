@@ -5,6 +5,7 @@
 #include <assimp/Importer.hpp>  // Assimp Importer object
 
 #include "vertex.h"
+#include "logger.h"
 
 // TODO finish mesh importer
 // figure out how to deal with textures, because the mess of the filepath is
@@ -16,13 +17,16 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
       _indices(indices),
       _num_indices(num_indices),
       _material(material) {
-  std::cout << "mesh created" << std::endl;
+  LOG_TRACE(
+      "Mesh(const std::vector<Vertex>&, const std::vector<unsigned int>&, "
+      "const unsigned int, const Material&)");
+
   glGenVertexArrays(1, &_VAO);
   glBindVertexArray(_VAO);
-  // Vertex Buffer Object is NOT bounf to the Vertex Array Object
+  // Vertex Buffer Object is NOT bound to the Vertex Array Object
   // the actual association between an attribute index and a buffer is made
   // by glVertexAttribPointer
-  // (https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object)
+  // https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object
   glGenBuffers(1, &_VBO);
   glBindBuffer(GL_ARRAY_BUFFER, _VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(),
@@ -44,6 +48,10 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
                _indices.data(), GL_STATIC_DRAW);
 
   glBindVertexArray(0);
+}
+
+Mesh::~Mesh() {
+  LOG_TRACE("~Mesh()");
 }
 
 const GLuint& Mesh::getVAO() const {

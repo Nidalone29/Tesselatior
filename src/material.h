@@ -13,7 +13,7 @@ class Material {
    * https://registry.khronos.org/OpenGL-Refpages/es1.1/xhtml/glMaterial.xml
    */
   Material();
-  ~Material() = default;
+  ~Material();
   Material(const Material& other) = default;
   Material& operator=(const Material& other) = default;
   Material(Material&& other) = default;

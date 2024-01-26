@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "common.h"
 #include "framebuffer.h"
+#include "logger.h"
 
 class Application {
  public:

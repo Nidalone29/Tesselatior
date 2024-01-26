@@ -9,6 +9,7 @@
 class Scene {
  public:
   Scene();
+  ~Scene();
   // temp
   Scene(const Scene& other) = default;
   Scene& operator=(const Scene& other) = default;

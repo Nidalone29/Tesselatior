@@ -14,7 +14,7 @@ class Texture {
    * @param path
    */
   Texture(const std::filesystem::path& path, const std::string& type);
-  ~Texture() = default;
+  ~Texture();
   Texture(const Texture& other) = default;
   Texture& operator=(const Texture& other) = default;
   Texture(Texture&& other) = default;

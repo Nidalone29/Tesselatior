@@ -1,5 +1,7 @@
 #include "light.h"
 
+#include "logger.h"
+
 Light::Light() : _color(glm::vec3(1.0F)), _intensity(glm::vec3(0.2F)) {
   //
 }
@@ -26,26 +28,26 @@ void Light::setIntensity(const glm::vec3& intensity) {
 }
 
 AmbientLight::AmbientLight() : Light() {
-  //
+  LOG_TRACE("AmbientLight()");
 }
 
 AmbientLight::AmbientLight(const glm::vec3& color, const glm::vec3& intensity)
     : Light(color, intensity) {
-  //
+  LOG_TRACE("AmbientLight(const glm::vec3&, const glm::vec3&)");
 }
 
 DirectionalLight::DirectionalLight()
     : Light(), _direction_vector(0.0F, 0.0F, 0.0F) {
-  //
-}
-
-const glm::vec3& DirectionalLight::getDirection() const {
-  return _direction_vector;
+  LOG_TRACE("DirectionalLight()");
 }
 
 DirectionalLight::DirectionalLight(const glm::vec3& direction)
     : Light(), _direction_vector(direction) {
-  //
+  LOG_TRACE("DirectionalLight(const glm::vec3&)");
+}
+
+const glm::vec3& DirectionalLight::getDirection() const {
+  return _direction_vector;
 }
 
 DirectionalLight::DirectionalLight(const glm::vec3& color,

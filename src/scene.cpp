@@ -5,12 +5,19 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "logger.h"
+
 Scene::Scene()
     : _name("unnamed scene"),
-      _ambient_light(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2))),
+      _ambient_light(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2F))),
       _directional_light(DirectionalLight(
           glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(0, 0, -1))) {
-  std::cout << "scene created" << std::endl;
+  LOG_TRACE("Scene()");
+}
+
+Scene::~Scene() {
+  LOG_TRACE("~Scene()");
+  LOG_TRACE("Destroying scene \"{}\"", _name);
 }
 
 void Scene::addObject(const Object& to_add) {

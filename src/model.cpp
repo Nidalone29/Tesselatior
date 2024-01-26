@@ -5,11 +5,19 @@
 
 #include <assimp/Importer.hpp>
 
+#include "logger.h"
+
 Model::Model(const std::filesystem::path& path, unsigned int flags)
     : _model_path(path) {
   // ASSIMP imports the mesh
+  LOG_TRACE("Model()");
   load_meshes(flags);
-  std::cout << "model created" << std::endl;
+  LOG_INFO("Model created from \"{}\"", path.string());
+}
+
+Model::~Model() {
+  LOG_TRACE("~Model()");
+  LOG_TRACE("Destroying model \"{}\"", _model_path.string());
 }
 
 /**

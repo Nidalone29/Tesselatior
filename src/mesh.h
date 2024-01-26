@@ -33,7 +33,7 @@ class Mesh {
   Mesh(const std::vector<Vertex>& vertices,
        const std::vector<unsigned int>& indices, const unsigned int num_indices,
        const Material& material);
-  ~Mesh() = default;
+  ~Mesh();
 
   /**
    * Funzione che carica il modello e lo prepara per il rendering.

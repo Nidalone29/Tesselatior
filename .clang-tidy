@@ -18,7 +18,8 @@ Checks: "-*,
         -google-readability-todo,
         -readability-implicit-bool-conversion,
         -llvm-include-order,
-        -readability-isolate-declaration"
+        -readability-isolate-declaration,
+        -readability-redundant-member-init"
 
 WarningsAsErrors: ''
 HeaderFilterRegex: ''

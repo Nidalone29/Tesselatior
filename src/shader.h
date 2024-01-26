@@ -13,6 +13,7 @@
 class Shader {
  public:
   Shader();
+  ~Shader();
 
   /**
    * @brief loads a shader given the source file

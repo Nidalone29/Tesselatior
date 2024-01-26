@@ -2,11 +2,15 @@
 
 #include <iostream>
 
+#include "logger.h"
+
 Object::Object(const Model& model) : _model(model) {
-  std::cout << "object created" << std::endl;
+  LOG_TRACE("Object(const Model&)");
 }
 
-Object::~Object() {}
+Object::~Object() {
+  LOG_TRACE("~Object()");
+}
 
 const Model& Object::getModel() const {
   return _model;

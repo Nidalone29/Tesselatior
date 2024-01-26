@@ -4,9 +4,11 @@
 
 #include "mesh.h"
 #include "shader.h"
+#include "logger.h"
 
 Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
-  std::cout << "renderer created" << std::endl;
+  LOG_TRACE("Renderer()");
+
   _render_target.bind();
 
   glEnable(GL_CULL_FACE);
@@ -19,11 +21,16 @@ Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
   _render_target.unbind();
 }
 
+Renderer::~Renderer() {
+  LOG_TRACE("~Renderer()");
+}
+
 void Renderer::toggleWireframe() {
   _render_target.bind();
 
   _gl_mode = _gl_mode == GL_FILL ? GL_LINE : GL_FILL;
   glPolygonMode(GL_FRONT_AND_BACK, _gl_mode);
+  LOG_INFO("Toggled wireframe {}", (_gl_mode == GL_FILL) ? "OFF" : "ON");
 
   _render_target.unbind();
 }

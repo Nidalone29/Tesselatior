@@ -6,22 +6,27 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "transform.h"
+#include "logger.h"
 
 Camera::Camera()
     : _sensitivity(1.0F),
       _pitch_deg(0.0F),
       _yaw_deg(-90.0F),
       _movement_speed(5.0F) {
+  LOG_TRACE("Camera()");
   reset_view();
 }
 
-Camera::~Camera() {}
+Camera::~Camera() {
+  LOG_TRACE("~Camera()");
+}
 
 void Camera::reset_view() {
   _yaw_deg = -90.0F;
   _pitch_deg = 0.0F;
   // TODO there should an initial camera position that the client can set...
   set_camera(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+  LOG_INFO("Camera view reset");
 }
 
 void Camera::set_camera(const glm::vec3& position, const glm::vec3& lookat,
