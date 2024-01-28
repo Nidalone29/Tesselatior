@@ -19,15 +19,8 @@ Checks: "-*,
         -readability-implicit-bool-conversion,
         -llvm-include-order,
         -readability-isolate-declaration,
-        -readability-redundant-member-init"
+        -readability-redundant-member-init,
+        -readability-identifier-length"
 
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
-
-CheckOptions:
-  - key: readability-identifier-length.IgnoredVariableNames
-    value: 'x|y|z|os|o|x|y|z|up|a|b|c|s|t|v|m|n|io'
-  - key: readability-identifier-length.IgnoredParameterNames
-    value: 'x|y|z|os|o|x|y|z|up|a|b|c|s|t|v|m|n'
-  - key: readability-identifier-length.MinimumLoopCounterNameLength 
-    value: 0

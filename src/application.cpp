@@ -24,6 +24,8 @@
 #include "logger.h"
 
 using namespace std::chrono_literals;
+using hr_clock = std::chrono::high_resolution_clock;
+using clock_ms = std::chrono::milliseconds;
 
 Renderer& Application::GetRenderer() {
   return *(Instance()._renderer);
@@ -80,7 +82,6 @@ Camera& Application::GetCamera() {
 Application::Application()
     : _vsync(false), _app_state(VIEWPORT_FOCUS), _current_scene_index(0) {
 #ifndef NDEBUG
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
   spdlog::set_level(spdlog::level::trace);
 #endif  // NDEBUG
 
@@ -168,20 +169,17 @@ void Application::init() {
   _shader.enable();
 
   // init scenes
-  Scene Flower;
-  Flower.setName("Flower");
+  Scene Flower("Flower");
   Model flower("models/flower/flower.obj", aiProcess_Triangulate);
   Transform flower_t;
   flower_t = flower_t * Math::translationMatrix(0.0F, -4.0F, -15.0F);
   flower_t = flower_t * Math::rotationMatrix(-90.0F, 0.0F, 0.0F);
-  // TODO this will have to be passed to the shader
   flower.setTransform(flower_t);
   Flower.addObject(Object(flower));
   // there is probably a more efficient way of doing this
   _scenes.push_back(Flower);
 
-  Scene Teapot;
-  Teapot.setName("Teapot");
+  Scene Teapot("Teapot");
   Model teapot("models/teapot.obj");
   Transform teapot_t;
   teapot_t = teapot_t * Math::translationMatrix(0.0F, -1.6F, -9.0F);
@@ -192,8 +190,7 @@ void Application::init() {
   Flower.addObject(Object(teapot));
 
   /*
-    Scene Dragon;
-    Dragon.setName("Dragon");
+    Scene Dragon("Dragon");
     Model dragon("models/dragon.obj");
     Transform dragon_t;
     dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
@@ -202,8 +199,7 @@ void Application::init() {
     Dragon.addObject(Object(dragon));
     _scenes.push_back(Dragon);
 
-    Scene Skull;
-    Skull.setName("Skull");
+    Scene Skull("Skull");
     Model skull("models/skull.obj");
     Transform skull_t;
     skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
@@ -212,8 +208,7 @@ void Application::init() {
     Skull.addObject(Object(skull));
     _scenes.push_back(Skull);
 
-    Scene Boot;
-    Boot.setName("Boot");
+    Scene Boot("Boot");
     Model boot("models/boot/boot.obj");
     Transform boot_t;
     boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
@@ -222,8 +217,7 @@ void Application::init() {
     Boot.addObject(Object(boot));
     _scenes.push_back(Boot);
 
-    Scene Katana;
-    Katana.setName("Katana");
+    Scene Katana("Katana");
     Model katana("models/dragon_katana_oni_koroshi.glb");
     Transform katana_t;
     katana_t = katana_t * Math::translationMatrix(0.0F, 0.0F, 0.0F);
@@ -284,8 +278,6 @@ void Application::cameraControl(const double xpos, const double ypos,
 }
 
 void Application::run() {
-  glEnable(GL_DEBUG_OUTPUT);
-
   double xpos, ypos;
 
   float camera_sens = _main_camera.sensitivity();
@@ -308,8 +300,7 @@ void Application::run() {
   glm::vec3 directional;
 
   std::chrono::duration<float, std::chrono::seconds::period> delta_time{16ms};
-  std::chrono::time_point<std::chrono::high_resolution_clock> begin_time =
-      std::chrono::high_resolution_clock::now();
+  std::chrono::time_point<hr_clock> begin_time = hr_clock::now();
 
   int number_of_scenes = _scenes.size();
   while (!glfwWindowShouldClose(_window)) {
@@ -360,7 +351,7 @@ void Application::run() {
       ImGui::Text("Scenes");
       if (ImGui::BeginListBox(
               "Current Scene",
-              ImVec2(-FLT_MIN, number_of_scenes * 1.05 *
+              ImVec2(-FLT_MIN, number_of_scenes * 1.05F *
                                    ImGui::GetTextLineHeightWithSpacing()))) {
         for (int n = 0; n < number_of_scenes; n++) {
           const bool is_selected = (_current_scene_index == n);
@@ -422,7 +413,6 @@ void Application::run() {
       ImGui::Begin("viewport", nullptr, window_flags);
 
       glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-      // TODO fix float to int comparison
       if (viewportPanelSize != _renderer->target().getSize()) {
         _renderer->resizeTarget(viewportPanelSize.x, viewportPanelSize.y);
         _main_camera.set_projection(30.0F, viewportPanelSize.x,
@@ -446,10 +436,8 @@ void Application::run() {
     // Swap front and back buffers
     glfwSwapBuffers(_window);
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> end_time =
-        std::chrono::high_resolution_clock::now();
-    delta_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-        end_time - begin_time);
+    std::chrono::time_point<hr_clock> end_time = hr_clock::now();
+    delta_time = std::chrono::duration_cast<clock_ms>(end_time - begin_time);
     begin_time = end_time;
   }
 }

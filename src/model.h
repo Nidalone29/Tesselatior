@@ -9,7 +9,7 @@
 class Model {
  public:
   Model() = delete;  // can't create an empty model
-  Model(const std::filesystem::path& path, unsigned int flags = 0);
+  explicit Model(const std::filesystem::path& path, unsigned int flags = 0);
   ~Model();
   Model(const Model& other) = default;
   Model& operator=(const Model& other) = default;

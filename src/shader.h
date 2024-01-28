@@ -36,14 +36,13 @@ class Shader {
   void enable() const;
   void disable() const;
 
-  // TODO deal with uniforms, and change the old code in app
-  // and after this i should have "finished"
-  void setUniformMat4(const std::string uniform_name,
+  void setUniformMat4(const std::string& uniform_name,
                       const glm::mat4& matrix) const;
-  void setUniformFloat(const std::string uniform_name, const float value) const;
-  void setUniformVec3(const std::string uniform_name,
+  void setUniformFloat(const std::string& uniform_name,
+                       const float value) const;
+  void setUniformVec3(const std::string& uniform_name,
                       const glm::vec3& vec) const;
-  void setUnifromSampler(const std::string uniform_name, int id) const;
+  void setUnifromSampler(const std::string& uniform_name, int id) const;
 
  private:
   static GLuint compileShader(const GLenum type, const std::string& src);
@@ -57,8 +56,6 @@ class Shader {
   std::vector<ShaderSource> _shaders;
 
   GLuint _program;
-
-  // bool enabled; successfully enabled? for uniforms?
 };
 
 #endif  // SHADER_H

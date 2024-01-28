@@ -1,13 +1,15 @@
 #include "shader.h"
 
-#define INVALID_UNIFORM_LOCATION 0xffffffff
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "utilities.h"  // FileNotFoundException
 #include "logger.h"
+
+#define INVALID_UNIFORM_LOCATION 0xffffffff
 
 Shader::Shader() {
   LOG_TRACE("Shader()");
@@ -94,7 +96,7 @@ void Shader::init() {
 
   // Note the different functions here: glGetProgram* instead of glGetShader*.
   GLint isLinked = 0;
-  glGetProgramiv(_program, GL_LINK_STATUS, (int*)&isLinked);
+  glGetProgramiv(_program, GL_LINK_STATUS, &isLinked);
   if (isLinked == GL_FALSE) {
     GLint maxLength = 0;
     glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &maxLength);
@@ -113,8 +115,7 @@ void Shader::init() {
       glDeleteShader(x);
     }
 
-    // In this simple program, we'll just leave
-    return;
+    throw ProgramCreationException();
   }
 
   // Always detach shaders after a successful link.
@@ -142,18 +143,17 @@ GLint Shader::getUniformLocation(const std::string& uniform_name) const {
   return Location;
 }
 
-void Shader::setUniformMat4(const std::string uniform_name,
+void Shader::setUniformMat4(const std::string& uniform_name,
                             const glm::mat4& matrix) const {
   GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
-    glUniformMatrix4fv(uniform_location, 1, GL_FALSE,
-                       const_cast<float*>(&matrix[0][0]));
+    glUniformMatrix4fv(uniform_location, 1, GL_FALSE, glm::value_ptr(matrix));
   } else {
     LOG_WARN("Error setting {} uniform", uniform_name);
   }
 }
 
-void Shader::setUniformFloat(const std::string uniform_name,
+void Shader::setUniformFloat(const std::string& uniform_name,
                              const float value) const {
   GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
@@ -163,17 +163,17 @@ void Shader::setUniformFloat(const std::string uniform_name,
   }
 }
 
-void Shader::setUniformVec3(const std::string uniform_name,
+void Shader::setUniformVec3(const std::string& uniform_name,
                             const glm::vec3& vec) const {
   GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
-    glUniform3fv(uniform_location, 1, const_cast<float*>(&vec[0]));
+    glUniform3fv(uniform_location, 1, glm::value_ptr(vec));
   } else {
     LOG_WARN("Error setting {} uniform", uniform_name);
   }
 }
 
-void Shader::setUnifromSampler(const std::string uniform_name,
+void Shader::setUnifromSampler(const std::string& uniform_name,
                                const int id) const {
   GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {

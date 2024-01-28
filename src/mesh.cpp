@@ -33,14 +33,14 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
                _vertices.data(), GL_STATIC_DRAW);
 
   glVertexAttribPointer(ATTRIB_POSITIONS, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void*)offsetof(struct Vertex, _position));
+                        (GLvoid*)offsetof(struct Vertex, _position));
   glVertexAttribPointer(ATTRIB_NORMALS, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void*)offsetof(struct Vertex, _normal));
+                        (GLvoid*)offsetof(struct Vertex, _normal));
 
   // we are talking about the texture color here
   glVertexAttribPointer(ATTRIB_COLOR_TEXTURE_COORDS, 2, GL_FLOAT, GL_FALSE,
                         sizeof(Vertex),
-                        (void*)offsetof(struct Vertex, _text_coords));
+                        (GLvoid*)offsetof(struct Vertex, _text_coords));
 
   glGenBuffers(1, &_IBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
@@ -64,8 +64,4 @@ const unsigned int& Mesh::get_num_indices() const {
 
 const Material& Mesh::getMaterial() const {
   return _material;
-}
-
-bool Mesh::isLoaded() const {
-  return _loaded;
 }

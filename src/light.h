@@ -46,11 +46,4 @@ class DirectionalLight : public Light {
   glm::vec3 _direction_vector;
 };
 
-class PointLight : public Light {
- public:
- private:
-  glm::vec3 _position;
-  float _radius;
-};
-
 #endif  // LIGHT_H

@@ -93,7 +93,10 @@ const FrameBuffer& Renderer::target() {
   return _render_target;
 }
 
-// resizeViewport maybe is a better name? idk
 void Renderer::resizeTarget(const int width, const int height) {
   _render_target.resize(width, height);
+}
+
+void Renderer::resizeTarget(const float width, const float height) {
+  _render_target.resize(static_cast<int>(width), static_cast<int>(height));
 }

@@ -33,8 +33,6 @@ void Model::load_meshes(unsigned int flags) {
   const aiScene* pScene =
       Importer.ReadFile(_model_path.string().c_str(), flags);
 
-  std::vector<Mesh> meshes;
-
   // dealing with every mesh in the model
   for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
     // -- Dealing with a Mesh
@@ -45,11 +43,11 @@ void Model::load_meshes(unsigned int flags) {
     std::vector<Vertex> Vertices;
     std::vector<unsigned int> Indices;
 
-    for (unsigned int i = 0; i < paiMesh->mNumVertices; i++) {
-      const aiVector3D* pPos = &(paiMesh->mVertices[i]);
-      const aiVector3D* pNormal = &(paiMesh->mNormals[i]);
+    for (unsigned int j = 0; j < paiMesh->mNumVertices; j++) {
+      const aiVector3D* pPos = &(paiMesh->mVertices[j]);
+      const aiVector3D* pNormal = &(paiMesh->mNormals[j]);
       const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0)
-                                        ? &(paiMesh->mTextureCoords[0][i])
+                                        ? &(paiMesh->mTextureCoords[0][j])
                                         : &Zero3D;
 
       Vertex v(glm::vec3(pPos->x, pPos->y, pPos->z),
@@ -59,8 +57,8 @@ void Model::load_meshes(unsigned int flags) {
       Vertices.push_back(v);
     }
 
-    for (unsigned int i = 0; i < paiMesh->mNumFaces; i++) {
-      const aiFace& Face = paiMesh->mFaces[i];
+    for (unsigned int j = 0; j < paiMesh->mNumFaces; j++) {
+      const aiFace& Face = paiMesh->mFaces[j];
       assert(Face.mNumIndices == 3);
       Indices.push_back(Face.mIndices[0]);
       Indices.push_back(Face.mIndices[1]);

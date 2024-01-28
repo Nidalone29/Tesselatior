@@ -7,6 +7,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#ifndef NDEBUG
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+#endif  // NDEBUG
+
 #include "scene.h"
 #include "renderer.h"
 #include "camera.h"
@@ -44,8 +48,11 @@ class Application {
     int Width;
     int Height;
 
-    Props(std::string title = "Tesselatior", int width = 1280, int height = 720)
-        : Title(title), Width(width), Height(height) {}
+    explicit Props(const std::string& title = "Tesselatior",
+                   const int width = 1280, const int height = 720)
+        : Title(title), Width(width), Height(height) {
+      //
+    }
   };
 
   Props _properties;

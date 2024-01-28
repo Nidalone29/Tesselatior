@@ -78,7 +78,7 @@ class Camera {
                   const glm::vec3& up);
 
   // defining the camera
-  glm::mat4 _view_matrix;        // view transofrm matrix
+  glm::mat4 _view_matrix;        // view transform matrix
   glm::mat4 _projection_matrix;  // camera pojection matrix (perspective)
 
   glm::vec3 _up;

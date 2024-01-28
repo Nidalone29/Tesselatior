@@ -7,12 +7,12 @@
 
 #include "logger.h"
 
-Scene::Scene()
-    : _name("unnamed scene"),
+Scene::Scene(const std::string& name)
+    : _name(name),
       _ambient_light(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2F))),
       _directional_light(DirectionalLight(
           glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(0, 0, -1))) {
-  LOG_TRACE("Scene()");
+  LOG_TRACE("Scene(const std::string&)");
 }
 
 Scene::~Scene() {
@@ -24,7 +24,6 @@ void Scene::addObject(const Object& to_add) {
   _objects.push_back(to_add);
 }
 
-// TODO improve by making this return a const reference
 const std::vector<Object>& Scene::getAllObjects() const {
   return _objects;
 }
@@ -48,6 +47,7 @@ const DirectionalLight& Scene::getDirectionalLight() const {
 void Scene::setName(const std::string& to_add) {
   _name = to_add;
 }
+
 const std::string& Scene::getName() const {
   return _name;
 }

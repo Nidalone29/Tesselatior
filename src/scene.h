@@ -8,7 +8,7 @@
 
 class Scene {
  public:
-  Scene();
+  explicit Scene(const std::string& name = "unnamed scene");
   ~Scene();
   // temp
   Scene(const Scene& other) = default;

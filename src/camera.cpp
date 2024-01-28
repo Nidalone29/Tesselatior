@@ -14,6 +14,7 @@ Camera::Camera()
       _yaw_deg(-90.0F),
       _movement_speed(5.0F) {
   LOG_TRACE("Camera()");
+  _mouse_position = {0.0, 0.0};
   reset_view();
 }
 
@@ -78,7 +79,6 @@ const glm::vec3& Camera::up() const {
 
 void Camera::move(const CameraMovements movement, const float timestep) {
   glm::vec3 tmp, new_position;
-  // TODO narrowing conversion
   const float speed = _movement_speed * timestep;
   switch (movement) {
     case CameraMovements::LEFT:
@@ -97,7 +97,6 @@ void Camera::move(const CameraMovements movement, const float timestep) {
     case CameraMovements::BACK:
       new_position = _position - (_lookat_dir * speed);
       break;
-
     // these are independent from the mouse
     case CameraMovements::UP:
       new_position = _position + (glm::vec3(0.0F, 1.0F, 0.0F) * speed);
@@ -117,9 +116,8 @@ void Camera::rotate(const double newx, const double newy) {
   _mouse_position.xpos = newx;
   _mouse_position.ypos = newy;
 
-  // TODO narrowing conversion
-  _yaw_deg += xoffset;
-  _pitch_deg += yoffset;
+  _yaw_deg += static_cast<float>(xoffset);
+  _pitch_deg += static_cast<float>(yoffset);
 
   // for not rotating backwards indefinetly
   if (_pitch_deg > 89.0F) {
@@ -137,7 +135,6 @@ void Camera::rotate(const double newx, const double newy) {
   set_camera(_position, _position + direction, _up);
 }
 
-// it will be controlled by imgui
 void Camera::set_speed(const float speed) {
   _movement_speed = speed;
 }
