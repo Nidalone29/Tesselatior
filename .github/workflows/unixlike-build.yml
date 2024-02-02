@@ -35,7 +35,7 @@ jobs:
     # https://www.glfw.org/docs/latest/compile_guide.html#compile_deps_x11
     - name: "Install glfw3 dependencies on linux (ubuntu)"
       if: runner.os == 'Linux'
-      run: sudo apt install xorg-dev
+      run: sudo apt-get install xorg-dev
 
     # macOS glfw (and glew) dependencies are not needed in this case because 
     # the github runner already has them (it has Xcode installed by default)
