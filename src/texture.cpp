@@ -7,8 +7,9 @@
 #include <stb_image.h>
 
 #include "logger.h"
+#include "common.h"
 
-Texture::Texture(const std::filesystem::path& path, const std::string& type)
+Texture::Texture(const std::filesystem::path& path, const TEXTURE_TYPE type)
     : _id(-1), _type(type) {
   LOG_TRACE("Texture(const std::filesystem::path&, const std::string&)");
 
@@ -69,8 +70,7 @@ Texture::Texture(const std::filesystem::path& path, const std::string& type)
   glBindTexture(GL_TEXTURE_2D, 0);
 
   stbi_image_free(image);
-  LOG_INFO("Texture of type {} has been created from \"{}\"", type,
-           path.string());
+  LOG_INFO("Texture has been created from \"{}\"", path.string());
 }
 
 Texture::~Texture() {

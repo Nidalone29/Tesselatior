@@ -48,7 +48,6 @@ glm::vec2 FrameBuffer::getSize() const {
 void FrameBuffer::check() const {
   glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-  // TODO error handle with exception
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
     LOG_ERROR("Framebuffer status error");
     throw FramebufferException();

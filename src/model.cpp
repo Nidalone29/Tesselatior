@@ -6,6 +6,7 @@
 #include <assimp/Importer.hpp>
 
 #include "logger.h"
+#include "common.h"
 #include "utilities.h"
 
 Model::Model(const std::filesystem::path& path, unsigned int flags)
@@ -57,15 +58,14 @@ void Model::load_meshes(unsigned int flags) {
                                         ? &(paiMesh->mTextureCoords[0][j])
                                         : &Zero3D;
 
-      Vertex v(glm::vec3(pPos->x, pPos->y, pPos->z),
-               glm::vec3(pNormal->x, pNormal->y, pNormal->z),
-               glm::vec2(pTexCoord->x, pTexCoord->y));
-
-      Vertices.push_back(v);
+      Vertices.emplace_back(glm::vec3(pPos->x, pPos->y, pPos->z),
+                            glm::vec3(pNormal->x, pNormal->y, pNormal->z),
+                            glm::vec2(pTexCoord->x, pTexCoord->y));
     }
 
     for (unsigned int j = 0; j < paiMesh->mNumFaces; j++) {
       const aiFace& Face = paiMesh->mFaces[j];
+      // TODO pass triangulate by default
       assert(Face.mNumIndices == 3);
       Indices.push_back(Face.mIndices[0]);
       Indices.push_back(Face.mIndices[1]);
@@ -83,7 +83,6 @@ void Model::load_meshes(unsigned int flags) {
 
     const unsigned int material_i = paiMesh->mMaterialIndex;
     const aiMaterial* material = pScene->mMaterials[material_i];
-    // TODO deal with all material properties
     Material x;
 
     if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
@@ -96,16 +95,16 @@ void Model::load_meshes(unsigned int flags) {
         // TODO the type will become an enum eventually
         std::filesystem::path texture_path = _model_path;
         texture_path.replace_filename(Path.data);  // Path.data
-        Texture texture(texture_path, "diffusive");
+        Texture texture(texture_path, DIFFUSE_TEXTURE);
         x.addTexture(texture);
       }
     } else {
       // texture does not exist, load blank
-      Texture texture("white.png", "diffusive");
+      Texture texture("white.png", DIFFUSE_TEXTURE);
       x.addTexture(texture);
     }
     // add the mesh to the model
-    _meshes.push_back(Mesh(Vertices, Indices, _num_indices, x));
+    _meshes.emplace_back(Vertices, Indices, _num_indices, x);
   }
 }
 

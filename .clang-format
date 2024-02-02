@@ -5,3 +5,4 @@ DerivePointerAlignment: false
 PointerAlignment: Left
 SortIncludes: false
 AllowShortFunctionsOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false

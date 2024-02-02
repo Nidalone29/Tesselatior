@@ -2,6 +2,7 @@
 #define UTILITIES_H
 
 #include <stdexcept>
+#include <filesystem>
 
 #include <GL/glew.h>
 

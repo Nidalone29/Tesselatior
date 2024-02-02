@@ -101,9 +101,8 @@ Application::Application()
   if (!glfwInit()) {
     LOG_ERROR("GLFW Init fail");
     throw AppInitException();
-  } else {
-    LOG_INFO("Initialized GLFW");
   }
+  LOG_INFO("Initialized GLFW");
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -356,8 +355,8 @@ void Application::run() {
           if (ImGui::Selectable(_scenes[n].getName().c_str(), is_selected)) {
             _current_scene_index = n;
           }
-          // Set the initial focus when opening the combo (scrolling + keyboard
-          // navigation focus)
+          // Set the initial focus when opening the combo (scrolling +
+          // keyboard navigation focus)
           if (is_selected) {
             ImGui::SetItemDefaultFocus();
           }
