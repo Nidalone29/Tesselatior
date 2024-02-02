@@ -6,11 +6,12 @@
 #include <assimp/Importer.hpp>
 
 #include "logger.h"
+#include "utilities.h"
 
 Model::Model(const std::filesystem::path& path, unsigned int flags)
     : _model_path(path) {
   // ASSIMP imports the mesh
-  LOG_TRACE("Model()");
+  LOG_TRACE("Model(const std::filesystem::path&, unsigned int)");
   load_meshes(flags);
   LOG_INFO("Model created from \"{}\"", path.string());
 }
@@ -32,6 +33,12 @@ void Model::load_meshes(unsigned int flags) {
   // doesnt deal with different file formats
   const aiScene* pScene =
       Importer.ReadFile(_model_path.string().c_str(), flags);
+
+  if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
+      !pScene->mRootNode) {
+    LOG_ERROR("ASSIMP Error: {}", Importer.GetErrorString());
+    throw MeshImportException();
+  }
 
   // dealing with every mesh in the model
   for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {

@@ -22,6 +22,7 @@
 #include "renderer.h"
 #include "shader.h"
 #include "logger.h"
+#include "utilities.h"
 
 using namespace std::chrono_literals;
 using hr_clock = std::chrono::high_resolution_clock;
@@ -79,6 +80,15 @@ Camera& Application::GetCamera() {
   return Instance()._main_camera;
 }
 
+GLFWwindow* Application::GetWindow() {
+  return Instance()._window;
+}
+
+Application& Application::Instance() {
+  static Application _instance;
+  return _instance;
+}
+
 Application::Application()
     : _vsync(false), _app_state(VIEWPORT_FOCUS), _current_scene_index(0) {
 #ifndef NDEBUG
@@ -90,7 +100,7 @@ Application::Application()
   // Initialize the window library
   if (!glfwInit()) {
     LOG_ERROR("GLFW Init fail");
-    exit(1);
+    throw AppInitException();
   } else {
     LOG_INFO("Initialized GLFW");
   }
@@ -103,6 +113,7 @@ Application::Application()
   if (!_window) {
     glfwTerminate();
     LOG_ERROR("GLFW Window creation fail");
+    throw AppInitException();
   }
   // Make the window's context current
   glfwMakeContextCurrent(_window);
@@ -111,10 +122,9 @@ Application::Application()
   GLenum res = glewInit();
   if (res != GLEW_OK) {
     LOG_ERROR("GLEW Init fail");
-    exit(1);
-  } else {
-    LOG_INFO("Initialized GLEW");
+    throw AppInitException();
   }
+  LOG_INFO("Initialized GLEW");
 
   // TODO fix with std::make_unique and smart pointers
   _renderer = new Renderer();
@@ -128,21 +138,11 @@ Application::~Application() {
 
   delete _renderer;
 
-  // Cleanup
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 
   glfwTerminate();
-}
-
-GLFWwindow* Application::GetWindow() {
-  return Instance()._window;
-}
-
-Application& Application::Instance() {
-  static Application _instance;
-  return _instance;
 }
 
 void Application::init() {
@@ -159,7 +159,6 @@ void Application::init() {
   glfwSetWindowPos(_window, 100, 100);
   glfwSetCursorPos(_window, 0, 0);
 
-  // app only works with vsync because of fixed timesteps
   glfwSwapInterval(_vsync);
 
   _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
@@ -187,7 +186,6 @@ void Application::init() {
   teapot.setTransform(teapot_t);
   Teapot.addObject(Object(teapot));
   _scenes.push_back(Teapot);
-  Flower.addObject(Object(teapot));
 
   /*
     Scene Dragon("Dragon");

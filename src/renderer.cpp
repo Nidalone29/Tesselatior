@@ -15,7 +15,6 @@ Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
   glEnable(GL_DEPTH_TEST);
-  // TODO there should an initial clear color that the client can set...
   glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
 
   _render_target.unbind();
@@ -28,7 +27,7 @@ Renderer::~Renderer() {
 void Renderer::toggleWireframe() {
   _render_target.bind();
 
-  _gl_mode = _gl_mode == GL_FILL ? GL_LINE : GL_FILL;
+  _gl_mode = (_gl_mode == GL_FILL) ? GL_LINE : GL_FILL;
   glPolygonMode(GL_FRONT_AND_BACK, _gl_mode);
   LOG_INFO("Toggled wireframe {}", (_gl_mode == GL_FILL) ? "OFF" : "ON");
 

@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include "logger.h"
+#include "utilities.h"
 
 FrameBuffer::FrameBuffer(const int width, const int height)
     : _width(width), _height(height) {
@@ -44,19 +45,16 @@ glm::vec2 FrameBuffer::getSize() const {
   return {_width, _height};
 }
 
-bool FrameBuffer::check() const {
+void FrameBuffer::check() const {
   glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
   // TODO error handle with exception
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-    //
-  } else {
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
     LOG_ERROR("Framebuffer status error");
-    std::exit(3);
+    throw FramebufferException();
   }
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  return true;
 }
 
 void FrameBuffer::reset() {

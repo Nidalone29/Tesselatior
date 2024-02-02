@@ -16,6 +16,15 @@ Shader::Shader() {
 }
 
 Shader::~Shader() {
+  for (const GLuint x : _compiled_shaders) {
+    glDeleteShader(x);
+  }
+
+  if (_program != 0) {
+    glDeleteProgram(_program);
+    _program = 0;
+  }
+
   LOG_TRACE("~Shader()");
 }
 
@@ -27,8 +36,9 @@ void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
       res.type = type;
       break;
     default:
-      // TODO: error handling wrong shader type
       LOG_ERROR("Wrong/Unsupported shader type");
+      LOG_ERROR("\"{} not loaded\"", path.string());
+      return;
       break;
   }
 
@@ -37,12 +47,12 @@ void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
     LOG_ERROR("File not found: {}", path.string());
     throw FileNotFoundException();
   }
+
   std::stringstream shaderData;
   shaderData << shaderFile.rdbuf();
   shaderFile.close();
   res.source = shaderData.str();
 
-  // DEBUG call to say that a shader has been loaded
   _shaders.push_back(res);
 }
 
@@ -56,20 +66,16 @@ GLuint Shader::compileShader(const GLenum type, const std::string& src) {
   glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
 
   if (isCompiled == GL_FALSE) {
+    // Generate error message
     GLint maxLength = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-
     // The maxLength includes the NULL character
-    std::vector<GLchar> infoLog(maxLength);
-    glGetShaderInfoLog(shader, maxLength, &maxLength, infoLog.data());
+    GLchar* infoLog = new GLchar[maxLength];
+    glGetShaderInfoLog(shader, maxLength, &maxLength, infoLog);
+    LOG_ERROR("Shader compilation fail: {}", infoLog);
 
-    // We don't need the shader anymore.
-    // TODO delete all the shader
-    glDeleteShader(shader);
-
-    LOG_ERROR("Shader compilation fail: {}", infoLog.data());
-
-    throw ShaderCreationException();
+    delete[] infoLog;
+    throw ShaderCompilationException();
   }
 
   return shader;
@@ -81,11 +87,9 @@ void Shader::init() {
   // Get a program object.
   _program = glCreateProgram();
 
-  std::vector<GLuint> compiled_shaders;
-
   for (const ShaderSource& x : _shaders) {
     GLuint currentShader = compileShader(x.type, x.source);
-    compiled_shaders.push_back(currentShader);
+    _compiled_shaders.push_back(currentShader);
 
     // Attach our shaders to our program
     glAttachShader(_program, currentShader);
@@ -101,26 +105,28 @@ void Shader::init() {
     GLint maxLength = 0;
     glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &maxLength);
 
-    // The maxLength includes the NULL character
-    std::vector<GLchar> infoLog(maxLength);
-    glGetProgramInfoLog(_program, maxLength, &maxLength, infoLog.data());
+    GLchar* infoLog = new GLchar[maxLength];
+    glGetProgramInfoLog(_program, maxLength, &maxLength, infoLog);
+    LOG_ERROR("Shader linkage fail: {}", infoLog);
 
-    LOG_ERROR("Shader compilation fail: {}", infoLog.data());
+    delete[] infoLog;
 
-    // We don't need the program anymore.
+    // We don't need the program anymore, it doesn't work
     glDeleteProgram(_program);
-
-    // Don't leak shaders either.
-    for (const GLuint x : compiled_shaders) {
-      glDeleteShader(x);
-    }
-
-    throw ProgramCreationException();
   }
 
   // Always detach shaders after a successful link.
-  for (const GLuint x : compiled_shaders) {
+  for (const GLuint x : _compiled_shaders) {
     glDetachShader(_program, x);
+  }
+
+  // These are not needed after we have a program
+  for (const GLuint x : _compiled_shaders) {
+    glDeleteShader(x);
+  }
+
+  if (isLinked == GL_FALSE) {
+    throw ProgramCreationException();
   }
 }
 

@@ -8,13 +8,15 @@
 
 class Model {
  public:
-  Model() = delete;  // can't create an empty model
+  Model() = delete;
   explicit Model(const std::filesystem::path& path, unsigned int flags = 0);
   ~Model();
   Model(const Model& other) = default;
   Model& operator=(const Model& other) = default;
   Model(Model&& other) = default;
   Model& operator=(Model&& other) = default;
+
+  void setMesh(const std::filesystem::path& path, unsigned int flags = 0);
 
   const std::vector<Mesh>& getMeshes() const;
   const Transform& getTransform() const;

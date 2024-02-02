@@ -54,6 +54,7 @@ class Shader {
   };
 
   std::vector<ShaderSource> _shaders;
+  std::vector<GLuint> _compiled_shaders;
 
   GLuint _program;
 };

@@ -35,7 +35,7 @@ class FrameBuffer {
   void resize(const int new_width, const int new_height);
 
  private:
-  bool check() const;
+  void check() const;
   void reset();
   void create();
 
