@@ -6,7 +6,11 @@
 
 #include <GL/glew.h>
 
-#include "common.h"
+#include <assimp/texture.h>
+
+enum class TEXTURE_TYPE {
+  DIFFUSE
+};
 
 class Texture {
  public:
@@ -16,6 +20,14 @@ class Texture {
    * @param path
    */
   Texture(const std::filesystem::path& path, const TEXTURE_TYPE type);
+  Texture(const aiTexture* embedded, const TEXTURE_TYPE type);
+  /**
+   * @brief default texture
+   *
+   * @param type the TEXTURE_TYPE of the default texture to creade
+   */
+  Texture(const TEXTURE_TYPE type);
+
   ~Texture();
   Texture(const Texture& other) = default;
   Texture& operator=(const Texture& other) = default;

@@ -16,9 +16,13 @@
 #include "camera.h"
 #include "light.h"
 #include "shader.h"
-#include "common.h"
 #include "framebuffer.h"
 #include "logger.h"
+
+enum class APP_STATE {
+  VIEWPORT_FOCUS,
+  MENU_CONTROL
+};
 
 class Application {
  public:
@@ -39,9 +43,11 @@ class Application {
  private:
   Application();
   ~Application();
-  void init();
+
+  void cleanUp();
   void cameraControl(const double xpos, const double ypos,
                      const float delta_time);
+  void init();
 
   struct Props {
     std::string Title;

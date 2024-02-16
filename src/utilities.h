@@ -2,11 +2,15 @@
 #define UTILITIES_H
 
 #include <stdexcept>
-#include <filesystem>
+#include <type_traits>
 
-#include <GL/glew.h>
-
-#include "logger.h"
+// this exists because std::to_underlying is C++23 only
+// https://en.cppreference.com/w/cpp/utility/to_underlying
+template <class T>
+[[nodiscard]] constexpr typename std::underlying_type<T>::type to_underlying(
+    T val) noexcept {
+  return static_cast<typename std::underlying_type<T>::type>(val);
+}
 
 /**
  * Semplici strutture che rappresentano delle eccezioni

@@ -7,10 +7,10 @@
 #include "logger.h"
 
 Material::Material()
-    : _ambient_reflectivity(glm::vec3(1, 1, 1)),
-      _diffuse_reflectivity(glm::vec3(0.8F, 0.8F, 0.8F)),
-      _specular_reflectivity(glm::vec3(0.8F, 0.8F, 0.8F)),
-      _specular_glossiness_exponent(30) {
+    : _ambient_reflectivity(glm::vec3(1.0F, 1.0F, 1.0F)),
+      _diffuse_reflectivity(glm::vec3(1.0F, 1.0F, 1.0F)),
+      _specular_reflectivity(glm::vec3(0.0F, 0.0F, 0.0F)),
+      _specular_glossiness_exponent(30.0F) {
   LOG_TRACE("Material()");
 }
 
@@ -23,6 +23,7 @@ void Material::addTexture(const Texture& toadd) {
 }
 
 void Material::bind() const {
+  glBindTexture(GL_TEXTURE_2D, 0);
   for (const Texture& t : _textures) {
     // (for now it's 0, meaning it's all color texture)
     // TODO a check for all different types of textures and deal with it
@@ -30,7 +31,6 @@ void Material::bind() const {
 
     // Attiviamo la TextureUnit da usare per il sampling
     glActiveTexture(unit);
-
     // Bindiamo la texture
     glBindTexture(GL_TEXTURE_2D, t.getID());
   }

@@ -62,12 +62,12 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
   // that causes the camera to jump
   if (key == GLFW_KEY_O && action == GLFW_PRESS &&
       glfwGetWindowAttrib(window, GLFW_HOVERED)) {
-    if (Application::GetAppState() == VIEWPORT_FOCUS) {
-      Application::SetAppState(MENU_CONTROL);
+    if (Application::GetAppState() == APP_STATE::VIEWPORT_FOCUS) {
+      Application::SetAppState(APP_STATE::MENU_CONTROL);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
     } else {
-      Application::SetAppState(VIEWPORT_FOCUS);
+      Application::SetAppState(APP_STATE::VIEWPORT_FOCUS);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       glfwGetCursorPos(window, &x_pos, &y_pos);
       Application::GetCamera().set_mouseposition(x_pos, y_pos);
@@ -90,12 +90,32 @@ Application& Application::Instance() {
 }
 
 Application::Application()
-    : _vsync(false), _app_state(VIEWPORT_FOCUS), _current_scene_index(0) {
+    : _vsync(true),
+      _app_state(APP_STATE::VIEWPORT_FOCUS),
+      _current_scene_index(0) {
+  LOG_TRACE("Application()");
+  init();
+}
+
+void Application::cleanUp() {
+  delete _renderer;
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+
+  glfwTerminate();
+}
+
+Application::~Application() {
+  LOG_TRACE("~Application()");
+  cleanUp();
+}
+
+void Application::init() {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::trace);
 #endif  // NDEBUG
-
-  LOG_TRACE("Application()");
 
   // Initialize the window library
   if (!glfwInit()) {
@@ -128,23 +148,6 @@ Application::Application()
   // TODO fix with std::make_unique and smart pointers
   _renderer = new Renderer();
 
-  LOG_INFO("Created Application");
-  init();
-}
-
-Application::~Application() {
-  LOG_TRACE("~Application()");
-
-  delete _renderer;
-
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
-
-  glfwTerminate();
-}
-
-void Application::init() {
   // input settings
   glfwSetKeyCallback(_window, InputHandle);
 
@@ -167,6 +170,7 @@ void Application::init() {
   _shader.enable();
 
   // init scenes
+
   Scene Flower("Flower");
   Model flower("models/flower/flower.obj", aiProcess_Triangulate);
   Transform flower_t;
@@ -186,44 +190,77 @@ void Application::init() {
   Teapot.addObject(Object(teapot));
   _scenes.push_back(Teapot);
 
-  /*
-    Scene Dragon("Dragon");
-    Model dragon("models/dragon.obj");
-    Transform dragon_t;
-    dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
-    dragon_t = dragon_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-    dragon.setTransform(dragon_t);
-    Dragon.addObject(Object(dragon));
-    _scenes.push_back(Dragon);
+  Scene Dragon("Dragon");
+  Model dragon("models/dragon.obj");
+  Transform dragon_t;
+  dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
+  dragon_t = dragon_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  dragon.setTransform(dragon_t);
+  Dragon.addObject(Object(dragon));
+  _scenes.push_back(Dragon);
 
-    Scene Skull("Skull");
-    Model skull("models/skull.obj");
-    Transform skull_t;
-    skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
-    skull_t = skull_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-    skull.setTransform(skull_t);
-    Skull.addObject(Object(skull));
-    _scenes.push_back(Skull);
+  Scene Skull("Skull");
+  Model skull("models/skull.obj");
+  Transform skull_t;
+  skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
+  skull_t = skull_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  skull.setTransform(skull_t);
+  Skull.addObject(Object(skull));
+  _scenes.push_back(Skull);
 
-    Scene Boot("Boot");
-    Model boot("models/boot/boot.obj");
-    Transform boot_t;
-    boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
-    boot_t = boot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-    boot.setTransform(boot_t);
-    Boot.addObject(Object(boot));
-    _scenes.push_back(Boot);
+  Scene Boot("Boot");
+  Model boot("models/boot/boot.obj");
+  Transform boot_t;
+  boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
+  boot_t = boot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  boot.setTransform(boot_t);
+  Boot.addObject(Object(boot));
+  _scenes.push_back(Boot);
 
-    Scene Katana("Katana");
-    Model katana("models/dragon_katana_oni_koroshi.glb");
-    Transform katana_t;
-    katana_t = katana_t * Math::translationMatrix(0.0F, 0.0F, 0.0F);
-    katana_t = katana_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-    katana.setTransform(katana_t);
-    Katana.addObject(Object(katana));
-    _scenes.push_back(Katana);
-  */
-  _shader.setUnifromSampler("ColorTextSampler", TEXTURE_COLOR);
+  Scene Perseverance("Rover");
+  Model perseverance("models/Perseverance.glb", aiProcess_PreTransformVertices);
+  Perseverance.addObject(Object(perseverance));
+  _scenes.push_back(Perseverance);
+
+  Scene Katana("Katana");
+  Model katana("models/dragon_katana_oni_koroshi.glb",
+               aiProcess_PreTransformVertices);
+  Katana.addObject(Object(katana));
+  _scenes.push_back(Katana);
+
+  Scene Sphere("Sphere");
+  Model sphere("models/SphereByNidal.glb", aiProcess_PreTransformVertices);
+  Sphere.addObject(Object(sphere));
+  _scenes.push_back(Sphere);
+
+  Scene Suzanne("MrMonkey");
+  Model suzanne("models/mrmonkey.glb", aiProcess_PreTransformVertices);
+  Suzanne.addObject(Object(suzanne));
+  _scenes.push_back(Suzanne);
+
+  Scene Shibahu("shibahu");
+  Model shibahu("models/shibahu/Shibahu_skechfab.fbx",
+                aiProcess_PreTransformVertices);
+  Shibahu.addObject(Object(shibahu));
+  _scenes.push_back(Shibahu);
+
+  Scene Drone("drone");
+  Model drone("models/drone/Drone.fbx", aiProcess_PreTransformVertices);
+  Drone.addObject(Object(drone));
+  _scenes.push_back(Drone);
+
+  Scene Halo("halo");
+  Model halo("models/spartan_armour_mkv_-_halo_reach.glb",
+             aiProcess_PreTransformVertices);
+  Halo.addObject(Object(halo));
+  _scenes.push_back(Halo);
+
+  Scene BMW("BMW M3 E30");
+  Model bmw("models/free_bmw_m3_e30.glb", aiProcess_PreTransformVertices);
+  BMW.addObject(Object(bmw));
+  _scenes.push_back(BMW);
+
+  _shader.setUnifromSampler("ColorTextSampler", TEXTURE_UNIT_ID::TEXTURE_COLOR);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -311,7 +348,7 @@ void Application::run() {
     // Poll for and process events
     glfwPollEvents();
 
-    if (_app_state == VIEWPORT_FOCUS) {
+    if (_app_state == APP_STATE::VIEWPORT_FOCUS) {
       glfwGetCursorPos(_window, &xpos, &ypos);
       cameraControl(xpos, ypos, delta_time.count());
     }
@@ -386,8 +423,8 @@ void Application::run() {
         ImGui::Text("Camera sensitivity (0.01 -> 10)");
         ImGui::SliderFloat("sens", &camera_sens, 0.1F, 10.0F, "%.2f",
                            ImGuiSliderFlags_None);
-        ImGui::Text("Movement speed (1 -> 25)");
-        ImGui::SliderFloat("speed", &camera_speed, 1.0F, 25.0F, "%.2f",
+        ImGui::Text("Movement speed (1 -> 100)");
+        ImGui::SliderFloat("speed", &camera_speed, 1.0F, 100.0F, "%.2f",
                            ImGuiSliderFlags_None);
 
         _main_camera.set_sensitivity(camera_sens);
@@ -413,7 +450,7 @@ void Application::run() {
       if (viewportPanelSize != _renderer->target().getSize()) {
         _renderer->resizeTarget(viewportPanelSize.x, viewportPanelSize.y);
         _main_camera.set_projection(30.0F, viewportPanelSize.x,
-                                    viewportPanelSize.y, 0.1F, 100);
+                                    viewportPanelSize.y, 0.1F, 10000);
       }
       _renderer->render(_scenes[_current_scene_index], _main_camera, _shader);
 

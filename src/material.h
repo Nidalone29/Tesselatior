@@ -44,7 +44,7 @@ class Material {
   glm::vec3 _ambient_reflectivity;
   glm::vec3 _diffuse_reflectivity;
   glm::vec3 _specular_reflectivity;
-  float _specular_glossiness_exponent;
+  float _specular_glossiness_exponent;  // aka Shininess
 };
 
 #endif  // MATERIAL_H

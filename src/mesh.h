@@ -10,10 +10,15 @@
 #include <assimp/scene.h>        // Assimp output data structure
 #include <assimp/postprocess.h>  // Assimp post processing flags
 
-#include "common.h"
 #include "vertex.h"
 #include "texture.h"
 #include "material.h"
+
+enum class ATTRIB_ID {
+  POSITIONS = 0,
+  NORMALS = 1,
+  COLOR_TEXTURE_COORDS = 2
+};
 
 /**
  * @brief A mesh is saved in a renederable state for opengl

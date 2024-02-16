@@ -5,8 +5,9 @@
 
 #include <assimp/Importer.hpp>
 
+#include <assimp/scene.h>
+
 #include "logger.h"
-#include "common.h"
 #include "utilities.h"
 
 Model::Model(const std::filesystem::path& path, unsigned int flags)
@@ -41,9 +42,10 @@ void Model::load_meshes(unsigned int flags) {
     throw MeshImportException();
   }
 
-  // dealing with every mesh in the model
-  for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
-    // -- Dealing with a Mesh
+  LOG_INFO("The number of embedded textures in the current file is: {}",
+           pScene->mNumTextures);
+
+  for (int i = 0; i < pScene->mNumMeshes; i++) {
     const aiMesh* paiMesh = pScene->mMeshes[i];
 
     const aiVector3D Zero3D(0.0F, 0.0F, 0.0F);
@@ -74,36 +76,74 @@ void Model::load_meshes(unsigned int flags) {
 
     unsigned int _num_indices = Indices.size();
 
-    // -- Deal with material
-
     // NOTE a mesh has one and only one material
 
-    // for now i only consider the diffusive property (so the color for non
-    // metal materials, because i don't support metallic at the moment)
+    // for now i only import the diffusive property (so the color for non
+    // metal materials, because i don't support metallic or else at the
+    // moment)
 
+    // NOTE: If a material has not been found by Assimp, it loads a
+    // "DefaultMaterial" (with ambient 0, diffuse 0.6 and specular 0.6... and i
+    // think it even changes from format to format, for example a .blend file
+    // has a different default material than a .obj file)
     const unsigned int material_i = paiMesh->mMaterialIndex;
     const aiMaterial* material = pScene->mMaterials[material_i];
+    LOG_INFO("Processing material: {}", material->GetName().C_Str());
     Material x;
 
-    if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-      aiString Path;
+    aiColor3D color;
 
-      if (material->GetTexture(aiTextureType_DIFFUSE, 0, &Path, nullptr,
-                               nullptr, nullptr, nullptr,
-                               nullptr) == AI_SUCCESS) {
-        // e mo si carica la texture con stb_image
-        // TODO the type will become an enum eventually
+    if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == aiReturn_SUCCESS) {
+      x.setAmbientReflectivity(glm::vec3(color.r, color.g, color.b));
+    }
+
+    if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == aiReturn_SUCCESS) {
+      x.setSpecularReflectivity(glm::vec3(color.r, color.g, color.b));
+    }
+
+    float shininess = 0.0F;
+    if (material->Get(AI_MATKEY_SHININESS, shininess) == aiReturn_SUCCESS) {
+      x.setGlossinessExponent(shininess);
+    }
+
+    if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == aiReturn_SUCCESS) {
+      x.setDiffuseReflectivity(glm::vec3(color.r, color.g, color.b));
+    }
+
+    aiString diffuse_path;
+    if (material->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0),
+                      diffuse_path) == aiReturn_SUCCESS) {
+      x.setDiffuseReflectivity(glm::vec3(1.0F, 1.0F, 1.0F));
+      if (const auto* _texture =
+              pScene->GetEmbeddedTexture(diffuse_path.C_Str())) {
+        // returned pointer is not null, aka the texture is embedded
+        // the texture is compressed (png, jpeg...), so we load it with stb
+        if (_texture->mHeight == 0) {
+          Texture texture(_texture, TEXTURE_TYPE::DIFFUSE);
+          x.addTexture(texture);
+        } else {
+          // the texture is not compressed
+          // _texture->mWidth;
+          // _texture->mHeight;
+          // _texture->pcData;
+          LOG_ERROR("Unsupported uncompressed texture");
+          x.addTexture(Texture(TEXTURE_TYPE::DIFFUSE));
+        }
+      } else {
+        // the texture could be an external file, so we try to load it
         std::filesystem::path texture_path = _model_path;
-        texture_path.replace_filename(Path.data);  // Path.data
-        Texture texture(texture_path, DIFFUSE_TEXTURE);
+        texture_path.replace_filename(diffuse_path.data);
+        // if we can't find a texture with this path, then there will still be
+        // a texture created automatically with the default "white.png"
+        Texture texture(texture_path, TEXTURE_TYPE::DIFFUSE);
         x.addTexture(texture);
       }
     } else {
-      // texture does not exist, load blank
-      Texture texture("white.png", DIFFUSE_TEXTURE);
-      x.addTexture(texture);
+      // the default white texture that doesn't influence the base color
+      // (because the base color gets multiplied by 1)
+      x.addTexture(Texture(TEXTURE_TYPE::DIFFUSE));
     }
-    // add the mesh to the model
+
     _meshes.emplace_back(Vertices, Indices, _num_indices, x);
   }
 }

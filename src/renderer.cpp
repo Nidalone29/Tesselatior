@@ -2,9 +2,12 @@
 
 #include <iostream>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "mesh.h"
 #include "shader.h"
 #include "logger.h"
+#include "utilities.h"
 
 Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
   LOG_TRACE("Renderer()");
@@ -57,9 +60,9 @@ void Renderer::render(const Scene& scene, const Camera& camera,
 
       mesh.getMaterial().bind();
 
-      glEnableVertexAttribArray(ATTRIB_POSITIONS);
-      glEnableVertexAttribArray(ATTRIB_NORMALS);
-      glEnableVertexAttribArray(ATTRIB_COLOR_TEXTURE_COORDS);
+      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
+      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
+      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::COLOR_TEXTURE_COORDS));
 
       // clang-format off
       const AmbientLight& ambient_light = scene.getAmbientLight();
@@ -72,8 +75,8 @@ void Renderer::render(const Scene& scene, const Camera& camera,
       shader.setUniformVec3("directional_light_direction", directional_light.getDirection());
 	  
       const Material& material = mesh.getMaterial();
-      shader.setUniformVec3("material_ambient_reflectivity", material.getAmbientReflectivity());  
-      shader.setUniformVec3("material_diffuse_reflectivity", material.getDiffuseReflectivity());	  
+      shader.setUniformVec3("material_ambient_reflectivity", material.getAmbientReflectivity());
+      shader.setUniformVec3("material_diffuse_reflectivity", material.getDiffuseReflectivity());
       shader.setUniformVec3("material_specular_reflectivity", material.getSpecularReflectivity());
       shader.setUniformFloat("material_specular_glossiness_exponent", material.getGlossinessExponent());
       // clang-format on

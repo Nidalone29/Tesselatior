@@ -179,11 +179,21 @@ void Shader::setUniformVec3(const std::string& uniform_name,
   }
 }
 
-void Shader::setUnifromSampler(const std::string& uniform_name,
-                               const int id) const {
+void Shader::setUniformVec4(const std::string& uniform_name,
+                            const glm::vec4& vec) const {
   GLint uniform_location = getUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
-    glUniform1i(uniform_location, id);
+    glUniform4fv(uniform_location, 1, glm::value_ptr(vec));
+  } else {
+    LOG_WARN("Error setting {} uniform", uniform_name);
+  }
+}
+
+void Shader::setUnifromSampler(const std::string& uniform_name,
+                               const TEXTURE_UNIT_ID id) const {
+  GLint uniform_location = getUniformLocation(uniform_name);
+  if (uniform_location != INVALID_UNIFORM_LOCATION) {
+    glUniform1i(uniform_location, to_underlying(id));
   } else {
     LOG_WARN("Error setting {} uniform", uniform_name);
   }

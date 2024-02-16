@@ -88,5 +88,8 @@ endif()
 # if(MSVC)
 #   target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 # else()
-#   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused -Wno-unused-parameter -Wno-sign-compare)
+#   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused -Wno-unused-parameter -Wno-sign-compare) #-fsanitize=undefined
+#   # target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=undefined)
 # endif()
+#
+# message(STATUS "CXX Flags for RelWithDebInfo: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
