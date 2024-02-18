@@ -25,45 +25,45 @@ class Shader {
    * @param type Vertex or Fragment shader
    * @param path path to the source code of the shader
    */
-  void addShader(const GLenum type, const std::filesystem::path& path);
+  void AddShader(const GLenum type, const std::filesystem::path& path);
 
   /**
    * @brief compiling and linking all the added shaders to a program
    *
    */
-  void init();
+  void Init();
 
   /**
    * @brief enabling the program
    *
    */
-  void enable() const;
-  void disable() const;
+  void Enable() const;
+  void Disable() const;
 
-  void setUniformMat4(const std::string& uniform_name,
+  void SetUniformMat4(const std::string& uniform_name,
                       const glm::mat4& matrix) const;
-  void setUniformFloat(const std::string& uniform_name,
+  void SetUniformFloat(const std::string& uniform_name,
                        const float value) const;
-  void setUniformVec3(const std::string& uniform_name,
+  void SetUniformVec3(const std::string& uniform_name,
                       const glm::vec3& vec) const;
-  void setUniformVec4(const std::string& uniform_name,
+  void SetUniformVec4(const std::string& uniform_name,
                       const glm::vec4& vec) const;
-  void setUnifromSampler(const std::string& uniform_name,
+  void SetUnifromSampler(const std::string& uniform_name,
                          const TEXTURE_UNIT_ID id) const;
 
  private:
-  static GLuint compileShader(const GLenum type, const std::string& src);
-  GLint getUniformLocation(const std::string& uniform_name) const;
+  static GLuint CompileShader(const GLenum type, const std::string& src);
+  GLint GetUniformLocation(const std::string& uniform_name) const;
 
   struct ShaderSource {
     GLenum type;
     std::string source;
   };
 
-  std::vector<ShaderSource> _shaders;
-  std::vector<GLuint> _compiled_shaders;
+  std::vector<ShaderSource> shaders_;
+  std::vector<GLuint> compiled_shaders_;
 
-  GLuint _program;
+  GLuint program_;
 };
 
 #endif  // SHADER_H

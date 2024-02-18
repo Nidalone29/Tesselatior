@@ -3,7 +3,15 @@
 
 #include <glm/glm.hpp>
 
-enum class CameraMovements { LEFT, RIGHT, FORWARD, BACK, UP, DOWN };
+enum class CameraMovements {
+  LEFT,
+  RIGHT,
+  FORWARD,
+  BACK,
+  UP,
+  DOWN
+};
+
 struct MousePosition {
   double xpos, ypos;
 };
@@ -26,8 +34,9 @@ class Camera {
    * @param znear coordinata z del near plane
    * @param zfar coordinate z del far plane
    */
-  void set_projection(const float FOVDeg, const float width, const float height,
-                      const float znear, const float zfar);
+  void projection_matrix(const float FOVDeg, const float width,
+                         const float height, const float znear,
+                         const float zfar);
 
   /**
    * Returns the current view_matrix
@@ -45,23 +54,26 @@ class Camera {
    * Resets the view the yaw to -90deg, the pitch to 0deg and the view matrix
    * (and everything that makes it up) to the initial value
    */
-  void reset_view();
+  void ResetView();
 
   const glm::vec3& position() const;
-  const glm::vec3& lookAt() const;
+  const glm::vec3& look_at() const;
   const glm::vec3& up() const;
 
-  const float& speed() const;
-  void set_speed(const float speed);
-  const float& sensitivity() const;
-  void set_sensitivity(const float sensitivity);
+  float speed() const;
+  float* speed();  // useful for imgui
+  void speed(const float speed);
 
-  void move(const CameraMovements movement, const float timestep);
+  float sensitivity() const;
+  float* sensitivity();
+  void sensitivity(const float sensitivity);
+
+  void Move(const CameraMovements movement, const float timestep);
   // the timestep is not needed because of how the rotation is calculated (glfw
   // mouse offset)
-  void rotate(const double newx, const double newy);
+  void Rotate(const double newx, const double newy);
 
-  void set_mouseposition(const double x, const double y);
+  MousePosition mouse_position_;
 
  private:
   /**
@@ -74,24 +86,23 @@ class Camera {
    * @param lookat point where the camera is looking at
    * @param up the vector pointing up for the camera
    */
-  void set_camera(const glm::vec3& position, const glm::vec3& lookat,
-                  const glm::vec3& up);
+  void SetCameraView(const glm::vec3& position, const glm::vec3& lookat,
+                     const glm::vec3& up);
 
   // defining the camera
-  glm::mat4 _view_matrix;        // view transform matrix
-  glm::mat4 _projection_matrix;  // camera pojection matrix (perspective)
+  glm::mat4 view_matrix_;        // view transform matrix
+  glm::mat4 projection_matrix_;  // camera pojection matrix (perspective)
 
-  glm::vec3 _up;
-  glm::vec3 _position;
-  glm::vec3 _lookat_dir;
+  glm::vec3 up_;
+  glm::vec3 position_;
+  glm::vec3 lookat_dir_;
 
   // controlling the camera
-  MousePosition _mouse_position;
-  float _sensitivity;  // mouse movement speed (deg/sec)
-  float _pitch_deg;
-  float _yaw_deg;
+  float sensitivity_;  // mouse movement speed (deg/sec)
+  float pitch_deg_;
+  float yaw_deg_;
 
-  float _movement_speed;  // keyboard movement speed
+  float movement_speed_;  // keyboard movement speed
 };
 
 #endif  // CAMERA_H

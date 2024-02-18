@@ -12,21 +12,21 @@ class Renderer {
  public:
   Renderer();
   ~Renderer();
-  void render(const Scene& scene, const Camera& camera,
+  void Render(const Scene& scene, const Camera& camera,
               const Shader& shader) const;
 
-  void toggleWireframe();
+  void ToggleWireframe();
   const FrameBuffer& target();
-  void resizeTarget(const int width, const int height);
-  void resizeTarget(const float width, const float height);
-  void setClearColor(const float r, const float g, const float b,
-                     const float a);
+  void ResizeTarget(const int width, const int height);
+  void ResizeTarget(const float width, const float height);
+  // void clear_color(const float r, const float g, const float b, const float
+  // a);
 
  private:
   // for wireframe
-  GLint _gl_mode;
+  GLint gl_mode_;
 
-  FrameBuffer _render_target;
+  FrameBuffer render_target_;
 };
 
 #endif  // RENDERER_H

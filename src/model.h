@@ -16,21 +16,19 @@ class Model {
   Model(Model&& other) = default;
   Model& operator=(Model&& other) = default;
 
-  void setMesh(const std::filesystem::path& path, unsigned int flags = 0);
-
-  const std::vector<Mesh>& getMeshes() const;
-  const Transform& getTransform() const;
-  void setTransform(const Transform& transform);
+  const std::vector<Mesh>& meshes() const;
+  const Transform& transform() const;
+  void transform(const Transform& transform);
 
  private:
-  void load_meshes(unsigned int flags);
+  void LoadMeshes(unsigned int flags);
 
   // 1 to n meshes
-  std::vector<Mesh> _meshes;
+  std::vector<Mesh> meshes_;
   // be applied to all meshes of the model
-  Transform _transform;
+  Transform transform_;
 
-  std::filesystem::path _model_path;
+  std::filesystem::path model_path_;
 };
 
 #endif  // MODEL_H

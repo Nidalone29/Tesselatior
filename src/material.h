@@ -9,7 +9,8 @@
 
 class Material {
  public:
-  /** default material with values from
+  /**
+   * default material with values from
    * https://registry.khronos.org/OpenGL-Refpages/es1.1/xhtml/glMaterial.xml
    */
   Material();
@@ -19,32 +20,32 @@ class Material {
   Material(Material&& other) = default;
   Material& operator=(Material&& other) = default;
 
-  void addTexture(const Texture& toadd);
+  void AddTexture(const Texture& to_add);
 
   /**
    * @brief binds all the textures of the material
    *
    */
-  void bind() const;
+  void BindTextures() const;
 
-  void setAmbientReflectivity(const glm::vec3& in);
-  const glm::vec3& getAmbientReflectivity() const;
+  void ambient_reflectivity(const glm::vec3& in);
+  const glm::vec3& ambient_reflectivity() const;
 
-  void setDiffuseReflectivity(const glm::vec3& in);
-  const glm::vec3& getDiffuseReflectivity() const;
+  void diffuse_reflectivity(const glm::vec3& in);
+  const glm::vec3& diffuse_reflectivity() const;
 
-  void setSpecularReflectivity(const glm::vec3& in);
-  const glm::vec3& getSpecularReflectivity() const;
+  void specular_reflectivity(const glm::vec3& in);
+  const glm::vec3& specular_reflectivity() const;
 
-  void setGlossinessExponent(const float& in);
-  const float& getGlossinessExponent() const;
+  void shininess(const float in);
+  const float shininess() const;
 
  private:
-  std::vector<Texture> _textures;
-  glm::vec3 _ambient_reflectivity;
-  glm::vec3 _diffuse_reflectivity;
-  glm::vec3 _specular_reflectivity;
-  float _specular_glossiness_exponent;  // aka Shininess
+  std::vector<Texture> textures_;
+  glm::vec3 ambient_reflectivity_;
+  glm::vec3 diffuse_reflectivity_;
+  glm::vec3 specular_reflectivity_;
+  float shininess_;  // specular glossiness exponent
 };
 
 #endif  // MATERIAL_H

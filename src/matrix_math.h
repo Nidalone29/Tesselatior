@@ -1,6 +1,7 @@
 #ifndef MATRIX_MATH_H
 #define MATRIX_MATH_H
 
+// for PI
 #define _USE_MATH_DEFINES
 #include <math.h>
 

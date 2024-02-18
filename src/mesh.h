@@ -46,23 +46,21 @@ class Mesh {
    */
   void load();
 
-  const GLuint& getVAO() const;
-  const unsigned int& get_num_indices() const;
-  const Material& getMaterial() const;
+  const GLuint& vao() const;
+  const unsigned int& num_indices() const;
+  const Material& material() const;
 
  private:
   void clear();
 
-  GLuint _VAO;  // Vertex Array Object
-  GLuint _VBO;  // Vertex Buffer Object
-  GLuint _IBO;  // Index Buffer Object
+  GLuint VAO_;  // Vertex Array Object
+  GLuint VBO_;  // Vertex Buffer Object
+  GLuint IBO_;  // Index Buffer Object
 
-  std::vector<Vertex> _vertices;
-  std::vector<unsigned int> _indices;
-  unsigned int _num_indices;
-  Material _material;
+  std::vector<Vertex> vertices_;
+  std::vector<unsigned int> indices_;
+  unsigned int num_indices_;
+  Material material_;
 };
-
-std::ostream& operator<<(std::ostream& os, const Vertex& v);
 
 #endif  // MESH_H

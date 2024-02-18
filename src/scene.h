@@ -16,25 +16,28 @@ class Scene {
   Scene(Scene&& other) = default;
   Scene& operator=(Scene&& other) = default;
 
-  void addObject(const Object& to_add);
-  const std::vector<Object>& getAllObjects() const;
+  void AddObject(const Object& to_add);
+  const std::vector<Object>& objects() const;
 
-  void setAmbientLight(const AmbientLight& to_add);
-  const AmbientLight& getAmbientLight() const;
-  void setDirectionalLight(const DirectionalLight& to_add);
-  const DirectionalLight& getDirectionalLight() const;
+  const AmbientLight& ambient_light() const;
+  AmbientLight* ambient_light();
+  void ambient_light(const AmbientLight& to_add);
 
-  void setName(const std::string& to_add);
-  const std::string& getName() const;
+  const DirectionalLight& directional_light() const;
+  DirectionalLight* directional_light();
+  void directional_light(const DirectionalLight& to_add);
+
+  void name(const std::string& to_add);
+  const std::string& name() const;
 
  private:
-  std::string _name;
-  std::vector<Object> _objects;
+  std::string name_;
+  std::vector<Object> objects_;
 
-  // there is only one ambient light
-  AmbientLight _ambient_light;
-  // there could probably be multiple directional lights?
-  DirectionalLight _directional_light;
+  // There is only one ambient light
+  AmbientLight ambient_light_;
+  // The sun?
+  DirectionalLight directional_light_;
 };
 
 #endif  // SCENE_H

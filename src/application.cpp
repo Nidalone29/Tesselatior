@@ -28,31 +28,39 @@ using namespace std::chrono_literals;
 using hr_clock = std::chrono::high_resolution_clock;
 using clock_ms = std::chrono::milliseconds;
 
+// imgui
+constexpr ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+constexpr ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoAlpha |
+                                            ImGuiColorEditFlags_PickerHueBar |
+                                            ImGuiColorEditFlags_DisplayRGB;
+constexpr ImGuiSliderFlags slider_flags = ImGuiSliderFlags_AlwaysClamp;
+
+constexpr ImGuiWindowFlags window_flags =
+    ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+
 Renderer& Application::GetRenderer() {
-  return *(Instance()._renderer);
+  return *(Instance().renderer_);
 }
 
 APP_STATE Application::GetAppState() {
-  return Instance()._app_state;
+  return Instance().app_state_;
 }
 
 void Application::SetAppState(const APP_STATE to_add) {
-  Instance()._app_state = to_add;
+  Instance().app_state_ = to_add;
 }
-
-static double x_pos, y_pos;
 
 // handling key inputs
 void InputHandle(GLFWwindow* window, int key, int scancode, int action,
                  int mods) {
   // camera reset
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-    Application::GetCamera().reset_view();
+    Application::GetCamera().ResetView();
   }
 
   // wireframe mode
   if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
-    Application::GetRenderer().toggleWireframe();
+    Application::GetRenderer().ToggleWireframe();
   }
 
   ImGuiIO& io = ImGui::GetIO();
@@ -69,36 +77,36 @@ void InputHandle(GLFWwindow* window, int key, int scancode, int action,
     } else {
       Application::SetAppState(APP_STATE::VIEWPORT_FOCUS);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-      glfwGetCursorPos(window, &x_pos, &y_pos);
-      Application::GetCamera().set_mouseposition(x_pos, y_pos);
+      glfwGetCursorPos(window, &Application::GetCamera().mouse_position_.xpos,
+                       &Application::GetCamera().mouse_position_.ypos);
       io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
     }
   }
 }
 
 Camera& Application::GetCamera() {
-  return Instance()._main_camera;
+  return Instance().main_camera_;
 }
 
 GLFWwindow* Application::GetWindow() {
-  return Instance()._window;
+  return Instance().window_;
 }
 
 Application& Application::Instance() {
-  static Application _instance;
-  return _instance;
+  static Application instance_;
+  return instance_;
 }
 
 Application::Application()
-    : _vsync(true),
-      _app_state(APP_STATE::VIEWPORT_FOCUS),
-      _current_scene_index(0) {
+    : vsync_(true),
+      app_state_(APP_STATE::VIEWPORT_FOCUS),
+      current_scene_index_(0) {
   LOG_TRACE("Application()");
-  init();
+  Init();
 }
 
-void Application::cleanUp() {
-  delete _renderer;
+void Application::CleanUp() {
+  delete renderer_;
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -109,10 +117,10 @@ void Application::cleanUp() {
 
 Application::~Application() {
   LOG_TRACE("~Application()");
-  cleanUp();
+  CleanUp();
 }
 
-void Application::init() {
+void Application::Init() {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::trace);
 #endif  // NDEBUG
@@ -127,15 +135,15 @@ void Application::init() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   // Create a windowed mode window and its OpenGL context
-  _window = glfwCreateWindow(_properties.Width, _properties.Height,
-                             _properties.Title.c_str(), nullptr, nullptr);
-  if (!_window) {
+  window_ = glfwCreateWindow(properties_.Width, properties_.Height,
+                             properties_.Title.c_str(), nullptr, nullptr);
+  if (!window_) {
     glfwTerminate();
     LOG_ERROR("GLFW Window creation fail");
     throw AppInitException();
   }
   // Make the window's context current
-  glfwMakeContextCurrent(_window);
+  glfwMakeContextCurrent(window_);
 
   // initialize everything else
   GLenum res = glewInit();
@@ -146,28 +154,28 @@ void Application::init() {
   LOG_INFO("Initialized GLEW");
 
   // TODO fix with std::make_unique and smart pointers
-  _renderer = new Renderer();
+  renderer_ = new Renderer();
 
   // input settings
-  glfwSetKeyCallback(_window, InputHandle);
+  glfwSetKeyCallback(window_, InputHandle);
 
   // cursor settings
-  glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   if (glfwRawMouseMotionSupported()) {
     LOG_INFO("Raw mouse input detected -> enabled raw mouse input");
-    glfwSetInputMode(_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    glfwSetInputMode(window_, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
   }
 
-  glfwSetWindowPos(_window, 100, 100);
-  glfwSetCursorPos(_window, 0, 0);
+  glfwSetWindowPos(window_, 100, 100);
+  glfwSetCursorPos(window_, 0, 0);
 
-  glfwSwapInterval(_vsync);
+  glfwSwapInterval(vsync_);
 
-  _shader.addShader(GL_VERTEX_SHADER, "shaders/14.vert");
-  _shader.addShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
+  shader_.AddShader(GL_VERTEX_SHADER, "shaders/14.vert");
+  shader_.AddShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
 
-  _shader.init();
-  _shader.enable();
+  shader_.Init();
+  shader_.Enable();
 
   // init scenes
 
@@ -176,91 +184,77 @@ void Application::init() {
   Transform flower_t;
   flower_t = flower_t * Math::translationMatrix(0.0F, -4.0F, -15.0F);
   flower_t = flower_t * Math::rotationMatrix(-90.0F, 0.0F, 0.0F);
-  flower.setTransform(flower_t);
-  Flower.addObject(Object(flower));
+  flower.transform(flower_t);
+  Flower.AddObject(Object(flower));
   // there is probably a more efficient way of doing this
-  _scenes.push_back(Flower);
+  scenes_.push_back(Flower);
 
   Scene Teapot("Teapot");
   Model teapot("models/teapot.obj");
   Transform teapot_t;
   teapot_t = teapot_t * Math::translationMatrix(0.0F, -1.6F, -9.0F);
   teapot_t = teapot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  teapot.setTransform(teapot_t);
-  Teapot.addObject(Object(teapot));
-  _scenes.push_back(Teapot);
+  teapot.transform(teapot_t);
+  Teapot.AddObject(Object(teapot));
+  scenes_.push_back(Teapot);
 
   Scene Dragon("Dragon");
   Model dragon("models/dragon.obj");
   Transform dragon_t;
   dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
   dragon_t = dragon_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  dragon.setTransform(dragon_t);
-  Dragon.addObject(Object(dragon));
-  _scenes.push_back(Dragon);
+  dragon.transform(dragon_t);
+  Dragon.AddObject(Object(dragon));
+  scenes_.push_back(Dragon);
 
   Scene Skull("Skull");
   Model skull("models/skull.obj");
   Transform skull_t;
   skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
   skull_t = skull_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  skull.setTransform(skull_t);
-  Skull.addObject(Object(skull));
-  _scenes.push_back(Skull);
+  skull.transform(skull_t);
+  Skull.AddObject(Object(skull));
+  scenes_.push_back(Skull);
 
   Scene Boot("Boot");
   Model boot("models/boot/boot.obj");
   Transform boot_t;
   boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
   boot_t = boot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
-  boot.setTransform(boot_t);
-  Boot.addObject(Object(boot));
-  _scenes.push_back(Boot);
+  boot.transform(boot_t);
+  Boot.AddObject(Object(boot));
+  scenes_.push_back(Boot);
 
   Scene Perseverance("Rover");
   Model perseverance("models/Perseverance.glb", aiProcess_PreTransformVertices);
-  Perseverance.addObject(Object(perseverance));
-  _scenes.push_back(Perseverance);
+  Perseverance.AddObject(Object(perseverance));
+  scenes_.push_back(Perseverance);
 
   Scene Katana("Katana");
   Model katana("models/dragon_katana_oni_koroshi.glb",
                aiProcess_PreTransformVertices);
-  Katana.addObject(Object(katana));
-  _scenes.push_back(Katana);
+  Katana.AddObject(Object(katana));
+  scenes_.push_back(Katana);
 
   Scene Sphere("Sphere");
   Model sphere("models/SphereByNidal.glb", aiProcess_PreTransformVertices);
-  Sphere.addObject(Object(sphere));
-  _scenes.push_back(Sphere);
+  Sphere.AddObject(Object(sphere));
+  scenes_.push_back(Sphere);
 
   Scene Suzanne("MrMonkey");
   Model suzanne("models/mrmonkey.glb", aiProcess_PreTransformVertices);
-  Suzanne.addObject(Object(suzanne));
-  _scenes.push_back(Suzanne);
-
-  Scene Shibahu("shibahu");
-  Model shibahu("models/shibahu/Shibahu_skechfab.fbx",
-                aiProcess_PreTransformVertices);
-  Shibahu.addObject(Object(shibahu));
-  _scenes.push_back(Shibahu);
-
-  Scene Drone("drone");
-  Model drone("models/drone/Drone.fbx", aiProcess_PreTransformVertices);
-  Drone.addObject(Object(drone));
-  _scenes.push_back(Drone);
+  Suzanne.AddObject(Object(suzanne));
+  scenes_.push_back(Suzanne);
 
   Scene Halo("halo");
   Model halo("models/spartan_armour_mkv_-_halo_reach.glb",
              aiProcess_PreTransformVertices);
-  Halo.addObject(Object(halo));
-  _scenes.push_back(Halo);
+  Halo.AddObject(Object(halo));
+  scenes_.push_back(Halo);
 
-  Scene BMW("BMW M3 E30");
-  Model bmw("models/free_bmw_m3_e30.glb", aiProcess_PreTransformVertices);
-  BMW.addObject(Object(bmw));
-  _scenes.push_back(BMW);
+  number_of_scenes_ = scenes_.size();
 
-  _shader.setUnifromSampler("ColorTextSampler", TEXTURE_UNIT_ID::TEXTURE_COLOR);
+  shader_.SetUnifromSampler("ColorTextSampler", TEXTURE_UNIT_ID::TEXTURE_COLOR);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -269,7 +263,7 @@ void Application::init() {
   ImGui::StyleColorsDark();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplGlfw_InitForOpenGL(_window, true);
+  ImGui_ImplGlfw_InitForOpenGL(window_, true);
 
   std::string glsl_version = "#version 420";
   ImGui_ImplOpenGL3_Init(glsl_version.c_str());
@@ -280,195 +274,178 @@ void Application::init() {
   io.IniFilename = "imgui-layout.ini";
 }
 
-void Application::cameraControl(const double xpos, const double ypos,
+void Application::CameraControl(const double xpos, const double ypos,
                                 const float delta_time) {
-  const int stateA = glfwGetKey(_window, GLFW_KEY_A);
-  const int stateD = glfwGetKey(_window, GLFW_KEY_D);
-  const int stateS = glfwGetKey(_window, GLFW_KEY_S);
-  const int stateW = glfwGetKey(_window, GLFW_KEY_W);
-  const int stateSPACE = glfwGetKey(_window, GLFW_KEY_SPACE);
-  const int stateLSHIFT = glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT);
+  const int stateA = glfwGetKey(window_, GLFW_KEY_A);
+  const int stateD = glfwGetKey(window_, GLFW_KEY_D);
+  const int stateS = glfwGetKey(window_, GLFW_KEY_S);
+  const int stateW = glfwGetKey(window_, GLFW_KEY_W);
+  const int stateSPACE = glfwGetKey(window_, GLFW_KEY_SPACE);
+  const int stateLSHIFT = glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT);
 
   if (stateA == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::LEFT, delta_time);
+    main_camera_.Move(CameraMovements::LEFT, delta_time);
   }
   if (stateD == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::RIGHT, delta_time);
+    main_camera_.Move(CameraMovements::RIGHT, delta_time);
   }
   if (stateW == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::FORWARD, delta_time);
+    main_camera_.Move(CameraMovements::FORWARD, delta_time);
   }
   if (stateS == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::BACK, delta_time);
+    main_camera_.Move(CameraMovements::BACK, delta_time);
   }
   if (stateSPACE == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::UP, delta_time);
+    main_camera_.Move(CameraMovements::UP, delta_time);
   }
   if (stateLSHIFT == GLFW_PRESS) {
-    _main_camera.move(CameraMovements::DOWN, delta_time);
+    main_camera_.Move(CameraMovements::DOWN, delta_time);
   }
 
-  _main_camera.rotate(xpos, ypos);
+  main_camera_.Rotate(xpos, ypos);
 }
 
-void Application::run() {
-  double xpos, ypos;
+void Application::DrawViewport() {
+  // Creating the Viewport imgui window
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
+  ImGui::Begin("viewport", nullptr, window_flags);
 
-  float camera_sens = _main_camera.sensitivity();
-  float camera_speed = _main_camera.speed();
+  glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+  if (viewportPanelSize != renderer_->target().size_vector()) {
+    renderer_->ResizeTarget(viewportPanelSize.x, viewportPanelSize.y);
+    main_camera_.projection_matrix(30.0F, viewportPanelSize.x,
+                                   viewportPanelSize.y, 0.1F, 10000);
+  }
+  renderer_->Render(scenes_[current_scene_index_], main_camera_, shader_);
 
-  // imgui
-  constexpr ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-  constexpr ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoAlpha |
-                                              ImGuiColorEditFlags_PickerHueBar |
-                                              ImGuiColorEditFlags_DisplayRGB;
+  // Update the ImGui image with the new texture data
+  ImGui::Image(
+      reinterpret_cast<void*>(renderer_->target().color_attachment_id()),
+      ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2{0, 1},
+      ImVec2{1, 0});
 
-  constexpr ImGuiWindowFlags window_flags =
-      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+  ImGui::End();          // "viewport"
+  ImGui::PopStyleVar();  // window padding
+}
+
+void Application::DrawControls() {
+  AmbientLight* scene_ambient = scenes_[current_scene_index_].ambient_light();
+  DirectionalLight* scene_directional =
+      scenes_[current_scene_index_].directional_light();
+
+  ImGui::Begin("stats", nullptr, window_flags);
+  ImGui::Text("dear imgui says hello! (%s) (%d)", IMGUI_VERSION,
+              IMGUI_VERSION_NUM);
+
+  ImGui::Spacing();
+  ImGui::Text("Scenes");
+  if (ImGui::BeginListBox(
+          "Current Scene",
+          ImVec2(-FLT_MIN, number_of_scenes_ * 1.05F *
+                               ImGui::GetTextLineHeightWithSpacing()))) {
+    for (int n = 0; n < number_of_scenes_; n++) {
+      const bool is_selected = (current_scene_index_ == n);
+      if (ImGui::Selectable(scenes_[n].name().c_str(), is_selected)) {
+        current_scene_index_ = n;
+      }
+      // Set the initial focus when opening the combo (scrolling +
+      // keyboard navigation focus)
+      if (is_selected) {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndListBox();  // "Current Scene"
+  }
+  ImGui::Spacing();
+
+  if (ImGui::CollapsingHeader("Lights")) {
+    ImGui::Text("Ambient Light");
+    ImGui::ColorPicker3("ambient color", scene_ambient->color(), color_flags);
+
+    ImGui::Text("Directional Light");
+    ImGui::ColorPicker3("directional color", scene_directional->color(),
+                        color_flags);
+
+    ImGui::Text("Light Direction");
+    ImGui::DragFloat3("light direction", scene_directional->direction(), 0.01F,
+                      -1.0F, 1.0F, "%.2f", ImGuiSliderFlags_None);
+  }
+
+  if (ImGui::CollapsingHeader("Camera")) {
+    const glm::vec3 cam_pos = main_camera_.position();
+    ImGui::Text("Position (X: %.2f, Y: %.2f, Z: %.2f)", cam_pos.x, cam_pos.y,
+                cam_pos.z);
+
+    ImGui::Text("Camera sensitivity (0.01 -> 10)");
+    ImGui::SliderFloat("sens", main_camera_.sensitivity(), 0.1F, 10.0F, "%.2f",
+                       ImGuiSliderFlags_None);
+    ImGui::Text("Movement speed (1 -> 100)");
+    ImGui::SliderFloat("speed", main_camera_.speed(), 1.0F, 100.0F, "%.2f",
+                       ImGuiSliderFlags_None);
+  }
+
+  ImGui::Separator();
+  if (ImGui::Button("Toggle Vsync")) {
+    vsync_ = !vsync_;
+    glfwSwapInterval(vsync_);
+  }
 
   ImGuiIO& io = ImGui::GetIO();
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+              1000.0F / io.Framerate, io.Framerate);
+  ImGui::End();
+}
 
-  AmbientLight scene_ambient;
-  DirectionalLight scene_directional;
-  glm::vec3 ambient;
-  glm::vec3 directional;
+void Application::DrawImGuiLayer() {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2);
+
+  // Making the window a dosckpace
+  ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspace_flags);
+  // the menu bar
+  if (ImGui::BeginMainMenuBar()) {
+    if (ImGui::BeginMenu("File")) {
+      if (ImGui::MenuItem("Open")) {
+      }
+      if (ImGui::MenuItem("Quit")) {
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
+
+  ImGui::ShowDemoWindow();
+
+  DrawControls();
+  DrawViewport();
+
+  ImGui::PopStyleVar();  // frame rounding
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Application::Run() {
+  double xpos, ypos;
 
   std::chrono::duration<float, std::chrono::seconds::period> delta_time{16ms};
   std::chrono::time_point<hr_clock> begin_time = hr_clock::now();
 
-  int number_of_scenes = _scenes.size();
-  while (!glfwWindowShouldClose(_window)) {
-    // very temp
-    scene_ambient = _scenes[_current_scene_index].getAmbientLight();
-    scene_directional = _scenes[_current_scene_index].getDirectionalLight();
-
-    ambient = scene_ambient.getColor();
-    directional = scene_directional.getColor();
-
+  while (!glfwWindowShouldClose(window_)) {
     // Poll for and process events
     glfwPollEvents();
 
-    if (_app_state == APP_STATE::VIEWPORT_FOCUS) {
-      glfwGetCursorPos(_window, &xpos, &ypos);
-      cameraControl(xpos, ypos, delta_time.count());
+    if (app_state_ == APP_STATE::VIEWPORT_FOCUS) {
+      glfwGetCursorPos(window_, &xpos, &ypos);
+      CameraControl(xpos, ypos, delta_time.count());
     }
 
-    // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2);
-
-    // Making the window a dosckpace
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspace_flags);
-    // the menu bar
-    if (ImGui::BeginMainMenuBar()) {
-      if (ImGui::BeginMenu("File")) {
-        if (ImGui::MenuItem("Open")) {
-        }
-        if (ImGui::MenuItem("Quit")) {
-        }
-        ImGui::EndMenu();
-      }
-      ImGui::EndMainMenuBar();
-    }
-
-    ImGui::ShowDemoWindow();
-
-    {
-      ImGui::Begin("stats", nullptr, window_flags);
-      ImGui::Text("dear imgui says hello! (%s) (%d)", IMGUI_VERSION,
-                  IMGUI_VERSION_NUM);
-
-      ImGui::Spacing();
-      ImGui::Text("Scenes");
-      if (ImGui::BeginListBox(
-              "Current Scene",
-              ImVec2(-FLT_MIN, number_of_scenes * 1.05F *
-                                   ImGui::GetTextLineHeightWithSpacing()))) {
-        for (int n = 0; n < number_of_scenes; n++) {
-          const bool is_selected = (_current_scene_index == n);
-          if (ImGui::Selectable(_scenes[n].getName().c_str(), is_selected)) {
-            _current_scene_index = n;
-          }
-          // Set the initial focus when opening the combo (scrolling +
-          // keyboard navigation focus)
-          if (is_selected) {
-            ImGui::SetItemDefaultFocus();
-          }
-        }
-        ImGui::EndListBox();  // "Current Scene"
-      }
-      ImGui::Spacing();
-
-      if (ImGui::CollapsingHeader("Lights")) {
-        ImGui::Text("Ambient Light");
-        ImGui::ColorPicker3("ambient color", &ambient.x, color_flags);
-        scene_ambient.setColor(ambient);
-
-        ImGui::Text("Directional Light");
-        ImGui::ColorPicker3("directional color", &directional.x, color_flags);
-        scene_directional.setColor(directional);
-
-        _scenes[_current_scene_index].setAmbientLight(scene_ambient);
-        _scenes[_current_scene_index].setDirectionalLight(scene_directional);
-      }
-
-      if (ImGui::CollapsingHeader("Camera")) {
-        const glm::vec3 cam_pos = _main_camera.position();
-        ImGui::Text("Position (X: %.2f, Y: %.2f, Z: %.2f)", cam_pos.x,
-                    cam_pos.y, cam_pos.z);
-
-        ImGui::Text("Camera sensitivity (0.01 -> 10)");
-        ImGui::SliderFloat("sens", &camera_sens, 0.1F, 10.0F, "%.2f",
-                           ImGuiSliderFlags_None);
-        ImGui::Text("Movement speed (1 -> 100)");
-        ImGui::SliderFloat("speed", &camera_speed, 1.0F, 100.0F, "%.2f",
-                           ImGuiSliderFlags_None);
-
-        _main_camera.set_sensitivity(camera_sens);
-        _main_camera.set_speed(camera_speed);
-      }
-
-      ImGui::Separator();
-      if (ImGui::Button("Toggle Vsync")) {
-        _vsync = !_vsync;
-        glfwSwapInterval(_vsync);
-      }
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                  1000.0F / io.Framerate, io.Framerate);
-      ImGui::End();
-    }  // "stats"
-
-    {
-      // Creating the Viewport imgui window
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
-      ImGui::Begin("viewport", nullptr, window_flags);
-
-      glm::vec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-      if (viewportPanelSize != _renderer->target().getSize()) {
-        _renderer->resizeTarget(viewportPanelSize.x, viewportPanelSize.y);
-        _main_camera.set_projection(30.0F, viewportPanelSize.x,
-                                    viewportPanelSize.y, 0.1F, 10000);
-      }
-      _renderer->render(_scenes[_current_scene_index], _main_camera, _shader);
-
-      // Update the ImGui image with the new texture data
-      ImGui::Image(reinterpret_cast<void*>(_renderer->target().getTexture()),
-                   ImVec2(viewportPanelSize.x, viewportPanelSize.y),
-                   ImVec2{0, 1}, ImVec2{1, 0});
-
-      ImGui::End();          // "viewport"
-      ImGui::PopStyleVar();  // window padding
-    }
-
-    ImGui::PopStyleVar();  // frame rounding
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    DrawImGuiLayer();
 
     // Swap front and back buffers
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(window_);
 
     std::chrono::time_point<hr_clock> end_time = hr_clock::now();
     delta_time = std::chrono::duration_cast<clock_ms>(end_time - begin_time);

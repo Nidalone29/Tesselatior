@@ -16,19 +16,19 @@ Shader::Shader() {
 }
 
 Shader::~Shader() {
-  for (const GLuint x : _compiled_shaders) {
+  for (const GLuint x : compiled_shaders_) {
     glDeleteShader(x);
   }
 
-  if (_program != 0) {
-    glDeleteProgram(_program);
-    _program = 0;
+  if (program_ != 0) {
+    glDeleteProgram(program_);
+    program_ = 0;
   }
 
   LOG_TRACE("~Shader()");
 }
 
-void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
+void Shader::AddShader(const GLenum type, const std::filesystem::path& path) {
   ShaderSource res;
   switch (type) {
     case GL_VERTEX_SHADER:
@@ -53,10 +53,10 @@ void Shader::addShader(const GLenum type, const std::filesystem::path& path) {
   shaderFile.close();
   res.source = shaderData.str();
 
-  _shaders.push_back(res);
+  shaders_.push_back(res);
 }
 
-GLuint Shader::compileShader(const GLenum type, const std::string& src) {
+GLuint Shader::CompileShader(const GLenum type, const std::string& src) {
   GLuint shader = glCreateShader(type);
   const GLchar* source = src.c_str();
   glShaderSource(shader, 1, &source, nullptr);
@@ -81,47 +81,47 @@ GLuint Shader::compileShader(const GLenum type, const std::string& src) {
   return shader;
 }
 
-void Shader::init() {
+void Shader::Init() {
   // Vertex and fragment shaders are successfully compiled.
   // Now time to link them together into a program.
   // Get a program object.
-  _program = glCreateProgram();
+  program_ = glCreateProgram();
 
-  for (const ShaderSource& x : _shaders) {
-    GLuint currentShader = compileShader(x.type, x.source);
-    _compiled_shaders.push_back(currentShader);
+  for (const ShaderSource& x : shaders_) {
+    GLuint currentShader = CompileShader(x.type, x.source);
+    compiled_shaders_.push_back(currentShader);
 
     // Attach our shaders to our program
-    glAttachShader(_program, currentShader);
+    glAttachShader(program_, currentShader);
   }
 
   // Link our program
-  glLinkProgram(_program);
+  glLinkProgram(program_);
 
   // Note the different functions here: glGetProgram* instead of glGetShader*.
   GLint isLinked = 0;
-  glGetProgramiv(_program, GL_LINK_STATUS, &isLinked);
+  glGetProgramiv(program_, GL_LINK_STATUS, &isLinked);
   if (isLinked == GL_FALSE) {
     GLint maxLength = 0;
-    glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &maxLength);
+    glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &maxLength);
 
     GLchar* infoLog = new GLchar[maxLength];
-    glGetProgramInfoLog(_program, maxLength, &maxLength, infoLog);
+    glGetProgramInfoLog(program_, maxLength, &maxLength, infoLog);
     LOG_ERROR("Shader linkage fail: {}", infoLog);
 
     delete[] infoLog;
 
     // We don't need the program anymore, it doesn't work
-    glDeleteProgram(_program);
+    glDeleteProgram(program_);
   }
 
   // Always detach shaders after a successful link.
-  for (const GLuint x : _compiled_shaders) {
-    glDetachShader(_program, x);
+  for (const GLuint x : compiled_shaders_) {
+    glDetachShader(program_, x);
   }
 
   // These are not needed after we have a program
-  for (const GLuint x : _compiled_shaders) {
+  for (const GLuint x : compiled_shaders_) {
     glDeleteShader(x);
   }
 
@@ -130,28 +130,28 @@ void Shader::init() {
   }
 }
 
-void Shader::enable() const {
-  glUseProgram(_program);
+void Shader::Enable() const {
+  glUseProgram(program_);
 }
 
-void Shader::disable() const {
+void Shader::Disable() const {
   glUseProgram(0);
 }
 
-GLint Shader::getUniformLocation(const std::string& uniform_name) const {
-  GLint Location = glGetUniformLocation(_program, uniform_name.c_str());
+GLint Shader::GetUniformLocation(const std::string& uniform_name) const {
+  GLint location = glGetUniformLocation(program_, uniform_name.c_str());
 
-  if (Location == -1) {
+  if (location == -1) {
     LOG_WARN("Unable to get uniform location {}", uniform_name);
     return INVALID_UNIFORM_LOCATION;
   }
 
-  return Location;
+  return location;
 }
 
-void Shader::setUniformMat4(const std::string& uniform_name,
+void Shader::SetUniformMat4(const std::string& uniform_name,
                             const glm::mat4& matrix) const {
-  GLint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = GetUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniformMatrix4fv(uniform_location, 1, GL_FALSE, glm::value_ptr(matrix));
   } else {
@@ -159,9 +159,9 @@ void Shader::setUniformMat4(const std::string& uniform_name,
   }
 }
 
-void Shader::setUniformFloat(const std::string& uniform_name,
+void Shader::SetUniformFloat(const std::string& uniform_name,
                              const float value) const {
-  GLint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = GetUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1f(uniform_location, value);
   } else {
@@ -169,9 +169,9 @@ void Shader::setUniformFloat(const std::string& uniform_name,
   }
 }
 
-void Shader::setUniformVec3(const std::string& uniform_name,
+void Shader::SetUniformVec3(const std::string& uniform_name,
                             const glm::vec3& vec) const {
-  GLint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = GetUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform3fv(uniform_location, 1, glm::value_ptr(vec));
   } else {
@@ -179,9 +179,9 @@ void Shader::setUniformVec3(const std::string& uniform_name,
   }
 }
 
-void Shader::setUniformVec4(const std::string& uniform_name,
+void Shader::SetUniformVec4(const std::string& uniform_name,
                             const glm::vec4& vec) const {
-  GLint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = GetUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform4fv(uniform_location, 1, glm::value_ptr(vec));
   } else {
@@ -189,9 +189,9 @@ void Shader::setUniformVec4(const std::string& uniform_name,
   }
 }
 
-void Shader::setUnifromSampler(const std::string& uniform_name,
+void Shader::SetUnifromSampler(const std::string& uniform_name,
                                const TEXTURE_UNIT_ID id) const {
-  GLint uniform_location = getUniformLocation(uniform_name);
+  GLint uniform_location = GetUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1i(uniform_location, to_underlying(id));
   } else {

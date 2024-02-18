@@ -5,11 +5,13 @@
 
 class Light {
  public:
-  const glm::vec3& getColor() const;
-  const glm::vec3& getIntensity() const;
+  const glm::vec3& color() const;
+  float* color();
+  void color(const glm::vec3& color);
 
-  void setColor(const glm::vec3& color);
-  void setIntensity(const glm::vec3& intensity);
+  const glm::vec3& intensity() const;
+  float* intensity();
+  void intensity(const glm::vec3& intensity);
 
  protected:
   /**
@@ -20,16 +22,14 @@ class Light {
   Light(const glm::vec3& color, const glm::vec3& intensity);
 
  private:
-  glm::vec3 _color;
-  glm::vec3 _intensity;  // the intensity of all 3 color channels
+  glm::vec3 color_;
+  glm::vec3 intensity_;  // the intensity of all 3 color channels
 };
 
 class AmbientLight : public Light {
  public:
   AmbientLight();
   AmbientLight(const glm::vec3& color, const glm::vec3& intensity);
-
- private:
 };
 
 class DirectionalLight : public Light {
@@ -40,10 +40,13 @@ class DirectionalLight : public Light {
 
   DirectionalLight(const glm::vec3& color, const glm::vec3& intensity,
                    const glm::vec3& direction);
-  const glm::vec3& getDirection() const;
+
+  void direction(const glm::vec3& in);
+  const glm::vec3& direction() const;
+  float* direction();
 
  private:
-  glm::vec3 _direction_vector;
+  glm::vec3 direction_vector_;
 };
 
 #endif  // LIGHT_H

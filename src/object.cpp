@@ -4,7 +4,7 @@
 
 #include "logger.h"
 
-Object::Object(const Model& model) : _model(model) {
+Object::Object(const Model& model) : model_(model) {
   LOG_TRACE("Object(const Model&)");
 }
 
@@ -12,10 +12,10 @@ Object::~Object() {
   LOG_TRACE("~Object()");
 }
 
-const Model& Object::getModel() const {
-  return _model;
+const Model& Object::model() const {
+  return model_;
 }
 
-void Object::setModel(const Model& model) {
-  _model = model;
+void Object::model(const Model& model) {
+  model_ = model;
 }

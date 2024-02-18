@@ -9,10 +9,10 @@
 #include "logger.h"
 #include "utilities.h"
 
-Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
+Renderer::Renderer() : gl_mode_(GL_FILL), render_target_(1, 1) {
   LOG_TRACE("Renderer()");
 
-  _render_target.bind();
+  render_target_.Bind();
 
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
@@ -20,85 +20,84 @@ Renderer::Renderer() : _gl_mode(GL_FILL), _render_target(1, 1) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
 
-  _render_target.unbind();
+  render_target_.Unbind();
 }
 
 Renderer::~Renderer() {
   LOG_TRACE("~Renderer()");
 }
 
-void Renderer::toggleWireframe() {
-  _render_target.bind();
+void Renderer::ToggleWireframe() {
+  render_target_.Bind();
 
-  _gl_mode = (_gl_mode == GL_FILL) ? GL_LINE : GL_FILL;
-  glPolygonMode(GL_FRONT_AND_BACK, _gl_mode);
-  LOG_INFO("Toggled wireframe {}", (_gl_mode == GL_FILL) ? "OFF" : "ON");
+  gl_mode_ = (gl_mode_ == GL_FILL) ? GL_LINE : GL_FILL;
+  glPolygonMode(GL_FRONT_AND_BACK, gl_mode_);
+  LOG_INFO("Toggled wireframe {}", (gl_mode_ == GL_FILL) ? "OFF" : "ON");
 
-  _render_target.unbind();
+  render_target_.Unbind();
 }
 
-void Renderer::render(const Scene& scene, const Camera& camera,
+void Renderer::Render(const Scene& scene, const Camera& camera,
                       const Shader& shader) const {
-  shader.enable();
-  _render_target.bind();
+  shader.Enable();
+  render_target_.Bind();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shader.setUniformMat4("camera_view_matrix", camera.view_matrix());
-  shader.setUniformMat4("camera_projection_matrix", camera.projection_matrix());
+  shader.SetUniformMat4("camera_view_matrix", camera.view_matrix());
+  shader.SetUniformMat4("camera_projection_matrix", camera.projection_matrix());
 
   // this is for the fragment shader
-  shader.setUniformVec3("camera_position", camera.position());
+  shader.SetUniformVec3("camera_position", camera.position());
 
-  for (const Object& o : scene.getAllObjects()) {
-    shader.setUniformMat4("Model2World",
-                          o.getModel().getTransform().getMatrix());
+  for (const Object& o : scene.objects()) {
+    shader.SetUniformMat4("Model2World", o.model().transform().matrix());
 
-    const std::vector<Mesh>& meshes = o.getModel().getMeshes();
+    const std::vector<Mesh>& meshes = o.model().meshes();
     for (const Mesh& mesh : meshes) {
-      glBindVertexArray(mesh.getVAO());
+      glBindVertexArray(mesh.vao());
 
-      mesh.getMaterial().bind();
+      mesh.material().BindTextures();
 
       glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
       glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
       glEnableVertexAttribArray(to_underlying(ATTRIB_ID::COLOR_TEXTURE_COORDS));
 
       // clang-format off
-      const AmbientLight& ambient_light = scene.getAmbientLight();
-      shader.setUniformVec3("ambient_light_color", ambient_light.getColor());
-      shader.setUniformVec3("ambient_light_intensity", ambient_light.getIntensity());
+      const AmbientLight& ambient_light = scene.ambient_light();
+      shader.SetUniformVec3("ambient_light_color", ambient_light.color());
+      shader.SetUniformVec3("ambient_light_intensity", ambient_light.intensity());
 
-      const DirectionalLight& directional_light = scene.getDirectionalLight();
-      shader.setUniformVec3("directional_light_color", directional_light.getColor());
-      shader.setUniformVec3("directional_light_intensity", directional_light.getIntensity());
-      shader.setUniformVec3("directional_light_direction", directional_light.getDirection());
+      const DirectionalLight& directional_light = scene.directional_light();
+      shader.SetUniformVec3("directional_light_color", directional_light.color());
+      shader.SetUniformVec3("directional_light_intensity", directional_light.intensity());
+      shader.SetUniformVec3("directional_light_direction", glm::normalize(directional_light.direction()));
 	  
-      const Material& material = mesh.getMaterial();
-      shader.setUniformVec3("material_ambient_reflectivity", material.getAmbientReflectivity());
-      shader.setUniformVec3("material_diffuse_reflectivity", material.getDiffuseReflectivity());
-      shader.setUniformVec3("material_specular_reflectivity", material.getSpecularReflectivity());
-      shader.setUniformFloat("material_specular_glossiness_exponent", material.getGlossinessExponent());
+      const Material& material = mesh.material();
+      shader.SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
+      shader.SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
+      shader.SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
+      shader.SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
       // clang-format on
 
-      glDrawElements(GL_TRIANGLES, mesh.get_num_indices(), GL_UNSIGNED_INT,
+      glDrawElements(GL_TRIANGLES, mesh.num_indices(), GL_UNSIGNED_INT,
                      nullptr);
 
       glBindVertexArray(0);
     }
   }
 
-  _render_target.unbind();
+  render_target_.Unbind();
 }
 
 const FrameBuffer& Renderer::target() {
-  return _render_target;
+  return render_target_;
 }
 
-void Renderer::resizeTarget(const int width, const int height) {
-  _render_target.resize(width, height);
+void Renderer::ResizeTarget(const int width, const int height) {
+  render_target_.Resize(width, height);
 }
 
-void Renderer::resizeTarget(const float width, const float height) {
-  _render_target.resize(static_cast<int>(width), static_cast<int>(height));
+void Renderer::ResizeTarget(const float width, const float height) {
+  render_target_.Resize(static_cast<int>(width), static_cast<int>(height));
 }

@@ -8,46 +8,54 @@
 #include "logger.h"
 
 Scene::Scene(const std::string& name)
-    : _name(name),
-      _ambient_light(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2F))),
-      _directional_light(DirectionalLight(
+    : name_(name),
+      ambient_light_(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2F))),
+      directional_light_(DirectionalLight(
           glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(0, 0, -1))) {
   LOG_TRACE("Scene(const std::string&)");
 }
 
 Scene::~Scene() {
   LOG_TRACE("~Scene()");
-  LOG_TRACE("Destroying scene \"{}\"", _name);
+  LOG_TRACE("Destroying scene \"{}\"", name_);
 }
 
-void Scene::addObject(const Object& to_add) {
-  _objects.push_back(to_add);
+void Scene::AddObject(const Object& to_add) {
+  objects_.push_back(to_add);
 }
 
-const std::vector<Object>& Scene::getAllObjects() const {
-  return _objects;
+const std::vector<Object>& Scene::objects() const {
+  return objects_;
 }
 
-void Scene::setAmbientLight(const AmbientLight& to_add) {
-  _ambient_light = to_add;
+const AmbientLight& Scene::ambient_light() const {
+  return ambient_light_;
 }
 
-const AmbientLight& Scene::getAmbientLight() const {
-  return _ambient_light;
+AmbientLight* Scene::ambient_light() {
+  return &ambient_light_;
 }
 
-void Scene::setDirectionalLight(const DirectionalLight& to_add) {
-  _directional_light = to_add;
+void Scene::ambient_light(const AmbientLight& to_add) {
+  ambient_light_ = to_add;
 }
 
-const DirectionalLight& Scene::getDirectionalLight() const {
-  return _directional_light;
+const DirectionalLight& Scene::directional_light() const {
+  return directional_light_;
 }
 
-void Scene::setName(const std::string& to_add) {
-  _name = to_add;
+DirectionalLight* Scene::directional_light() {
+  return &directional_light_;
 }
 
-const std::string& Scene::getName() const {
-  return _name;
+void Scene::directional_light(const DirectionalLight& to_add) {
+  directional_light_ = to_add;
+}
+
+void Scene::name(const std::string& to_add) {
+  name_ = to_add;
+}
+
+const std::string& Scene::name() const {
+  return name_;
 }

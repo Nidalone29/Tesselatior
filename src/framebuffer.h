@@ -21,31 +21,31 @@ class FrameBuffer {
    * @brief bind the framebuffer
    *
    */
-  void bind() const;
-  void unbind() const;
+  void Bind() const;
+  void Unbind() const;
 
   /**
-   * @brief Retrieved the texture where the framebuffer has rendered to
+   * @brief Retrieves the texture ID where the framebuffer has rendered to
    *
    * @return const GLuint
    */
-  GLuint getTexture() const;
+  GLuint color_attachment_id() const;
+  glm::vec2 size_vector() const;
 
-  glm::vec2 getSize() const;
-  void resize(const int new_width, const int new_height);
+  void Resize(const int new_width, const int new_height);
 
  private:
-  void check() const;
-  void reset();
-  void create();
+  void Check() const;
+  void Reset();
+  void Create();
 
-  int _width, _height;
+  int width_, height_;
 
-  GLuint _color_attachment;
-  GLuint _depth_stencil_attachment;
+  GLuint color_attachment_;
+  GLuint depth_stencil_attachment_;
 
   // Frame Buffer Object
-  GLuint _fbo;
+  GLuint fbo_;
 };
 
 #endif  // FRAMEBUFFER_H

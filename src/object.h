@@ -13,11 +13,11 @@ class Object {
   Object(Object&& other) = default;
   Object& operator=(Object&& other) = default;
 
-  const Model& getModel() const;
-  void setModel(const Model& model);
+  const Model& model() const;
+  void model(const Model& model);
 
  private:
-  Model _model;
+  Model model_;
 };
 
 #endif  // OBJECT_H

@@ -1,12 +1,12 @@
 #include "transform.h"
 
 Transform::Transform() {
-  _transform = glm::mat4(1.0F);
+  transform_ = glm::mat4(1.0F);
 }
 
 Transform::Transform(const glm::mat4 scale, const glm::mat4 rotation,
                      const glm::mat4 translation) {
-  _transform = translation * rotation * scale;
+  transform_ = translation * rotation * scale;
 }
 
 /**
@@ -15,11 +15,11 @@ Transform::Transform(const glm::mat4 scale, const glm::mat4 rotation,
  * TODO enforce the type of matrix
  * @param matrix
  */
-Transform Transform::operator*(const glm::mat4 matrix) {
-  _transform *= matrix;
+Transform Transform::operator*(const glm::mat4& matrix) {
+  transform_ *= matrix;
   return *this;
 }
 
-const glm::mat4& Transform::getMatrix() const {
-  return _transform;
+const glm::mat4& Transform::matrix() const {
+  return transform_;
 }

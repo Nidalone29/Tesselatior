@@ -1,30 +1,40 @@
 #include "light.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "logger.h"
 
-Light::Light() : _color(glm::vec3(1.0F)), _intensity(glm::vec3(0.2F)) {
+Light::Light() : color_(glm::vec3(1.0F)), intensity_(glm::vec3(0.2F)) {
   //
 }
 
 Light::Light(const glm::vec3& color, const glm::vec3& intensity)
-    : _color(color), _intensity(intensity) {
+    : color_(color), intensity_(intensity) {
   //
 }
 
-const glm::vec3& Light::getColor() const {
-  return _color;
+const glm::vec3& Light::color() const {
+  return color_;
 }
 
-const glm::vec3& Light::getIntensity() const {
-  return _intensity;
+float* Light::color() {
+  return glm::value_ptr(color_);
 }
 
-void Light::setColor(const glm::vec3& color) {
-  _color = color;
+const glm::vec3& Light::intensity() const {
+  return intensity_;
 }
 
-void Light::setIntensity(const glm::vec3& intensity) {
-  _intensity = intensity;
+float* Light::intensity() {
+  return glm::value_ptr(intensity_);
+}
+
+void Light::color(const glm::vec3& color) {
+  color_ = color;
+}
+
+void Light::intensity(const glm::vec3& intensity) {
+  intensity_ = intensity;
 }
 
 AmbientLight::AmbientLight() : Light() {
@@ -37,22 +47,30 @@ AmbientLight::AmbientLight(const glm::vec3& color, const glm::vec3& intensity)
 }
 
 DirectionalLight::DirectionalLight()
-    : Light(), _direction_vector(0.0F, 0.0F, 0.0F) {
+    : Light(), direction_vector_(0.0F, 0.0F, 0.0F) {
   LOG_TRACE("DirectionalLight()");
 }
 
 DirectionalLight::DirectionalLight(const glm::vec3& direction)
-    : Light(), _direction_vector(direction) {
+    : Light(), direction_vector_(direction) {
   LOG_TRACE("DirectionalLight(const glm::vec3&)");
-}
-
-const glm::vec3& DirectionalLight::getDirection() const {
-  return _direction_vector;
 }
 
 DirectionalLight::DirectionalLight(const glm::vec3& color,
                                    const glm::vec3& intensity,
                                    const glm::vec3& direction)
-    : Light(color, intensity), _direction_vector(direction) {
+    : Light(color, intensity), direction_vector_(direction) {
   //
+}
+
+void DirectionalLight::direction(const glm::vec3& in) {
+  direction_vector_ = in;
+}
+
+const glm::vec3& DirectionalLight::direction() const {
+  return direction_vector_;
+}
+
+float* DirectionalLight::direction() {
+  return glm::value_ptr(direction_vector_);
 }

@@ -38,16 +38,20 @@ class Application {
   static Renderer& GetRenderer();
   static APP_STATE GetAppState();
   static void SetAppState(const APP_STATE to_add);
-  void run();
+  void Run();
 
  private:
   Application();
   ~Application();
 
-  void cleanUp();
-  void cameraControl(const double xpos, const double ypos,
+  void Init();
+  void CleanUp();
+  void CameraControl(const double xpos, const double ypos,
                      const float delta_time);
-  void init();
+
+  void DrawImGuiLayer();
+  void DrawControls();
+  void DrawViewport();
 
   struct Props {
     std::string Title;
@@ -61,21 +65,22 @@ class Application {
     }
   };
 
-  Props _properties;
-  GLFWwindow* _window;
-  bool _vsync;
+  Props properties_;
+  GLFWwindow* window_;
+  bool vsync_;
 
   // for mouse toggle
-  APP_STATE _app_state;
+  APP_STATE app_state_;
 
   // rendering specific things
-  Camera _main_camera;
-  Renderer* _renderer;
-  std::vector<Scene> _scenes;
-  int _current_scene_index;
+  Camera main_camera_;
+  Renderer* renderer_;
+  std::vector<Scene> scenes_;
+  int number_of_scenes_;
+  int current_scene_index_;
 
   // shaders
-  Shader _shader;
+  Shader shader_;
 };
 
 #endif  // APPLICATION_H

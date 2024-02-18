@@ -17,12 +17,12 @@ class Transform {
   Transform(Transform&& other) = default;
   Transform& operator=(Transform&& other) = default;
 
-  Transform operator*(const glm::mat4 matrix);
+  Transform operator*(const glm::mat4& matrix);
 
-  const glm::mat4& getMatrix() const;
+  const glm::mat4& matrix() const;
 
  private:
-  glm::mat4 _transform;
+  glm::mat4 transform_;
 };
 
 #endif  // TRANSFORM_H
