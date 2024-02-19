@@ -1,8 +1,14 @@
 /.vscode
 /.vs
+/.idea
+cmake-build-*/
+
 /build
 *.dll
 /models
 
 # temp fix
 /src/texture
+
+# still have to configure for MSVC (with a cmakepresets)
+CMakeSettings.json

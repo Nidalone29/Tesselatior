@@ -1,79 +1,66 @@
-/*
-
-  Copyright 2011 Etay Meiri
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #ifndef MESH_H
 #define MESH_H
 
 #include <ostream>
 #include <vector>
-#include <GL/glew.h>
-#include "common.h"
-#include "texture2D.h"
-#include "glm/glm.hpp"
 #include <cstring>
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <assimp/scene.h>        // Assimp output data structure
 #include <assimp/postprocess.h>  // Assimp post processing flags
 
+#include "vertex.h"
+#include "texture.h"
+#include "material.h"
+
+enum class ATTRIB_ID {
+  POSITIONS = 0,
+  NORMALS = 1,
+  COLOR_TEXTURE_COORDS = 2
+};
+
 /**
- * Classe che incapsula la gestione dei modelli 3d caricati da file.
- * La classe usa la lista dei vertici indicizzati.
- * Al momento la classe supporta modelli con una sola texture colore.
- * Se il modello non ha una texture associata, viene usata una texture
- * di default "white.png"
+ * @brief A mesh is saved in a renederable state for opengl
+ *
  */
 class Mesh {
  public:
-  Mesh();
+  Mesh() = delete;  // can't create an empty mesh
+
+  /**
+   * @brief Construct a new Mesh object
+   *
+   * @param vertices
+   * @param indices
+   * @param material
+   */
+  Mesh(const std::vector<Vertex>& vertices,
+       const std::vector<unsigned int>& indices, const unsigned int num_indices,
+       const Material& material);
   ~Mesh();
 
   /**
-   * Funzione che carica il modello e lo prepara per il rendering.
+   * @brief
    *
-   * @param filename nome del file
-   * @param flags assimp post processing flags
-   *
-   * @return true se il modello è stato caricato correttamente
    */
-  bool load_mesh(const std::string& Filename, unsigned int flags = 0);
+  void load();
 
-  /**
-   * Renderizza l'oggetto in scena usando per la texture, la TextureUnit
-   * indicata.
-   *
-   * @param TextureUnit TextureUnit usata per recuperare i pixel
-   *
-   */
-  virtual void render();
+  const GLuint& vao() const;
+  const unsigned int& num_indices() const;
+  const Material& material() const;
 
  private:
-  bool init_from_scene(const aiScene* pScene, const std::string& Filename);
-
   void clear();
 
-  std::string get_file_path(const std::string& Filename) const;
+  GLuint VAO_;  // Vertex Array Object
+  GLuint VBO_;  // Vertex Buffer Object
+  GLuint IBO_;  // Index Buffer Object
 
-  unsigned int _num_indices;
-  Texture2D _texture;
-  GLuint _VAO;
-  GLuint _VBO;
-  GLuint _IBO;
+  std::vector<Vertex> vertices_;
+  std::vector<unsigned int> indices_;
+  unsigned int num_indices_;
+  Material material_;
 };
-
-std::ostream& operator<<(std::ostream& os, const Vertex& v);
 
 #endif  // MESH_H

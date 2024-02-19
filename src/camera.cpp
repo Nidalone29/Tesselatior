@@ -1,196 +1,160 @@
 #include "camera.h"
-#include "GL/freeglut.h"
-#include "transform.h"
-
-#define GLM_FORCE_RADIANS
-#include "glm/gtc/matrix_transform.hpp"
-
-#include "GL/freeglut.h"
 
 #include <iostream>
 
-static std::ostream& operator<<(std::ostream& os, const glm::vec3& v) {
-  for (int y = 0; y < 3; ++y) {
-    os << v[y] << " ";
-  }
-  return os;
+#define GLM_FORCE_RADIANS
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "transform.h"
+#include "logger.h"
+
+Camera::Camera()
+    : sensitivity_(1.0F),
+      pitch_deg_(0.0F),
+      yaw_deg_(-90.0F),
+      movement_speed_(5.0F) {
+  LOG_TRACE("Camera()");
+  mouse_position_ = {0.0, 0.0};
+  ResetView();
 }
 
-Camera::Camera() {
-  reset();
+Camera::~Camera() {
+  LOG_TRACE("~Camera()");
 }
 
-void Camera::reset() {
-  _combined = _projection = _camera = glm::mat4(1.0F);
-  _position = glm::vec3(0, 0, 0);
-  _lookat_dir = glm::vec3(0, 0, -1);
-  _up = glm::vec3(0, 1, 0);
-
-  _pitch_deg = 0;
-  _yaw_deg = -90.0;
-  _mouse_lastX = 0;
-  _mouse_lastY = 0;
-  _first_mouse_call = true;
-
-  _speed = 0.05F;
-  _mouse_speed = _speed * 2;
+void Camera::ResetView() {
+  yaw_deg_ = -90.0F;
+  pitch_deg_ = 0.0F;
+  // TODO there should an initial camera position that the client can set...
+  SetCameraView(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+  LOG_INFO("Camera view reset");
 }
 
-void Camera::update() {
-  _combined = _projection * _camera;
+void Camera::SetCameraView(const glm::vec3& position, const glm::vec3& lookat,
+                           const glm::vec3& up) {
+  position_ = position;
+  up_ = up;
+  lookat_dir_ = glm::normalize(lookat - position_);
+
+  // creating a lookat matrix (aka our view matrix)
+  // LookAt: a special type of view matrix that creates a coordinate system
+  // where all coordinates are rotated and translated in such a way that the
+  // user is looking at a given target from a given position.
+  view_matrix_ = glm::lookAt(position_, lookat_dir_ + position_, up_);
 }
 
-const glm::mat4& Camera::CP() const {
-  return _combined;
+// getter for the view matrix
+const glm::mat4& Camera::view_matrix() const {
+  return view_matrix_;
 }
 
-void Camera::set_camera(const glm::vec3& position, const glm::vec3& lookat,
-                        const glm::vec3& up) {
-  _position = position;
-  _up = up;
-
-  _lookat_dir = glm::normalize(lookat - _position);
-
-  _camera = camera_setting(_position, _lookat_dir + _position, _up);
-
-  _pitch_deg = 0;
-  _yaw_deg = -90.0;
-
-  update();
+const glm::mat4& Camera::projection_matrix() const {
+  return projection_matrix_;
 }
 
-glm::mat4 Camera::camera_setting(const glm::vec3& position,
-                                 const glm::vec3& lookat, const glm::vec3& up) {
-  glm::mat4 V = glm::lookAt(position, lookat, up);
-
-  return V;
-}
-
-const glm::mat4& Camera::camera() const {
-  return _camera;
-}
-
-void Camera::set_perspective(float FOVDeg, float width, float height,
-                             float znear, float zfar) {
-  _projection = perspective_projection(FOVDeg, width, height, znear, zfar);
-  update();
-}
-
-glm::mat4 Camera::perspective_projection(float FOVDeg, float width,
-                                         float height, float znear,
-                                         float zfar) {
+void Camera::projection_matrix(const float FOVDeg, const float width,
+                               const float height, const float znear,
+                               const float zfar) {
   assert(zfar > znear);
   assert(width > 0);
   assert(height > 0);
-
-  glm::mat4 p =
+  projection_matrix_ =
       glm::perspective(glm::radians(FOVDeg), width / height, znear, zfar);
-
-  return p;
 }
 
-const glm::mat4& Camera::projection() const {
-  return _projection;
+// getter camera position
+const glm::vec3& Camera::position() const {
+  return position_;
 }
 
-void Camera::set_speed(float speed) {
-  _speed = speed;
+// getter camera vettore lookat
+const glm::vec3& Camera::look_at() const {
+  return lookat_dir_;
 }
 
-const float& Camera::speed() const {
-  return _speed;
+// getter camera up
+const glm::vec3& Camera::up() const {
+  return up_;
 }
 
-bool Camera::onSpecialKeyboard(int key) {
-  glm::vec3 tmp;
-
-  // Lo spostamento in avanti/indietro avviene nella direzione
-  // di lookat.
-
-  // Lo spostamento a sinistra o a destra avviene nella direzione dell'asse
-  // identificato dal prodotto vettoriale tra up e lookat.
-
-  switch (key) {
-    case GLUT_KEY_UP:
-      _position += (_lookat_dir * _speed);
-      break;
-
-    case GLUT_KEY_DOWN:
-      _position -= (_lookat_dir * _speed);
-      break;
-
-    case GLUT_KEY_LEFT:
-      tmp = glm::cross(_up, _lookat_dir);
+void Camera::Move(const CameraMovements movement, const float timestep) {
+  glm::vec3 tmp, new_position;
+  const float camera_speed = movement_speed_ * timestep;
+  switch (movement) {
+    case CameraMovements::LEFT:
+      tmp = glm::cross(up_, lookat_dir_);
       tmp = glm::normalize(tmp);
-      _position += (tmp * _speed);
+      new_position = position_ + (tmp * camera_speed);
       break;
-
-    case GLUT_KEY_RIGHT:
-      tmp = glm::cross(_lookat_dir, _up);
+    case CameraMovements::RIGHT:
+      tmp = glm::cross(lookat_dir_, up_);
       tmp = glm::normalize(tmp);
-      _position += (_speed * tmp);
+      new_position = position_ + (camera_speed * tmp);
       break;
-
-    default:
-      return false;
+    case CameraMovements::FORWARD:
+      new_position = position_ + (lookat_dir_ * camera_speed);
+      break;
+    case CameraMovements::BACK:
+      new_position = position_ - (lookat_dir_ * camera_speed);
+      break;
+    // these are independent from the mouse
+    case CameraMovements::UP:
+      new_position = position_ + (glm::vec3(0.0F, 1.0F, 0.0F) * camera_speed);
+      break;
+    case CameraMovements::DOWN:
+      new_position = position_ - (glm::vec3(0.0F, 1.0F, 0.0F) * camera_speed);
       break;
   }
 
-  _camera = camera_setting(_position, _position + _lookat_dir, _up);
-  update();
-
-  return true;
+  SetCameraView(new_position, new_position + lookat_dir_, up_);
 }
 
-bool Camera::onMouse(int x, int y) {
-  if (_first_mouse_call) {
-    _mouse_lastX = x;
-    _mouse_lastY = y;
-    _first_mouse_call = false;
+void Camera::Rotate(const double newx, const double newy) {
+  double xoffset = (newx - mouse_position_.xpos) * sensitivity_ / 100;
+  double yoffset = (mouse_position_.ypos - newy) * sensitivity_ / 100;
+
+  mouse_position_.xpos = newx;
+  mouse_position_.ypos = newy;
+
+  yaw_deg_ += static_cast<float>(xoffset);
+  pitch_deg_ += static_cast<float>(yoffset);
+
+  // for not rotating backwards indefinetly
+  if (pitch_deg_ > 89.0F) {
+    pitch_deg_ = 89.0F;
+  } else if (pitch_deg_ < -89.0F) {
+    pitch_deg_ = -89.0F;
   }
-
-  float xoffset = x - _mouse_lastX;
-  float yoffset = _mouse_lastY - y;
-
-  if (xoffset + yoffset == 0) {
-    return false;
-  }
-
-  if (!_lock_mouse_position) {
-    _mouse_lastX = x;
-    _mouse_lastY = y;
-  }
-
-  float sensitivity = 0.1F;
-  xoffset *= sensitivity;
-  yoffset *= sensitivity;
-
-  _yaw_deg += xoffset;
-  _pitch_deg += yoffset;
-
-  _pitch_deg = (_pitch_deg > 89.0F) ? 89.0F : -89.0F;
 
   glm::vec3 direction;
-  direction.x = cos(glm::radians(_yaw_deg)) * cos(glm::radians(_pitch_deg));
-  direction.y = sin(glm::radians(_pitch_deg));
-  direction.z = sin(glm::radians(_yaw_deg)) * cos(glm::radians(_pitch_deg));
-  _lookat_dir = glm::normalize(direction);
+  direction.x = cos(glm::radians(yaw_deg_)) * cos(glm::radians(pitch_deg_));
+  direction.y = sin(glm::radians(pitch_deg_));
+  direction.z = sin(glm::radians(yaw_deg_)) * cos(glm::radians(pitch_deg_));
+  direction = glm::normalize(direction);
 
-  _camera = camera_setting(_position, _position + _lookat_dir, _up);
-  update();
-
-  return true;
+  SetCameraView(position_, position_ + direction, up_);
 }
 
-void Camera::set_mouse_init_position(int x, int y) {
-  _mouse_lastX = x;
-  _mouse_lastY = y;
+float Camera::speed() const {
+  return movement_speed_;
 }
 
-void Camera::lock_mouse_position(bool lock) {
-  _lock_mouse_position = lock;
+float* Camera::speed() {
+  return &movement_speed_;
 }
 
-const glm::vec3& Camera::position() const {
-  return _position;
+void Camera::speed(const float speed) {
+  movement_speed_ = speed;
+}
+
+float Camera::sensitivity() const {
+  return sensitivity_;
+}
+
+float* Camera::sensitivity() {
+  return &sensitivity_;
+}
+
+void Camera::sensitivity(const float sensitivity) {
+  sensitivity_ = sensitivity;
 }

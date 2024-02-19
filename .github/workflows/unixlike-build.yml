@@ -1,0 +1,57 @@
+name: Build project on MacOS and Linux
+
+on: [push, workflow_dispatch]
+
+# for vcpkg cache
+env: 
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        preset: [unixlike-gcc-release, unixlike-clang-release]
+        
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Export GitHub Actions cache environment variables (for vcpkg)
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+    # https://github.com/actions/runner-images/issues/2924
+    - name: "Run apt-get update"
+      if: runner.os == 'Linux'
+      run: sudo apt-get update
+
+    # https://glew.sourceforge.net/build.html
+    - name: "Install glew dependencies on linux (ubuntu)"
+      if: runner.os == 'Linux'
+      run: sudo apt-get install libxmu-dev libxi-dev libgl-dev libglu1-mesa-dev
+
+    # https://www.glfw.org/docs/latest/compile_guide.html#compile_deps_x11
+    - name: "Install glfw3 dependencies on linux (ubuntu)"
+      if: runner.os == 'Linux'
+      run: sudo apt-get install xorg-dev
+    # macOS glfw (and glew) dependencies are not needed in this case because 
+    # the github runner already has them (it has Xcode installed by default)
+    # https://www.glfw.org/docs/latest/compile_guide.html#compile_deps
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.preset }}" >> "$GITHUB_OUTPUT"
+
+    - name: Configure CMake
+      run: cmake --preset ${{ matrix.preset }}
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}

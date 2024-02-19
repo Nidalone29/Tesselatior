@@ -1,103 +1,76 @@
 #include "light.h"
 
-AmbientLight::AmbientLight()
-    : _color(glm::vec3(1.0, 1.0, 1.0)), _intensity(1.0) {}
+#include <glm/gtc/type_ptr.hpp>
 
-AmbientLight::AmbientLight(const glm::vec3& col, float i)
-    : _color(col), _intensity(i) {}
+#include "logger.h"
 
-void AmbientLight::inc(float value) {
-  _intensity += value;
-  if (_intensity > 1.0) {
-    _intensity = 1.0;
-  }
+Light::Light() : color_(glm::vec3(1.0F)), intensity_(glm::vec3(0.2F)) {
+  //
 }
 
-void AmbientLight::dec(float value) {
-  _intensity -= value;
-  if (_intensity < 0.0) {
-    _intensity = 0.0;
-  }
+Light::Light(const glm::vec3& color, const glm::vec3& intensity)
+    : color_(color), intensity_(intensity) {
+  //
 }
 
-glm::vec3 AmbientLight::color() const {
-  return _color;
+const glm::vec3& Light::color() const {
+  return color_;
 }
 
-float AmbientLight::intensity() const {
-  return _intensity;
+float* Light::color() {
+  return glm::value_ptr(color_);
+}
+
+const glm::vec3& Light::intensity() const {
+  return intensity_;
+}
+
+float* Light::intensity() {
+  return glm::value_ptr(intensity_);
+}
+
+void Light::color(const glm::vec3& color) {
+  color_ = color;
+}
+
+void Light::intensity(const glm::vec3& intensity) {
+  intensity_ = intensity;
+}
+
+AmbientLight::AmbientLight() : Light() {
+  LOG_TRACE("AmbientLight()");
+}
+
+AmbientLight::AmbientLight(const glm::vec3& color, const glm::vec3& intensity)
+    : Light(color, intensity) {
+  LOG_TRACE("AmbientLight(const glm::vec3&, const glm::vec3&)");
 }
 
 DirectionalLight::DirectionalLight()
-    : _color(glm::vec3(1.0F, 1.0F, 1.0F)),
-      _direction(glm::vec3(0.0F, -1.0F, 0.0F)) {}
-
-DirectionalLight::DirectionalLight(const glm::vec3& col, const glm::vec3& dir)
-    : _color(col), _direction(dir) {}
-
-glm::vec3 DirectionalLight::color() const {
-  return _color;
+    : Light(), direction_vector_(0.0F, 0.0F, 0.0F) {
+  LOG_TRACE("DirectionalLight()");
 }
 
-glm::vec3 DirectionalLight::direction() const {
-  return _direction;
+DirectionalLight::DirectionalLight(const glm::vec3& direction)
+    : Light(), direction_vector_(direction) {
+  LOG_TRACE("DirectionalLight(const glm::vec3&)");
 }
 
-DiffusiveLight::DiffusiveLight() : _intensity(1.0F) {}
-
-DiffusiveLight::DiffusiveLight(float i) : _intensity(i) {}
-
-void DiffusiveLight::inc(float value) {
-  _intensity += value;
-  if (_intensity > 1.0) {
-    _intensity = 1.0;
-  }
+DirectionalLight::DirectionalLight(const glm::vec3& color,
+                                   const glm::vec3& intensity,
+                                   const glm::vec3& direction)
+    : Light(color, intensity), direction_vector_(direction) {
+  //
 }
 
-void DiffusiveLight::dec(float value) {
-  _intensity -= value;
-  if (_intensity < 0.0) {
-    _intensity = 0.0;
-  }
+void DirectionalLight::direction(const glm::vec3& in) {
+  direction_vector_ = in;
 }
 
-float DiffusiveLight::intensity() const {
-  return _intensity;
+const glm::vec3& DirectionalLight::direction() const {
+  return direction_vector_;
 }
 
-SpecularLight::SpecularLight() : _shininess(30.0F), _intensity(1.0F) {}
-
-SpecularLight::SpecularLight(float i, float s) : _intensity(i), _shininess(s) {}
-
-void SpecularLight::inc(float value) {
-  _intensity += value;
-  if (_intensity > 1.0) {
-    _intensity = 1.0;
-  }
-}
-
-void SpecularLight::dec(float value) {
-  _intensity -= value;
-  if (_intensity < 0.0) {
-    _intensity = 0.0;
-  }
-}
-
-void SpecularLight::inc_shine(float value) {
-  _shininess += value;
-}
-
-void SpecularLight::dec_shine(float value) {
-  _shininess -= value;
-  if (_shininess < 0.0) {
-    _shininess = 0.0;
-  }
-}
-
-float SpecularLight::intensity() const {
-  return _intensity;
-}
-
-float SpecularLight::shininess() const {
-  return _shininess;
+float* DirectionalLight::direction() {
+  return glm::value_ptr(direction_vector_);
 }

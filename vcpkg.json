@@ -1,13 +1,20 @@
 {
-	"name": "sandbox",
-	"version-string": "0.0.1",
-	"dependencies": [
-		"freeglut",
-		"glew",
-		"glm",
-		"stb",
-		"assimp",
-		"imgui",
-		"entt"
-	]
+  "name": "tesselatior",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "glfw3",
+    "glew",
+    "glm",
+    "spdlog",
+    "stb",
+    "assimp",
+    {
+      "name": "imgui",
+      "features": [
+        "opengl3-binding",
+        "glfw-binding",
+        "docking-experimental"
+      ]
+    }
+  ]
 }

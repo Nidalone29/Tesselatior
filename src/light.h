@@ -1,167 +1,52 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
-/**
- * Classe di supporto per gestire le informazion di luce ambientale
- */
-class AmbientLight {
-  glm::vec3 _color;  ///<< Colore della luce
-  float _intensity;  ///<< Intensità della luce
-
+class Light {
  public:
-  /**
-   * Setta la luce al colore bianco e massima intensità
-   */
-  AmbientLight();
-  /**
-   * Setta la luce al colore e intensità dati
-   * @param col colore dela luce
-   * @param i intensità della luce
-   */
-  AmbientLight(const glm::vec3& col, float i);
+  const glm::vec3& color() const;
+  float* color();
+  void color(const glm::vec3& color);
 
-  /**
-   * Incrementa l'intensità della luce della quantità data
-   * @param value valore di incremento
-   */
-  void inc(float value);
+  const glm::vec3& intensity() const;
+  float* intensity();
+  void intensity(const glm::vec3& intensity);
 
+ protected:
   /**
-   * Decrementa l'intensità della luce della quantità data
-   * @param value valore di decremento
+   * @brief Construct a new Light object with a white color and 20% intensity
+   *
    */
-  void dec(float value);
+  Light();
+  Light(const glm::vec3& color, const glm::vec3& intensity);
 
-  /**
-   * * Ritorna il colore della luce
-   */
-  glm::vec3 color() const;
-
-  /**
-   * * Ritorna l'intensità della luce
-   */
-  float intensity() const;
+ private:
+  glm::vec3 color_;
+  glm::vec3 intensity_;  // the intensity of all 3 color channels
 };
 
-class DirectionalLight {
-  glm::vec3 _color;      // Colore della luce
-  glm::vec3 _direction;  // Direzione della sorgente
-
+class AmbientLight : public Light {
  public:
-  /**
-   * Setta la luce al colore bianco.
-   * La direzione di default è un vettore verticale verso il basso.
-   */
+  AmbientLight();
+  AmbientLight(const glm::vec3& color, const glm::vec3& intensity);
+};
+
+class DirectionalLight : public Light {
+ public:
   DirectionalLight();
 
-  /**
-   * Setta la luce al colore e intensità dati
-   * @param col colore dela luce
-   * @param i intensità della luce
-   */
+  explicit DirectionalLight(const glm::vec3& direction);
 
-  DirectionalLight(const glm::vec3& col, const glm::vec3& dir);
+  DirectionalLight(const glm::vec3& color, const glm::vec3& intensity,
+                   const glm::vec3& direction);
 
-  /**
-   * Ritorna il colore della luce
-   */
-  glm::vec3 color() const;
+  void direction(const glm::vec3& in);
+  const glm::vec3& direction() const;
+  float* direction();
 
-  /**
-   * Ritorna la direzione della luce
-   */
-  glm::vec3 direction() const;
-};
-
-class DiffusiveLight {
-  float _intensity;  // Intensità della luce
-
- public:
-  /**
-   * Setta la luce al colore bianco e massima intensità e posizionata in alto
-   * La direzione di irraggiamento di default è un vettore verticale verso il
-   * basso.
-   */
-  DiffusiveLight();
-
-  /**
-   * Setta la luce al colore e intensità dati
-   * @param col colore dela luce
-   * @param i intensità della luce
-   */
-  DiffusiveLight(float i);
-
-  /**
-   * Incrementa l'intensità della luce della quantità data
-   * @param value valore di incremento
-   */
-  void inc(float value);
-
-  /**
-   * Decrementa l'intensità della luce della quantità data
-   * @param value valore di decremento
-   */
-  void dec(float value);
-
-  /**
-   * Ritorna l'intensità della luce
-   */
-  float intensity() const;
-};
-
-class SpecularLight {
-  float _shininess;  // esponente di shininess
-  float _intensity;  // Intensità della luce
-
- public:
-  /**
-   * Setta la luce alla massima intensità. La posizione della camera è quella di
-   * default. La shininess è settata a 30.
-   */
-  SpecularLight();
-
-  /**
-   * Setta la luce speculare
-   * @param col colore dela luce
-   * @param i intensità della luce
-   */
-  SpecularLight(float i, float s);
-
-  /**
-   * Incrementa l'intensità della luce della quantità data
-   * @param value valore di incremento
-   */
-  void inc(float value);
-
-  /**
-   * Decrementa l'intensità della luce della quantità data
-   * @param value valore di decremento
-   */
-  void dec(float value);
-
-  /**
-   * Incrementa l'intensità della luce della quantità data
-   * @param value valore di incremento
-   */
-  void inc_shine(float value);
-
-  /**
-   * Decrementa l'intensità della luce della quantità data
-   * @param value valore di decremento
-   */
-  void dec_shine(float value);
-
-  /**
-   * Ritorna l'intensità della luce
-   */
-  float intensity() const;
-
-  /**
-   * Ritorna il valore di shininess
-   */
-  float shininess() const;
+ private:
+  glm::vec3 direction_vector_;
 };
 
 #endif  // LIGHT_H
