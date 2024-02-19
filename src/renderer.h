@@ -19,8 +19,7 @@ class Renderer {
   const FrameBuffer& target();
   void ResizeTarget(const int width, const int height);
   void ResizeTarget(const float width, const float height);
-  // void clear_color(const float r, const float g, const float b, const float
-  // a);
+  void SetClearColor(const float r, const float g, const float b);
 
  private:
   // for wireframe

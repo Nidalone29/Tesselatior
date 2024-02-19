@@ -27,6 +27,10 @@ Renderer::~Renderer() {
   LOG_TRACE("~Renderer()");
 }
 
+void Renderer::SetClearColor(const float r, const float g, const float b) {
+  glClearColor(r, g, b, 1.0F);
+}
+
 void Renderer::ToggleWireframe() {
   render_target_.Bind();
 

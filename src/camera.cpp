@@ -79,30 +79,30 @@ const glm::vec3& Camera::up() const {
 
 void Camera::Move(const CameraMovements movement, const float timestep) {
   glm::vec3 tmp, new_position;
-  const float speed = movement_speed_ * timestep;
+  const float camera_speed = movement_speed_ * timestep;
   switch (movement) {
     case CameraMovements::LEFT:
       tmp = glm::cross(up_, lookat_dir_);
       tmp = glm::normalize(tmp);
-      new_position = position_ + (tmp * speed);
+      new_position = position_ + (tmp * camera_speed);
       break;
     case CameraMovements::RIGHT:
       tmp = glm::cross(lookat_dir_, up_);
       tmp = glm::normalize(tmp);
-      new_position = position_ + (speed * tmp);
+      new_position = position_ + (camera_speed * tmp);
       break;
     case CameraMovements::FORWARD:
-      new_position = position_ + (lookat_dir_ * speed);
+      new_position = position_ + (lookat_dir_ * camera_speed);
       break;
     case CameraMovements::BACK:
-      new_position = position_ - (lookat_dir_ * speed);
+      new_position = position_ - (lookat_dir_ * camera_speed);
       break;
     // these are independent from the mouse
     case CameraMovements::UP:
-      new_position = position_ + (glm::vec3(0.0F, 1.0F, 0.0F) * speed);
+      new_position = position_ + (glm::vec3(0.0F, 1.0F, 0.0F) * camera_speed);
       break;
     case CameraMovements::DOWN:
-      new_position = position_ - (glm::vec3(0.0F, 1.0F, 0.0F) * speed);
+      new_position = position_ - (glm::vec3(0.0F, 1.0F, 0.0F) * camera_speed);
       break;
   }
 

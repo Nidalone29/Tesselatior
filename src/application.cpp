@@ -182,8 +182,8 @@ void Application::Init() {
   Scene Flower("Flower");
   Model flower("models/flower/flower.obj", aiProcess_Triangulate);
   Transform flower_t;
-  flower_t = flower_t * Math::translationMatrix(0.0F, -4.0F, -15.0F);
-  flower_t = flower_t * Math::rotationMatrix(-90.0F, 0.0F, 0.0F);
+  flower_t.translate(0.0F, -4.0F, -15.0F);
+  flower_t.rotate(-90.0F, 0.0F, 0.0F);
   flower.transform(flower_t);
   Flower.AddObject(Object(flower));
   // there is probably a more efficient way of doing this
@@ -192,8 +192,8 @@ void Application::Init() {
   Scene Teapot("Teapot");
   Model teapot("models/teapot.obj");
   Transform teapot_t;
-  teapot_t = teapot_t * Math::translationMatrix(0.0F, -1.6F, -9.0F);
-  teapot_t = teapot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  teapot_t.translate(0.0F, -1.6F, -9.0F);
+  teapot_t.rotate(0.0F, 0.0F, 0.0F);
   teapot.transform(teapot_t);
   Teapot.AddObject(Object(teapot));
   scenes_.push_back(Teapot);
@@ -201,8 +201,8 @@ void Application::Init() {
   Scene Dragon("Dragon");
   Model dragon("models/dragon.obj");
   Transform dragon_t;
-  dragon_t = dragon_t * Math::translationMatrix(0.0F, 0.0F, -5.0F);
-  dragon_t = dragon_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  dragon_t.translate(0.0F, 0.0F, -5.0F);
+  dragon_t.rotate(0.0F, 0.0F, 0.0F);
   dragon.transform(dragon_t);
   Dragon.AddObject(Object(dragon));
   scenes_.push_back(Dragon);
@@ -210,8 +210,8 @@ void Application::Init() {
   Scene Skull("Skull");
   Model skull("models/skull.obj");
   Transform skull_t;
-  skull_t = skull_t * Math::translationMatrix(0.0F, -5.0F, -20.0F);
-  skull_t = skull_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  skull_t.translate(0.0F, -5.0F, -20.0F);
+  skull_t.rotate(0.0F, 0.0F, 0.0F);
   skull.transform(skull_t);
   Skull.AddObject(Object(skull));
   scenes_.push_back(Skull);
@@ -219,8 +219,8 @@ void Application::Init() {
   Scene Boot("Boot");
   Model boot("models/boot/boot.obj");
   Transform boot_t;
-  boot_t = boot_t * Math::translationMatrix(0.0F, -10.0F, -70.0F);
-  boot_t = boot_t * Math::rotationMatrix(0.0F, 0.0F, 0.0F);
+  boot_t.translate(0.0F, -10.0F, -70.0F);
+  boot_t.rotate(0.0F, 0.0F, 0.0F);
   boot.transform(boot_t);
   Boot.AddObject(Object(boot));
   scenes_.push_back(Boot);

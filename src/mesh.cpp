@@ -7,6 +7,7 @@
 #include "vertex.h"
 #include "logger.h"
 #include "utilities.h"
+
 Mesh::Mesh(const std::vector<Vertex>& vertices,
            const std::vector<unsigned int>& indices,
            const unsigned int num_indices, const Material& material)
