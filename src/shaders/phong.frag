@@ -1,13 +1,14 @@
-#version 420
+#version 420 core
 
-// Vettori della normali ricevuti dal vertex shader
-in vec3 fragment_normal;
+in TES_OUT {
+  vec3 normal_;
+  vec3 position_;
+  vec2 textcoord_;
+} fs_in;
 
-// Coordinate spaziali dei punti ricervuti dal vertex shader
-in vec3 fragment_position;
-
-// Coordinate di texture dei punti ricervuti dal vertex shader
-in vec2 fragment_textcoord;
+vec3 fragment_normal = fs_in.normal_;
+vec3 fragment_position = fs_in.position_;
+vec2 fragment_textcoord = fs_in.textcoord_;
 
 // Informazioni di luce ambientale 
 uniform vec3 ambient_light_color;

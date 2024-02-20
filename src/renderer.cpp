@@ -20,6 +20,8 @@ Renderer::Renderer() : gl_mode_(GL_FILL), render_target_(1, 1) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
 
+  glPatchParameteri(GL_PATCH_VERTICES, 3);
+
   render_target_.Unbind();
 }
 
@@ -54,6 +56,11 @@ void Renderer::Render(const Scene& scene, const Camera& camera,
   // this is for the fragment shader
   shader.SetUniformVec3("camera_position", camera.position());
 
+  shader.SetUniformFloat("tli0", static_cast<float>(tess_level_inner0_));
+  shader.SetUniformFloat("tlo0", static_cast<float>(tess_level_outer0_));
+  shader.SetUniformFloat("tlo1", static_cast<float>(tess_level_outer1_));
+  shader.SetUniformFloat("tlo2", static_cast<float>(tess_level_outer2_));
+
   for (const Object& o : scene.objects()) {
     shader.SetUniformMat4("Model2World", o.model().transform().matrix());
 
@@ -84,8 +91,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera,
       shader.SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
       // clang-format on
 
-      glDrawElements(GL_TRIANGLES, mesh.num_indices(), GL_UNSIGNED_INT,
-                     nullptr);
+      glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
 
       glBindVertexArray(0);
     }
@@ -104,4 +110,20 @@ void Renderer::ResizeTarget(const int width, const int height) {
 
 void Renderer::ResizeTarget(const float width, const float height) {
   render_target_.Resize(static_cast<int>(width), static_cast<int>(height));
+}
+
+int* Renderer::tess_level_inner0() {
+  return &tess_level_inner0_;
+}
+
+int* Renderer::tess_level_outer0() {
+  return &tess_level_outer0_;
+}
+
+int* Renderer::tess_level_outer1() {
+  return &tess_level_outer1_;
+}
+
+int* Renderer::tess_level_outer2() {
+  return &tess_level_outer2_;
 }

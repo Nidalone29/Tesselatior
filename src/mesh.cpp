@@ -65,3 +65,7 @@ const unsigned int& Mesh::num_indices() const {
 const Material& Mesh::material() const {
   return material_;
 }
+
+void Mesh::material(const Material& material) {
+  material_ = material;
+}

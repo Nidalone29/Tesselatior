@@ -9,9 +9,11 @@
 
 Scene::Scene(const std::string& name)
     : name_(name),
-      ambient_light_(AmbientLight(glm::vec3(1, 1, 1), glm::vec3(0.2F))),
-      directional_light_(DirectionalLight(
-          glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(0, 0, -1))) {
+      ambient_light_(
+          AmbientLight(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(0.2F))),
+      directional_light_(DirectionalLight(glm::vec3(1.0F, 1.0F, 1.0F),
+                                          glm::vec3(1.0F, 1.0F, 1.0F),
+                                          glm::vec3(0.0F, -1.0F, -1.0F))) {
   LOG_TRACE("Scene(const std::string&)");
 }
 

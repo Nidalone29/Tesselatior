@@ -40,19 +40,12 @@ class Mesh {
        const Material& material);
   ~Mesh();
 
-  /**
-   * @brief
-   *
-   */
-  void load();
-
   const GLuint& vao() const;
   const unsigned int& num_indices() const;
   const Material& material() const;
+  void material(const Material& material);
 
  private:
-  void clear();
-
   GLuint VAO_;  // Vertex Array Object
   GLuint VBO_;  // Vertex Buffer Object
   GLuint IBO_;  // Index Buffer Object

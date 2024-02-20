@@ -171,8 +171,10 @@ void Application::Init() {
 
   glfwSwapInterval(vsync_);
 
-  shader_.AddShader(GL_VERTEX_SHADER, "shaders/14.vert");
-  shader_.AddShader(GL_FRAGMENT_SHADER, "shaders/14.frag");
+  shader_.AddShader(GL_VERTEX_SHADER, "shaders/vertex.vert");
+  shader_.AddShader(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+  shader_.AddShader(GL_TESS_CONTROL_SHADER, "shaders/camera_control.tesc");
+  shader_.AddShader(GL_TESS_EVALUATION_SHADER, "shaders/tess_evaluation.tese");
 
   shader_.Init();
   shader_.Enable();
@@ -188,34 +190,34 @@ void Application::Init() {
   Flower.AddObject(Object(flower));
   // there is probably a more efficient way of doing this
   scenes_.push_back(Flower);
+  /*
+    Scene Teapot("Teapot");
+    Model teapot("models/teapot.obj");
+    Transform teapot_t;
+    teapot_t.translate(0.0F, -1.6F, -9.0F);
+    teapot_t.rotate(0.0F, 0.0F, 0.0F);
+    teapot.transform(teapot_t);
+    Teapot.AddObject(Object(teapot));
+    scenes_.push_back(Teapot);
 
-  Scene Teapot("Teapot");
-  Model teapot("models/teapot.obj");
-  Transform teapot_t;
-  teapot_t.translate(0.0F, -1.6F, -9.0F);
-  teapot_t.rotate(0.0F, 0.0F, 0.0F);
-  teapot.transform(teapot_t);
-  Teapot.AddObject(Object(teapot));
-  scenes_.push_back(Teapot);
+    Scene Dragon("Dragon");
+    Model dragon("models/dragon.obj");
+    Transform dragon_t;
+    dragon_t.translate(0.0F, 0.0F, -5.0F);
+    dragon_t.rotate(0.0F, 0.0F, 0.0F);
+    dragon.transform(dragon_t);
+    Dragon.AddObject(Object(dragon));
+    scenes_.push_back(Dragon);
 
-  Scene Dragon("Dragon");
-  Model dragon("models/dragon.obj");
-  Transform dragon_t;
-  dragon_t.translate(0.0F, 0.0F, -5.0F);
-  dragon_t.rotate(0.0F, 0.0F, 0.0F);
-  dragon.transform(dragon_t);
-  Dragon.AddObject(Object(dragon));
-  scenes_.push_back(Dragon);
-
-  Scene Skull("Skull");
-  Model skull("models/skull.obj");
-  Transform skull_t;
-  skull_t.translate(0.0F, -5.0F, -20.0F);
-  skull_t.rotate(0.0F, 0.0F, 0.0F);
-  skull.transform(skull_t);
-  Skull.AddObject(Object(skull));
-  scenes_.push_back(Skull);
-
+    Scene Skull("Skull");
+    Model skull("models/skull.obj");
+    Transform skull_t;
+    skull_t.translate(0.0F, -5.0F, -20.0F);
+    skull_t.rotate(0.0F, 0.0F, 0.0F);
+    skull.transform(skull_t);
+    Skull.AddObject(Object(skull));
+    scenes_.push_back(Skull);
+*/
   Scene Boot("Boot");
   Model boot("models/boot/boot.obj");
   Transform boot_t;
@@ -225,11 +227,18 @@ void Application::Init() {
   Boot.AddObject(Object(boot));
   scenes_.push_back(Boot);
 
-  Scene Perseverance("Rover");
-  Model perseverance("models/Perseverance.glb", aiProcess_PreTransformVertices);
-  Perseverance.AddObject(Object(perseverance));
-  scenes_.push_back(Perseverance);
+  Scene Plane("Plane");
+  Model plane("models/plane/plane.obj");
+  Plane.AddObject(Object(plane));
+  scenes_.push_back(Plane);
 
+  /*
+      Scene Perseverance("Rover");
+      Model perseverance("models/Perseverance.glb",
+      aiProcess_PreTransformVertices);
+      Perseverance.AddObject(Object(perseverance));
+      scenes_.push_back(Perseverance);
+   */
   Scene Katana("Katana");
   Model katana("models/dragon_katana_oni_koroshi.glb",
                aiProcess_PreTransformVertices);
@@ -245,13 +254,13 @@ void Application::Init() {
   Model suzanne("models/mrmonkey.glb", aiProcess_PreTransformVertices);
   Suzanne.AddObject(Object(suzanne));
   scenes_.push_back(Suzanne);
-
-  Scene Halo("halo");
-  Model halo("models/spartan_armour_mkv_-_halo_reach.glb",
-             aiProcess_PreTransformVertices);
-  Halo.AddObject(Object(halo));
-  scenes_.push_back(Halo);
-
+  /*
+    Scene Halo("halo");
+    Model halo("models/spartan_armour_mkv_-_halo_reach.glb",
+               aiProcess_PreTransformVertices);
+    Halo.AddObject(Object(halo));
+    scenes_.push_back(Halo);
+  */
   number_of_scenes_ = scenes_.size();
 
   shader_.SetUnifromSampler("ColorTextSampler", TEXTURE_UNIT_ID::TEXTURE_COLOR);
@@ -382,6 +391,21 @@ void Application::DrawControls() {
     ImGui::Text("Movement speed (1 -> 100)");
     ImGui::SliderFloat("speed", main_camera_.speed(), 1.0F, 100.0F, "%.2f",
                        ImGuiSliderFlags_None);
+  }
+
+  if (ImGui::CollapsingHeader("Tessellation level")) {
+    ImGui::Text("tess_level_inner0");
+    ImGui::SliderInt("tess_level_inner0", renderer_->tess_level_inner0(), 1,
+                     10);
+    ImGui::Text("tess_level_outer0");
+    ImGui::SliderInt("tess_level_outer0", renderer_->tess_level_outer0(), 1,
+                     10);
+    ImGui::Text("tess_level_outer1");
+    ImGui::SliderInt("tess_level_outer1", renderer_->tess_level_outer1(), 1,
+                     10);
+    ImGui::Text("tess_level_outer2");
+    ImGui::SliderInt("tess_level_outer2", renderer_->tess_level_outer2(), 1,
+                     10);
   }
 
   ImGui::Separator();

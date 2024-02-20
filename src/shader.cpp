@@ -33,6 +33,8 @@ void Shader::AddShader(const GLenum type, const std::filesystem::path& path) {
   switch (type) {
     case GL_VERTEX_SHADER:
     case GL_FRAGMENT_SHADER:
+    case GL_TESS_CONTROL_SHADER:
+    case GL_TESS_EVALUATION_SHADER:
       res.type = type;
       break;
     default:
