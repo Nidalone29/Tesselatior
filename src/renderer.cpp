@@ -56,6 +56,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera,
   // this is for the fragment shader
   shader.SetUniformVec3("camera_position", camera.position());
 
+  shader.SetUniformFloat("alpha", alpha);
   shader.SetUniformFloat("tli0", static_cast<float>(tess_level_inner0_));
   shader.SetUniformFloat("tlo0", static_cast<float>(tess_level_outer0_));
   shader.SetUniformFloat("tlo1", static_cast<float>(tess_level_outer1_));
@@ -126,4 +127,8 @@ int* Renderer::tess_level_outer1() {
 
 int* Renderer::tess_level_outer2() {
   return &tess_level_outer2_;
+}
+
+float* Renderer::phong_alpha() {
+  return &alpha;
 }

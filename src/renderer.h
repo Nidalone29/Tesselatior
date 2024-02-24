@@ -26,6 +26,8 @@ class Renderer {
   int* tess_level_outer1();
   int* tess_level_outer2();
 
+  float* phong_alpha();
+
  private:
   // for wireframe
   GLint gl_mode_;
@@ -37,6 +39,8 @@ class Renderer {
   int tess_level_outer0_ = 1.0;
   int tess_level_outer1_ = 1.0;
   int tess_level_outer2_ = 1.0;
+
+  float alpha = 0.5;
 };
 
 #endif  // RENDERER_H

@@ -51,8 +51,11 @@ class Mesh {
   GLuint IBO_;  // Index Buffer Object
 
   std::vector<Vertex> vertices_;
+  std::vector<HalfEdge> half_edges_;
+
   std::vector<unsigned int> indices_;
   unsigned int num_indices_;
+
   Material material_;
 };
 

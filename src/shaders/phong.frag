@@ -46,7 +46,7 @@ void main() {
   vec3 specular_reflection = vec3(0.0, 0.0, 0.0);
   float cosAlpha = dot(view_dir, reflect_dir);
   if (cosAlpha > 0) {
-    specular_reflection = material_color.rgb * material_specular_reflectivity * pow(cosAlpha, material_specular_glossiness_exponent);
+    specular_reflection = material_specular_reflectivity * pow(cosAlpha, material_specular_glossiness_exponent);
   }
   vec3 ambient_reflection = material_color.rgb * material_diffuse_reflectivity * material_ambient_reflectivity * ambient_light_intensity * ambient_light_color;
   vec3 diffuse_reflection = material_color.rgb * material_diffuse_reflectivity * directional_light_intensity * max(dot(normal, -directional_light_direction), 0.0);

@@ -67,8 +67,11 @@ void Model::LoadMeshes(unsigned int flags) {
 
     for (unsigned int j = 0; j < paiMesh->mNumFaces; j++) {
       const aiFace& Face = paiMesh->mFaces[j];
-      // TODO pass triangulate by default
-      assert(Face.mNumIndices == 3);
+      // assert(Face.mNumIndices == 3);
+      // Face.mNumIndices gives us the number of indices (3 = triangle and 4 =
+      // quad)
+      // TODO will make an "if" based on a parameter of this import function,
+      // for example MeshType::Triangles and MeshType::Quads
       Indices.push_back(Face.mIndices[0]);
       Indices.push_back(Face.mIndices[1]);
       Indices.push_back(Face.mIndices[2]);

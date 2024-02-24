@@ -21,10 +21,12 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
 
   glGenVertexArrays(1, &VAO_);
   glBindVertexArray(VAO_);
+
   // Vertex Buffer Object is NOT bound to the Vertex Array Object
   // the actual association between an attribute index and a buffer is made
   // by glVertexAttribPointer
   // https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object
+
   glGenBuffers(1, &VBO_);
   glBindBuffer(GL_ARRAY_BUFFER, VBO_);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices_.size(),
