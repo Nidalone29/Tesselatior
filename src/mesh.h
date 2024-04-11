@@ -17,7 +17,12 @@
 enum class ATTRIB_ID {
   POSITIONS = 0,
   NORMALS = 1,
-  COLOR_TEXTURE_COORDS = 2
+  TEXTURE_COORDS = 2
+};
+
+enum class MESH_TYPE {
+  TRIANGLES = 3,
+  QUADS = 4
 };
 
 /**
@@ -56,7 +61,10 @@ class Mesh {
   std::vector<unsigned int> indices_;
   unsigned int num_indices_;
 
+  // Rendering properties
   Material material_;
+  // the type of meshes that this model stores (quads or tris)
+  MESH_TYPE type_;
 };
 
 #endif  // MESH_H

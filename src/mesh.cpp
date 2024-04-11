@@ -38,10 +38,8 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
   glVertexAttribPointer(to_underlying(ATTRIB_ID::NORMALS), 3, GL_FLOAT,
                         GL_FALSE, sizeof(Vertex),
                         (GLvoid*)offsetof(struct Vertex, normal));
-
-  // we are talking about the texture color here
-  glVertexAttribPointer(to_underlying(ATTRIB_ID::COLOR_TEXTURE_COORDS), 2,
-                        GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  glVertexAttribPointer(to_underlying(ATTRIB_ID::TEXTURE_COORDS), 2, GL_FLOAT,
+                        GL_FALSE, sizeof(Vertex),
                         (GLvoid*)offsetof(struct Vertex, text_coords));
 
   glGenBuffers(1, &IBO_);

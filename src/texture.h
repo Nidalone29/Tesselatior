@@ -9,7 +9,8 @@
 #include <assimp/texture.h>
 
 enum class TEXTURE_TYPE {
-  DIFFUSE
+  DIFFUSE,
+  DISPLACEMENT
 };
 
 class Texture {
@@ -34,9 +35,11 @@ class Texture {
   Texture(Texture&& other) = default;
   Texture& operator=(Texture&& other) = default;
 
+  TEXTURE_TYPE type() const;
+
   GLuint id() const;
 
-  private:
+ private:
   GLuint id_;
   // Texture type article
   // https://help.poliigon.com/en/articles/1712652-what-are-the-different-texture-maps-for

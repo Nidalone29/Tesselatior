@@ -10,11 +10,12 @@
 #include "logger.h"
 #include "utilities.h"
 
-Model::Model(const std::filesystem::path& path, unsigned int flags)
+Model::Model(const MESH_TYPE type, const std::filesystem::path& path,
+             unsigned int flags)
     : model_path_(path) {
   // ASSIMP imports the mesh
   LOG_TRACE("Model(const std::filesystem::path&, unsigned int)");
-  LoadMeshes(flags);
+  LoadMeshes(type, flags);
   LOG_INFO("Model created from \"{}\"", path.string());
 }
 
@@ -28,7 +29,7 @@ Model::~Model() {
  * @param flags ASSIMP flags
  * https://assimp.sourceforge.net/lib_html/postprocess_8h.html#a64795260b95f5a4b3f3dc1be4f52e410
  */
-void Model::LoadMeshes(unsigned int flags) {
+void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
   Assimp::Importer Importer;
 
   // flags set to 0 for now, probably have to set them at some point if ASSIMP
@@ -67,25 +68,34 @@ void Model::LoadMeshes(unsigned int flags) {
 
     for (unsigned int j = 0; j < paiMesh->mNumFaces; j++) {
       const aiFace& Face = paiMesh->mFaces[j];
-      // assert(Face.mNumIndices == 3);
-      // Face.mNumIndices gives us the number of indices (3 = triangle and 4 =
-      // quad)
-      // TODO will make an "if" based on a parameter of this import function,
-      // for example MeshType::Triangles and MeshType::Quads
-      Indices.push_back(Face.mIndices[0]);
-      Indices.push_back(Face.mIndices[1]);
-      Indices.push_back(Face.mIndices[2]);
+
+      switch (type) {
+        case MESH_TYPE::TRIANGLES:
+          assert(Face.mNumIndices == to_underlying(MESH_TYPE::TRIANGLES));
+          Indices.push_back(Face.mIndices[0]);
+          Indices.push_back(Face.mIndices[1]);
+          Indices.push_back(Face.mIndices[2]);
+          break;
+        case MESH_TYPE::QUADS:
+          assert(Face.mNumIndices == to_underlying(MESH_TYPE::QUADS));
+          // For some reason the first 2 indices need to be swapped otherwise
+          // the hardware tessellator does not triangulate the quad properly
+          Indices.push_back(Face.mIndices[1]);
+          Indices.push_back(Face.mIndices[0]);
+          Indices.push_back(Face.mIndices[2]);
+          Indices.push_back(Face.mIndices[3]);
+          break;
+        default:
+          throw;
+          break;
+      }
     }
 
     unsigned int num_indices_ = Indices.size();
 
-    // NOTE a mesh has one and only one material
+    // NOTE A mesh has one and only one material
 
-    // for now i only import the diffusive property (so the color for non
-    // metal materials, because i don't support metallic or else at the
-    // moment)
-
-    // NOTE: If a material has not been found by Assimp, it loads a
+    // NOTE If a material has not been found by Assimp, it loads a
     // "DefaultMaterial" (with ambient 0, diffuse 0.6 and specular 0.6... and i
     // think it even changes from format to format, for example a .blend file
     // has a different default material than a .obj file)
@@ -145,6 +155,40 @@ void Model::LoadMeshes(unsigned int flags) {
       // the default white texture that doesn't influence the base color
       // (because the base color gets multiplied by 1)
       x.AddTexture(Texture(TEXTURE_TYPE::DIFFUSE));
+    }
+
+    aiString displacement_path;
+    if (material->Get(AI_MATKEY_TEXTURE(aiTextureType_DISPLACEMENT, 0),
+                      displacement_path) == aiReturn_SUCCESS) {
+      if (const auto* _texture =
+              pScene->GetEmbeddedTexture(displacement_path.C_Str())) {
+        // returned pointer is not null, aka the texture is embedded
+        // the texture is compressed (png, jpeg...), so we load it with stb
+        if (_texture->mHeight == 0) {
+          Texture texture(_texture, TEXTURE_TYPE::DISPLACEMENT);
+          x.AddTexture(texture);
+        } else {
+          // the texture is not compressed
+          // _texture->mWidth;
+          // _texture->mHeight;
+          // _texture->pcData;
+          LOG_ERROR("Unsupported uncompressed texture");
+          // x.AddTexture(Texture(TEXTURE_TYPE::DISPLACEMENT));
+        }
+      } else {
+        //! For some reason ASSIMP does NOT find a diffuse texture in a obj
+        //! material file (even if specified with disp as per
+        //! https://en.wikipedia.org/wiki/Wavefront_.obj_file#Texture_maps)
+        // the texture could be an external file, so we try to load it
+        std::filesystem::path texture_path = model_path_;
+        texture_path.replace_filename(displacement_path.data);
+        // if we can't find a texture with this path, then there will still be
+        // a texture created automatically with the default "black.png"
+        Texture texture(texture_path, TEXTURE_TYPE::DISPLACEMENT);
+        x.AddTexture(texture);
+      }
+    } else {
+      // Texture texture(Texture(TEXTURE_TYPE::DISPLACEMENT));
     }
 
     meshes_.emplace_back(Vertices, Indices, num_indices_, x);

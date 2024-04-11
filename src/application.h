@@ -11,8 +11,8 @@
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #endif  // NDEBUG
 
-#include "scene.h"
 #include "renderer.h"
+#include "scene.h"
 #include "camera.h"
 #include "light.h"
 #include "shader.h"
@@ -24,6 +24,8 @@ enum class APP_STATE {
   MENU_CONTROL
 };
 
+// The Application class is responsible for initializing and deleting all the
+// scenes and shaders
 class Application {
  public:
   Application(const Application& other) = delete;
@@ -75,12 +77,12 @@ class Application {
   // rendering specific things
   Camera main_camera_;
   Renderer* renderer_;
-  std::vector<Scene> scenes_;
+  std::vector<Scene*> scenes_;
   int number_of_scenes_;
   int current_scene_index_;
 
   // shaders
-  Shader shader_;
+  std::vector<Shader*> shaders_;
 };
 
 #endif  // APPLICATION_H

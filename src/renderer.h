@@ -12,8 +12,7 @@ class Renderer {
  public:
   Renderer();
   ~Renderer();
-  void Render(const Scene& scene, const Camera& camera,
-              const Shader& shader) const;
+  void Render(const Scene& scene, const Camera& camera) const;
 
   void ToggleWireframe();
   const FrameBuffer& target();
@@ -21,10 +20,9 @@ class Renderer {
   void ResizeTarget(const float width, const float height);
   void SetClearColor(const float r, const float g, const float b);
 
-  int* tess_level_inner0();
-  int* tess_level_outer0();
-  int* tess_level_outer1();
-  int* tess_level_outer2();
+  int* tess_level();
+  float* displacement_height();
+  int max_tessel_level() const;
 
   float* phong_alpha();
 
@@ -34,11 +32,9 @@ class Renderer {
 
   FrameBuffer render_target_;
 
-  int tess_level_inner0_ = 0.0;
-
-  int tess_level_outer0_ = 1.0;
-  int tess_level_outer1_ = 1.0;
-  int tess_level_outer2_ = 1.0;
+  int tess_level_;
+  int max_tessel_level_;
+  float displacement_height_;
 
   float alpha = 0.5;
 };

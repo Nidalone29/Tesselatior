@@ -14,19 +14,15 @@ out TCS_OUT {
   vec2 textcoord_;
 } tcs_out[];
 
-uniform float tli0;
-uniform float tlo0;
-uniform float tlo1;
-uniform float tlo2;
+uniform float tessellation_level;
 
 void main() {
   // invocation zero controls tessellation levels for the entire patch
   if (gl_InvocationID == 0) {
-    gl_TessLevelInner[0] = tli0;
-
-    gl_TessLevelOuter[0] = tlo0;
-    gl_TessLevelOuter[1] = tlo1;
-    gl_TessLevelOuter[2] = tlo2;
+    gl_TessLevelInner[0] = tessellation_level;
+    gl_TessLevelOuter[0] = tessellation_level;
+    gl_TessLevelOuter[1] = tessellation_level;
+    gl_TessLevelOuter[2] = tessellation_level;
   }
 
   // Everybody copies their input to their output

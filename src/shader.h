@@ -8,9 +8,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-enum class TEXTURE_UNIT_ID {
-  TEXTURE_COLOR = 0
-};
+#include "texture.h"
 
 // this actually rappresents a shader program (that can have multiple shaders
 // files maybe)
@@ -40,6 +38,8 @@ class Shader {
   void Enable() const;
   void Disable() const;
 
+  GLuint program_id() const;
+
   void SetUniformMat4(const std::string& uniform_name,
                       const glm::mat4& matrix) const;
   void SetUniformFloat(const std::string& uniform_name,
@@ -49,7 +49,7 @@ class Shader {
   void SetUniformVec4(const std::string& uniform_name,
                       const glm::vec4& vec) const;
   void SetUnifromSampler(const std::string& uniform_name,
-                         const TEXTURE_UNIT_ID id) const;
+                         const TEXTURE_TYPE id) const;
 
  private:
   static GLuint CompileShader(const GLenum type, const std::string& src);

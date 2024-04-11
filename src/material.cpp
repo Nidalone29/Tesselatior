@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 
 #include "logger.h"
+#include "utilities.h"
 
 Material::Material()
     : ambient_reflectivity_(glm::vec3(1.0F, 1.0F, 1.0F)),
@@ -25,9 +26,7 @@ void Material::AddTexture(const Texture& to_add) {
 void Material::BindTextures() const {
   glBindTexture(GL_TEXTURE_2D, 0);
   for (const Texture& t : textures_) {
-    // (for now it's 0, meaning it's all color texture)
-    // TODO a check for all different types of textures and deal with it
-    GLenum unit = GL_TEXTURE0;
+    GLenum unit = GL_TEXTURE0 + to_underlying(t.type());
 
     // Attiviamo la TextureUnit da usare per il sampling
     glActiveTexture(unit);

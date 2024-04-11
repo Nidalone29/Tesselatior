@@ -1,7 +1,5 @@
 #include "application.h"
 
-#include <iostream>
-#include <map>
 #include <chrono>
 
 #include <spdlog/spdlog.h>
@@ -19,6 +17,7 @@
 #include "light.h"
 #include "transform.h"
 #include "matrix_math.h"
+#include "scene.h"
 #include "renderer.h"
 #include "shader.h"
 #include "logger.h"
@@ -108,6 +107,14 @@ Application::Application()
 void Application::CleanUp() {
   delete renderer_;
 
+  for (int i = 0; i < shaders_.size(); i++) {
+    delete shaders_[i];
+  }
+
+  for (int i = 0; i < scenes_.size(); i++) {
+    delete scenes_[i];
+  }
+
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
@@ -153,9 +160,6 @@ void Application::Init() {
   }
   LOG_INFO("Initialized GLEW");
 
-  // TODO fix with std::make_unique and smart pointers
-  renderer_ = new Renderer();
-
   // input settings
   glfwSetKeyCallback(window_, InputHandle);
 
@@ -171,126 +175,58 @@ void Application::Init() {
 
   glfwSwapInterval(vsync_);
 
-  shader_.AddShader(GL_VERTEX_SHADER, "shaders/pass_through.vert");
-  shader_.AddShader(GL_TESS_CONTROL_SHADER, "shaders/pass_through.tesc");
-  shader_.AddShader(GL_TESS_EVALUATION_SHADER,
-                    "shaders/phong_tessellation.tese");
-  shader_.AddShader(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+  // TODO fix with std::make_unique and smart pointers
+  renderer_ = new Renderer();
 
-  shader_.Init();
-  shader_.Enable();
+  // pointers because if i copy to the vector then it's gonna destroy the local
+  // Shader in this scope, calling the destructor and deleting the shader
+  // program
+  Shader* default_shader = new Shader();  // 3 patch
+  default_shader->AddShader(GL_VERTEX_SHADER, "shaders/pass_through.vert");
+  default_shader->AddShader(GL_TESS_CONTROL_SHADER,
+                            "shaders/pass_through_tri.tesc");
+  default_shader->AddShader(GL_TESS_EVALUATION_SHADER,
+                            "shaders/phong_tessellation.tese");
+  default_shader->AddShader(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+
+  default_shader->Init();
+  shaders_.push_back(default_shader);
+
+  Shader* terrain_shader = new Shader();  // 4 patch
+  terrain_shader->AddShader(GL_VERTEX_SHADER, "shaders/pass_through.vert");
+  terrain_shader->AddShader(GL_TESS_CONTROL_SHADER, "shaders/cameraLOD.tesc");
+  terrain_shader->AddShader(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tese");
+  terrain_shader->AddShader(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+
+  terrain_shader->Init();
+  shaders_.push_back(terrain_shader);
 
   // init scenes
-  /*
-    Scene Flower("Flower");
-    Model flower("models/flower/flower.obj", aiProcess_Triangulate);
-    Transform flower_t;
-    flower_t.translate(0.0F, -4.0F, -15.0F);
-    flower_t.rotate(-90.0F, 0.0F, 0.0F);
-    flower.transform(flower_t);
-    Flower.AddObject(Object(flower));
-    // there is probably a more efficient way of doing this
-    scenes_.push_back(Flower);
+  Scene* Flower = new Scene("Flower");
+  Model flower(MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
+               aiProcess_Triangulate);
+  Transform flower_t;
+  flower_t.translate(0.0F, -4.0F, -15.0F);
+  flower_t.rotate(-90.0F, 0.0F, 0.0F);
+  flower.transform(flower_t);
+  StaticModel* sf = new StaticModel(flower, default_shader);
+  Flower->AddObject(sf);
+  // there is probably a more efficient way of doing this
+  scenes_.push_back(Flower);
 
-      Scene Teapot("Teapot");
-      Model teapot("models/teapot.obj");
-      Transform teapot_t;
-      teapot_t.translate(0.0F, -1.6F, -9.0F);
-      teapot_t.rotate(0.0F, 0.0F, 0.0F);
-      teapot.transform(teapot_t);
-      Teapot.AddObject(Object(teapot));
-      scenes_.push_back(Teapot);
+  Scene* Teapot = new Scene("Teapot");
+  Model teapot(MESH_TYPE::TRIANGLES, "models/teapot.obj",
+               aiProcess_Triangulate);
+  Transform teapot_t;
+  teapot_t.translate(0.0F, -1.6F, -9.0F);
+  teapot_t.rotate(0.0F, 0.0F, 0.0F);
+  teapot.transform(teapot_t);
+  StaticModel* st = new StaticModel(teapot, default_shader);
+  Teapot->AddObject(st);
+  // there is probably a more efficient way of doing this
+  scenes_.push_back(Teapot);
 
-      Scene Dragon("Dragon");
-      Model dragon("models/dragon.obj");
-      Transform dragon_t;
-      dragon_t.translate(0.0F, 0.0F, -5.0F);
-      dragon_t.rotate(0.0F, 0.0F, 0.0F);
-      dragon.transform(dragon_t);
-      Dragon.AddObject(Object(dragon));
-      scenes_.push_back(Dragon);
-
-      Scene Skull("Skull");
-      Model skull("models/skull.obj");
-      Transform skull_t;
-      skull_t.translate(0.0F, -5.0F, -20.0F);
-      skull_t.rotate(0.0F, 0.0F, 0.0F);
-      skull.transform(skull_t);
-      Skull.AddObject(Object(skull));
-      scenes_.push_back(Skull);
-
-  Scene Boot("Boot");
-  Model boot("models/boot/boot.obj");
-  Transform boot_t;
-  boot_t.translate(0.0F, -10.0F, -70.0F);
-  boot_t.rotate(0.0F, 0.0F, 0.0F);
-  boot.transform(boot_t);
-  Boot.AddObject(Object(boot));
-  scenes_.push_back(Boot);
-*/
-  Scene Plane("Plane");
-  Model plane("models/plane/plane.obj");
-  Plane.AddObject(Object(plane));
-  scenes_.push_back(Plane);
-
-  Scene Cube("Cube");
-  Model cube("models/cube/cube.obj", aiProcess_JoinIdenticalVertices);
-  Cube.AddObject(Object(cube));
-  scenes_.push_back(Cube);
-
-  /*
-      Scene Perseverance("Rover");
-      Model perseverance("models/Perseverance.glb",
-      aiProcess_PreTransformVertices);
-      Perseverance.AddObject(Object(perseverance));
-      scenes_.push_back(Perseverance);
-    */
-
-  Scene Sphere("Sphere");
-  Model sphere("models/SphereByNidal.glb", aiProcess_JoinIdenticalVertices);
-  Sphere.AddObject(Object(sphere));
-  scenes_.push_back(Sphere);
-
-  Scene Sphere2("Sphere2");
-  Model sphere2("models/Sphere2.obj", aiProcess_JoinIdenticalVertices);
-  Sphere2.AddObject(Object(sphere2));
-  scenes_.push_back(Sphere2);
-
-  Scene Suzanne("MrMonkey");
-  Model suzanne("models/mrmonkey.glb", aiProcess_PreTransformVertices);
-  Suzanne.AddObject(Object(suzanne));
-  scenes_.push_back(Suzanne);
-
-  Scene LowPoly("MrMonkey LowPoly Edition");
-  Model lowpoly(
-      "models/low_poly_monkey/mrmonkey.obj",
-      aiProcess_PreTransformVertices | aiProcess_JoinIdenticalVertices);
-  LowPoly.AddObject(Object(lowpoly));
-  scenes_.push_back(LowPoly);
-
-  Scene Monster("Monster Frog");
-  Model monster("models/monsterfrog.obj", aiProcess_PreTransformVertices |
-                                              aiProcess_JoinIdenticalVertices |
-                                              aiProcess_Triangulate);
-  Monster.AddObject(Object(monster));
-  scenes_.push_back(Monster);
-
-  /*
-      Scene Halo("halo");
-      Model halo("models/spartan_armour_mkv_-_halo_reach.glb",
-                  aiProcess_PreTransformVertices);
-      Halo.AddObject(Object(halo));
-      scenes_.push_back(Halo);
-
-      Scene Katana("Katana");
-      Model katana("models/dragon_katana_oni_koroshi.glb",
-                    aiProcess_PreTransformVertices);
-      Katana.AddObject(Object(katana));
-      scenes_.push_back(Katana);
-    */
   number_of_scenes_ = scenes_.size();
-
-  shader_.SetUnifromSampler("ColorTextSampler", TEXTURE_UNIT_ID::TEXTURE_COLOR);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -352,7 +288,8 @@ void Application::DrawViewport() {
     main_camera_.projection_matrix(30.0F, viewportPanelSize.x,
                                    viewportPanelSize.y, 0.1F, 10000);
   }
-  renderer_->Render(scenes_[current_scene_index_], main_camera_, shader_);
+
+  renderer_->Render(*scenes_[current_scene_index_], main_camera_);
 
   // Update the ImGui image with the new texture data
   ImGui::Image(
@@ -365,9 +302,9 @@ void Application::DrawViewport() {
 }
 
 void Application::DrawControls() {
-  AmbientLight* scene_ambient = scenes_[current_scene_index_].ambient_light();
+  AmbientLight* scene_ambient = scenes_[current_scene_index_]->ambient_light();
   DirectionalLight* scene_directional =
-      scenes_[current_scene_index_].directional_light();
+      scenes_[current_scene_index_]->directional_light();
 
   ImGui::Begin("stats", nullptr, window_flags);
   ImGui::Text("dear imgui says hello! (%s) (%d)", IMGUI_VERSION,
@@ -381,7 +318,7 @@ void Application::DrawControls() {
                                ImGui::GetTextLineHeightWithSpacing()))) {
     for (int n = 0; n < number_of_scenes_; n++) {
       const bool is_selected = (current_scene_index_ == n);
-      if (ImGui::Selectable(scenes_[n].name().c_str(), is_selected)) {
+      if (ImGui::Selectable(scenes_[n]->name().c_str(), is_selected)) {
         current_scene_index_ = n;
       }
       // Set the initial focus when opening the combo (scrolling +
@@ -422,17 +359,11 @@ void Application::DrawControls() {
 
   if (ImGui::CollapsingHeader("Tessellation level")) {
     ImGui::Text("tess_level_inner0");
-    ImGui::SliderInt("tess_level_inner0", renderer_->tess_level_inner0(), 1,
-                     10);
-    ImGui::Text("tess_level_outer0");
-    ImGui::SliderInt("tess_level_outer0", renderer_->tess_level_outer0(), 1,
-                     10);
-    ImGui::Text("tess_level_outer1");
-    ImGui::SliderInt("tess_level_outer1", renderer_->tess_level_outer1(), 1,
-                     10);
-    ImGui::Text("tess_level_outer2");
-    ImGui::SliderInt("tess_level_outer2", renderer_->tess_level_outer2(), 1,
-                     10);
+    ImGui::SliderInt("tess_level_inner0 (Tessell level)",
+                     renderer_->tess_level(), 1, renderer_->max_tessel_level());
+
+    ImGui::SliderFloat("Displacement height", renderer_->displacement_height(),
+                       0.0F, 20.0F, "%.2f", ImGuiSliderFlags_None);
 
     ImGui::SliderFloat("phong tessel alpha", renderer_->phong_alpha(), 0.0F,
                        1.0F, "%.2f", ImGuiSliderFlags_None);
@@ -444,7 +375,7 @@ void Application::DrawControls() {
     glfwSwapInterval(vsync_);
   }
 
-  ImGuiIO& io = ImGui::GetIO();
+  const ImGuiIO& io = ImGui::GetIO();
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0F / io.Framerate, io.Framerate);
   ImGui::End();

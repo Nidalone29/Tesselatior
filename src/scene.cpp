@@ -13,20 +13,23 @@ Scene::Scene(const std::string& name)
           AmbientLight(glm::vec3(1.0F, 1.0F, 1.0F), glm::vec3(0.2F))),
       directional_light_(DirectionalLight(glm::vec3(1.0F, 1.0F, 1.0F),
                                           glm::vec3(1.0F, 1.0F, 1.0F),
-                                          glm::vec3(0.0F, -1.0F, -1.0F))) {
+                                          glm::vec3(0.0F, 1.0F, 0.0F))) {
   LOG_TRACE("Scene(const std::string&)");
 }
 
 Scene::~Scene() {
   LOG_TRACE("~Scene()");
   LOG_TRACE("Destroying scene \"{}\"", name_);
+  for (const IRenderableObject* x : objects_) {
+    delete x;
+  }
 }
 
-void Scene::AddObject(const Object& to_add) {
+void Scene::AddObject(IRenderableObject* to_add) {
   objects_.push_back(to_add);
 }
 
-const std::vector<Object>& Scene::objects() const {
+const std::vector<IRenderableObject*> Scene::objects() const {
   return objects_;
 }
 

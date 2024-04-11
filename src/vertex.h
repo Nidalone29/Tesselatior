@@ -9,7 +9,7 @@ struct Vertex {
   glm::vec3 position;     // Coordinate spaziali
   glm::vec3 normal;       // Vertex normal (for phong shading)
   glm::vec2 text_coords;  // Coordinate di texture
-  HalfEdge* edge;
+  // HalfEdge* edge;
 
   Vertex(float x, float y, float z, float xn, float yn, float zn, float s,
          float t);

@@ -140,6 +140,10 @@ void Shader::Disable() const {
   glUseProgram(0);
 }
 
+GLuint Shader::program_id() const {
+  return program_;
+}
+
 GLint Shader::GetUniformLocation(const std::string& uniform_name) const {
   GLint location = glGetUniformLocation(program_, uniform_name.c_str());
 
@@ -192,7 +196,7 @@ void Shader::SetUniformVec4(const std::string& uniform_name,
 }
 
 void Shader::SetUnifromSampler(const std::string& uniform_name,
-                               const TEXTURE_UNIT_ID id) const {
+                               const TEXTURE_TYPE id) const {
   GLint uniform_location = GetUniformLocation(uniform_name);
   if (uniform_location != INVALID_UNIFORM_LOCATION) {
     glUniform1i(uniform_location, to_underlying(id));

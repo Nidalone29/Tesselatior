@@ -36,7 +36,7 @@ void main() {
 
   // NOTE: material_diffuse_reflectivity is basically the base color of the material
   // if it exists and gets multiplied by the texture color there are no issues, because
-  // the default texture color is 1, and 1 is the neutral element of moltiplication
+  // the default texture color is 1, and 1 is the neutral element of multiplication
 
   vec3 view_dir = normalize(camera_position - fragment_position);
   vec3 normal = normalize(fragment_normal);

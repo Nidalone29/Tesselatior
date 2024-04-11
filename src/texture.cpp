@@ -21,7 +21,20 @@ Texture::Texture(const TEXTURE_TYPE type) : id_(-1), type_(type) {
   stbi_set_flip_vertically_on_load(true);
 
   // 4 means desired channels, in this case we want 4 because RGBA
-  image = stbi_load("white.png", &width, &height, &channels, 4);
+  std::string default_path;
+
+  switch (type) {
+    case TEXTURE_TYPE::DIFFUSE:
+      default_path = "white.png";  // Neutral element for product is 1
+      break;
+    case TEXTURE_TYPE::DISPLACEMENT:
+      default_path = "black.png";  // Neutral element for sum is 0
+      break;
+    default:
+      break;
+  }
+
+  image = stbi_load(default_path.c_str(), &width, &height, &channels, 4);
   if (image == nullptr) {
     LOG_ERROR("Failed to load default texture");
     throw FileNotFoundException();
@@ -140,4 +153,8 @@ Texture::~Texture() {
 
 GLuint Texture::id() const {
   return id_;
+}
+
+TEXTURE_TYPE Texture::type() const {
+  return type_;
 }
