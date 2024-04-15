@@ -13,6 +13,10 @@ Light::Light(const glm::vec3& color, const glm::vec3& intensity)
   //
 }
 
+Light::~Light() {
+  //
+}
+
 const glm::vec3& Light::color() const {
   return color_;
 }

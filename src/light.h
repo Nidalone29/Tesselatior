@@ -3,8 +3,17 @@
 
 #include <glm/glm.hpp>
 
+// Abstract Light base class
 class Light {
  public:
+  /**
+   * @brief Construct a new Light object with a white color and 20% intensity
+   *
+   */
+  Light();
+  Light(const glm::vec3& color, const glm::vec3& intensity);
+  virtual ~Light() = 0;
+
   const glm::vec3& color() const;
   float* color();
   void color(const glm::vec3& color);
@@ -12,14 +21,6 @@ class Light {
   const glm::vec3& intensity() const;
   float* intensity();
   void intensity(const glm::vec3& intensity);
-
- protected:
-  /**
-   * @brief Construct a new Light object with a white color and 20% intensity
-   *
-   */
-  Light();
-  Light(const glm::vec3& color, const glm::vec3& intensity);
 
  private:
   glm::vec3 color_;
@@ -35,9 +36,7 @@ class AmbientLight : public Light {
 class DirectionalLight : public Light {
  public:
   DirectionalLight();
-
   explicit DirectionalLight(const glm::vec3& direction);
-
   DirectionalLight(const glm::vec3& color, const glm::vec3& intensity,
                    const glm::vec3& direction);
 

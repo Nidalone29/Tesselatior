@@ -14,7 +14,6 @@
 #include "renderer.h"
 #include "scene.h"
 #include "camera.h"
-#include "light.h"
 #include "shader.h"
 #include "framebuffer.h"
 #include "logger.h"
