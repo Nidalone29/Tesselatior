@@ -8,7 +8,7 @@
 
 class Model {
  public:
-  Model();
+  Model() = default;
   explicit Model(const MESH_TYPE type, const std::filesystem::path& path,
                  unsigned int flags = 0);
   ~Model();

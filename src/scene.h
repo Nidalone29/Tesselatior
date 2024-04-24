@@ -30,6 +30,8 @@ class Scene {
   void name(const std::string& to_add);
   const std::string& name() const;
 
+  int NumberOfObjects() const;
+
  private:
   std::string name_;
   std::vector<IRenderableObject*> objects_;

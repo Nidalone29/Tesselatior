@@ -21,6 +21,7 @@ set(Sources
 	./src/texture.cpp
 	./src/transform.cpp
 	./src/vertex.cpp
+	./src/subdiv/subdivision.cpp
 )
 
 set(Headers 

@@ -1,75 +1,41 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "logger.h"
 #include "shader.h"
 #include "model.h"
-#include "utilities.h"
+#include "./subdiv/subdivision.h"
 
 class IRenderableObject {
  public:
-  virtual ~IRenderableObject() = default;
+  virtual ~IRenderableObject() = 0;
   virtual void Draw() const = 0;
   virtual const Shader* GetShader() const = 0;
   virtual void SetRenderSettings() const = 0;
+  virtual void ShowSettingsGUI() = 0;
+
   virtual const Model& model() const = 0;
   virtual void model(const Model& model) = 0;
+  virtual const std::string& name() const = 0;
+  virtual void name(const std::string& name) = 0;
 };
 
 class Terrain : public IRenderableObject {
  public:
-  Terrain() : shader_(nullptr) {
-    LOG_TRACE("Terrain()");
-  }
+  Terrain();
+  ~Terrain();
 
-  ~Terrain() {  //
-    LOG_TRACE("~Terrain()");
-  }
+  void Draw() const override;
+  const Shader* GetShader() const override;
+  void SetRenderSettings() const override;
+  void ShowSettingsGUI() override;
 
-  void Draw() const override {
-    const std::vector<Mesh>& meshes = model_.meshes();
-    LOG_INFO("This model contains {} meshes", meshes.size());
-
-    for (const Mesh& mesh : meshes) {
-      glBindVertexArray(mesh.vao());
-
-      mesh.material().BindTextures();
-
-      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
-      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
-      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
-
-      // clang-format off
-      const Material& material = mesh.material();
-      shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
-      shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
-      shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
-      shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
-      // clang-format on
-
-      glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
-
-      glBindVertexArray(0);
-    }
-  }
-
-  void SetRenderSettings() const override {
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
-  }
-
-  const Shader* GetShader() const override {
-    return shader_;
-  }
-
-  const Model& model() const override {
-    return model_;
-  }
-
-  void model(const Model& model) override {
-    model_ = model;
-  }
+  const Model& model() const override;
+  void model(const Model& model) override;
+  const std::string& name() const override;
+  void name(const std::string& name) override;
 
  private:
+  std::string name_;
   Model model_;
   // Not owning
   const Shader* shader_;
@@ -77,94 +43,60 @@ class Terrain : public IRenderableObject {
 
 class ProgressiveMesh : public IRenderableObject {
  public:
-  ProgressiveMesh() : shader_(nullptr) {
-    LOG_TRACE("ProgressiveMesh()");
-  }
+  ProgressiveMesh();
+  ~ProgressiveMesh();
 
-  ~ProgressiveMesh() {  //
-    LOG_TRACE("~ProgressiveMesh()");
-  }
+  void Draw() const override;
+  const Shader* GetShader() const override;
+  void SetRenderSettings() const override;
+  void ShowSettingsGUI() override;
 
-  void Draw() const override {}
-
-  void SetRenderSettings() const override {}
-
-  const Shader* GetShader() const override {
-    return shader_;
-  }
-
-  const Model& model() const override {
-    return model_;
-  }
-
-  void model(const Model& model) override {
-    model_ = model;
-  }
+  const Model& model() const override;
+  void model(const Model& model) override;
+  const std::string& name() const override;
+  void name(const std::string& name) override;
 
  private:
+  std::string name_;
   Model model_;
   // Not owning
   const Shader* shader_;
 };
 
+// A Static Model that also supports uniform subdivision
+// owns and deletes a SubDiv Strategy
 class StaticModel : public IRenderableObject {
  public:
-  StaticModel(const Model& model, const Shader* shader)
-      : model_(model), shader_(shader) {
-    LOG_TRACE("StaticModel(const Model&)");
-  }
+  StaticModel(const std::string& name, const Model& model,
+              const Shader* shader);
+  ~StaticModel();
 
-  ~StaticModel() {  //
-    LOG_TRACE("~StaticModel()");
-  }
+  void Draw() const override;
+  const Shader* GetShader() const override;
+  void SetRenderSettings() const override;
+  void ShowSettingsGUI() override;
 
-  void Draw() const override {
-    const std::vector<Mesh>& meshes = model_.meshes();
-    LOG_INFO("This model contains {} meshes", meshes.size());
-
-    for (const Mesh& mesh : meshes) {
-      glBindVertexArray(mesh.vao());
-
-      mesh.material().BindTextures();
-
-      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
-      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
-      glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
-
-      // clang-format off
-      const Material& material = mesh.material();
-      shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
-      shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
-      shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
-      shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
-      // clang-format on
-
-      glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
-
-      glBindVertexArray(0);
-    }
-  }
-
-  void SetRenderSettings() const override {
-    glPatchParameteri(GL_PATCH_VERTICES, 3);
-  }
-
-  const Shader* GetShader() const override {
-    return shader_;
-  }
-
-  const Model& model() const override {
-    return model_;
-  }
-
-  void model(const Model& model) override {
-    model_ = model;
-  }
+  const Model& model() const override;
+  void model(const Model& model) override;
+  const std::string& name() const override;
+  void name(const std::string& name) override;
 
  private:
-  Model model_;
+  std::string name_;
+  // To submit to the subdivision algorithm (it always re-starts from the base
+  // model because it's easier)
+  Model base_model_;
   // Not owning
   const Shader* shader_;
+  // To be rendered
+  Model subdiv_model_;
+  // To be submitted to subdivision algorithm
+  int subdiv_level_;
+  sa::SubDiv subdiv_algo_;
+  // To be shown in UI
+  int current_subdiv_level_;
+  sa::SubDiv current_subdiv_algo_;
+  // ISubdivision* subdiv_strategy_;
 };
 
 #endif  // OBJECT_H

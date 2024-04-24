@@ -119,7 +119,7 @@ void Camera::Rotate(const double newx, const double newy) {
   yaw_deg_ += static_cast<float>(xoffset);
   pitch_deg_ += static_cast<float>(yoffset);
 
-  // for not rotating backwards indefinetly
+  // for not rotating backwards indefinitely
   if (pitch_deg_ > 89.0F) {
     pitch_deg_ = 89.0F;
   } else if (pitch_deg_ < -89.0F) {

@@ -79,6 +79,7 @@ class Application {
   std::vector<Scene*> scenes_;
   int number_of_scenes_;
   int current_scene_index_;
+  int selected_obj_index_;
 
   // shaders
   std::vector<Shader*> shaders_;

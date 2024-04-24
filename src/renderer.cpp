@@ -48,12 +48,12 @@ void Renderer::ToggleWireframe() {
 }
 
 void Renderer::Render(const Scene& scene, const Camera& camera) const {
+  render_target_.Bind();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   for (const IRenderableObject* o : scene.objects()) {
     const Shader* shader = o->GetShader();
     shader->Enable();
-    render_target_.Bind();
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader->SetUniformMat4("camera_view_matrix", camera.view_matrix());
     shader->SetUniformMat4("camera_projection_matrix",

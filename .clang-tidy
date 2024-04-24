@@ -21,6 +21,10 @@ Checks: "-*,
         -readability-isolate-declaration,
         -readability-redundant-member-init,
         -readability-identifier-length"
+        
+CheckOptions:
+  - key: modernize-use-override.IgnoreDestructors
+    value: true
 
 WarningsAsErrors: ''
 HeaderFilterRegex: ''

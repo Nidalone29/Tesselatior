@@ -64,3 +64,7 @@ void Scene::name(const std::string& to_add) {
 const std::string& Scene::name() const {
   return name_;
 }
+
+int Scene::NumberOfObjects() const {
+  return objects_.size();
+}

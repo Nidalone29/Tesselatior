@@ -99,7 +99,8 @@ Application& Application::Instance() {
 Application::Application()
     : vsync_(true),
       app_state_(APP_STATE::VIEWPORT_FOCUS),
-      current_scene_index_(0) {
+      current_scene_index_(0),
+      selected_obj_index_(-1) {
   LOG_TRACE("Application()");
   Init();
 }
@@ -202,31 +203,36 @@ void Application::Init() {
   shaders_.push_back(terrain_shader);
 
   // init scenes
-  Scene* Flower = new Scene("Flower");
-  Model flower(MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
-               aiProcess_Triangulate);
+  Scene* flower_scene = new Scene("Flower");
+  Model flower_object(MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
+                      aiProcess_Triangulate);
   Transform flower_t;
   flower_t.translate(0.0F, -4.0F, -15.0F);
   flower_t.rotate(-90.0F, 0.0F, 0.0F);
-  flower.transform(flower_t);
-  StaticModel* sf = new StaticModel(flower, default_shader);
-  Flower->AddObject(sf);
-  // there is probably a more efficient way of doing this
-  scenes_.push_back(Flower);
+  flower_object.transform(flower_t);
+  StaticModel* sf = new StaticModel("flower", flower_object, default_shader);
+  flower_scene->AddObject(sf);
 
-  Scene* Teapot = new Scene("Teapot");
-  Model teapot(MESH_TYPE::TRIANGLES, "models/teapot.obj",
-               aiProcess_Triangulate);
+  Model dragon(MESH_TYPE::TRIANGLES, "models/dragon.obj");
+  StaticModel* dragon_model = new StaticModel("dragon", dragon, default_shader);
+  flower_scene->AddObject(dragon_model);
+
+  //  there is probably a more efficient way of doing this
+  scenes_.push_back(flower_scene);
+
+  Scene* teapot_scene = new Scene("Teapot");
+  Model teapot_object(MESH_TYPE::TRIANGLES, "models/teapot.obj",
+                      aiProcess_Triangulate);
   Transform teapot_t;
   teapot_t.translate(0.0F, -1.6F, -9.0F);
   teapot_t.rotate(0.0F, 0.0F, 0.0F);
-  teapot.transform(teapot_t);
-  StaticModel* st = new StaticModel(teapot, default_shader);
-  Teapot->AddObject(st);
+  teapot_object.transform(teapot_t);
+  StaticModel* st = new StaticModel("teapot", teapot_object, default_shader);
+  teapot_scene->AddObject(st);
   // there is probably a more efficient way of doing this
-  scenes_.push_back(Teapot);
+  scenes_.push_back(teapot_scene);
 
-  number_of_scenes_ = scenes_.size();
+  number_of_scenes_ = static_cast<int>(scenes_.size());
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -311,15 +317,17 @@ void Application::DrawControls() {
               IMGUI_VERSION_NUM);
 
   ImGui::Spacing();
-  ImGui::Text("Scenes");
+
+  ImGui::SeparatorText("Scenes");
   if (ImGui::BeginListBox(
           "Current Scene",
           ImVec2(-FLT_MIN, number_of_scenes_ * 1.05F *
                                ImGui::GetTextLineHeightWithSpacing()))) {
-    for (int n = 0; n < number_of_scenes_; n++) {
-      const bool is_selected = (current_scene_index_ == n);
-      if (ImGui::Selectable(scenes_[n]->name().c_str(), is_selected)) {
-        current_scene_index_ = n;
+    for (int i = 0; i < number_of_scenes_; i++) {
+      const bool is_selected = (current_scene_index_ == i);
+      if (ImGui::Selectable(scenes_[i]->name().c_str(), is_selected)) {
+        current_scene_index_ = i;
+        selected_obj_index_ = -1;
       }
       // Set the initial focus when opening the combo (scrolling +
       // keyboard navigation focus)
@@ -329,8 +337,31 @@ void Application::DrawControls() {
     }
     ImGui::EndListBox();  // "Current Scene"
   }
+
   ImGui::Spacing();
 
+  ImGui::SeparatorText("Objects in Scene");
+  const int objnum = scenes_[current_scene_index_]->NumberOfObjects();
+  for (int i = 0; i < objnum; i++) {
+    if (ImGui::Selectable(
+            scenes_[current_scene_index_]->objects()[i]->name().c_str(),
+            selected_obj_index_ == i)) {
+      selected_obj_index_ = i;
+    }
+  }
+
+  ImGui::Spacing();
+
+  // Only when an abject is selected
+  if (selected_obj_index_ != -1) {
+    scenes_[current_scene_index_]
+        ->objects()[selected_obj_index_]
+        ->ShowSettingsGUI();
+  }
+
+  ImGui::Spacing();
+
+  ImGui::SeparatorText("Scene controls");
   if (ImGui::CollapsingHeader("Lights")) {
     ImGui::Text("Ambient Light");
     ImGui::ColorPicker3("ambient color", scene_ambient->color(), color_flags);
