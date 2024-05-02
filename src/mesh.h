@@ -47,6 +47,7 @@ class Mesh {
 
   const GLuint& vao() const;
   const unsigned int& num_indices() const;
+  const unsigned int& num_vertices() const;
   const Material& material() const;
   void material(const Material& material);
 

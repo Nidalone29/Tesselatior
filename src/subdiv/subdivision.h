@@ -28,11 +28,23 @@ inline const std::map<SubDiv, std::string> kSubdivisions = {
 
 };  // namespace sa
 
+// [chapter 17.5 in RealTimeRendering 4th edition]
+// Subdivision in two phases
+// 1. Refinement phase: Given a control mesh create new vertices and reconnects
+// them to form smaller primitives
+// 2. Smoothing phase: Compute new positions for some (or all) the vertices
 class ISubdivision {
  public:
   virtual ~ISubdivision() = 0;
 
-  // virtual Model subdivide(StaticModel in, int n_steps) = 0;
+  // virtual const Model& subdivide(const SubDivMesh& in, int n_steps) = 0;
+
+ private:
+};
+
+class LoopSubdiv : public ISubdivision {
+ public:
+  // const Model& subdivide(const SubDivMesh& in, int n_steps) override;
 
  private:
 };

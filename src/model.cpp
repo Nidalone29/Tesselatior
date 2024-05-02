@@ -1,10 +1,8 @@
 #include "model.h"
 
-#include <iostream>
 #include <filesystem>
 
 #include <assimp/Importer.hpp>
-
 #include <assimp/scene.h>
 
 #include "logger.h"
@@ -12,7 +10,7 @@
 
 Model::Model(const MESH_TYPE type, const std::filesystem::path& path,
              unsigned int flags)
-    : model_path_(path) {
+    : type_(type), model_path_(path) {
   // ASSIMP imports the mesh
   LOG_TRACE("Model(const std::filesystem::path&, unsigned int)");
   LoadMeshes(type, flags);
@@ -33,7 +31,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
   Assimp::Importer Importer;
 
   // flags set to 0 for now, probably have to set them at some point if ASSIMP
-  // doesnt deal with different file formats
+  // doesn't deal with different file formats
   const aiScene* pScene =
       Importer.ReadFile(model_path_.string().c_str(), flags);
 
@@ -49,7 +47,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
   for (int i = 0; i < pScene->mNumMeshes; i++) {
     const aiMesh* paiMesh = pScene->mMeshes[i];
 
-    const aiVector3D Zero3D(0.0F, 0.0F, 0.0F);
+    const aiVector3D zero_3d(0.0F, 0.0F, 0.0F);
 
     std::vector<Vertex> Vertices;
     std::vector<unsigned int> Indices;
@@ -59,7 +57,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
       const aiVector3D* pNormal = &(paiMesh->mNormals[j]);
       const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0)
                                         ? &(paiMesh->mTextureCoords[0][j])
-                                        : &Zero3D;
+                                        : &zero_3d;
 
       Vertices.emplace_back(glm::vec3(pPos->x, pPos->y, pPos->z),
                             glm::vec3(pNormal->x, pNormal->y, pNormal->z),
@@ -197,6 +195,10 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
 
 const std::vector<Mesh>& Model::meshes() const {
   return meshes_;
+}
+
+const MESH_TYPE& Model::mesh_type() const {
+  return type_;
 }
 
 const Transform& Model::transform() const {

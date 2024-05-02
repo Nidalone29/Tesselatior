@@ -202,6 +202,7 @@ void Application::Init() {
   terrain_shader->Init();
   shaders_.push_back(terrain_shader);
 
+  /*
   // init scenes
   Scene* flower_scene = new Scene("Flower");
   Model flower_object(MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
@@ -231,7 +232,39 @@ void Application::Init() {
   teapot_scene->AddObject(st);
   // there is probably a more efficient way of doing this
   scenes_.push_back(teapot_scene);
+  */
 
+  Scene* cube_scene = new Scene("Cubes");
+
+  // questo dovrebbe avere 8 vertici e
+  Model cube_tri_model(MESH_TYPE::TRIANGLES, "models/cube/cube.obj",
+                       aiProcess_JoinIdenticalVertices | aiProcess_DropNormals |
+                           aiProcess_GenSmoothNormals);
+  Transform cube_tri_t;
+  cube_tri_t.translate(2.0F, 0.0F, 0.0F);
+  cube_tri_model.transform(cube_tri_t);
+  StaticModel* sf = new StaticModel("cube tri", cube_tri_model, default_shader);
+  cube_scene->AddObject(sf);
+
+  Model new_cube(MESH_TYPE::TRIANGLES, "models/cube/new_cube.obj",
+                 aiProcess_JoinIdenticalVertices);
+  Transform cube_tri_t2;
+  cube_tri_t.translate(0.0F, 2.0F, 0.0F);
+  new_cube.transform(cube_tri_t);
+  StaticModel* sf34 = new StaticModel("new cube tri", new_cube, default_shader);
+  cube_scene->AddObject(sf34);
+
+  Model cube_quad_model(MESH_TYPE::QUADS, "models/cube/cube_quad.obj",
+                        aiProcess_JoinIdenticalVertices);
+  Transform flower_t;
+  flower_t.translate(-2.0F, 0.0F, 0.0F);
+  cube_quad_model.transform(flower_t);
+  // it should not be terrain shader but whatever this is temp
+  StaticModel* sf2 =
+      new StaticModel("cube quad", cube_quad_model, terrain_shader);
+  cube_scene->AddObject(sf2);
+
+  scenes_.push_back(cube_scene);
   number_of_scenes_ = static_cast<int>(scenes_.size());
 
   IMGUI_CHECKVERSION();

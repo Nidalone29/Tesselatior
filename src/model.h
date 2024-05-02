@@ -9,8 +9,8 @@
 class Model {
  public:
   Model() = default;
-  explicit Model(const MESH_TYPE type, const std::filesystem::path& path,
-                 unsigned int flags = 0);
+  Model(const MESH_TYPE type, const std::filesystem::path& path,
+        unsigned int flags = 0);
   ~Model();
   Model(const Model& other) = default;
   Model& operator=(const Model& other) = default;
@@ -18,12 +18,14 @@ class Model {
   Model& operator=(Model&& other) = default;
 
   const std::vector<Mesh>& meshes() const;
+  const MESH_TYPE& mesh_type() const;
   const Transform& transform() const;
   void transform(const Transform& transform);
 
  private:
   void LoadMeshes(const MESH_TYPE type, unsigned int flags);
 
+  MESH_TYPE type_;
   // 1 to n meshes (for static meshes)
   // only 1 for progressive, subdiv and terrain
   std::vector<Mesh> meshes_;

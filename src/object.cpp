@@ -31,11 +31,11 @@ void Terrain::Draw() const {
     glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
 
     // clang-format off
-      const Material& material = mesh.material();
-      shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
-      shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
-      shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
-      shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
+    const Material& material = mesh.material();
+    shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
+    shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
+    shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
+    shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
     // clang-format on
 
     glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
@@ -114,27 +114,16 @@ void ProgressiveMesh::name(const std::string& name) {
 
 StaticModel::StaticModel(const std::string& name, const Model& model,
                          const Shader* shader)
-    : name_(name),
-      base_model_(model),
-      shader_(shader),
-      subdiv_level_(0),
-      subdiv_algo_(sa::SubDiv::NONE),
-      current_subdiv_level_(0),
-      current_subdiv_algo_(sa::SubDiv::NONE)
-// subdiv_strategy_(nullptr)
-{
-  LOG_TRACE("StaticModel(const Model&)");
+    : name_("Static | " + name), model_(model), shader_(shader) {
+  LOG_TRACE("StaticModel(const std::string&, const Model&, const Shader*)");
 }
 
 StaticModel::~StaticModel() {
-  // delete subdiv_strategy_;
   LOG_TRACE("~StaticModel()");
 }
 
 void StaticModel::Draw() const {
-  // TODO subdiv_model_
-  const std::vector<Mesh>& meshes = base_model_.meshes();
-  // LOG_INFO("This model contains {} meshes", meshes.size());
+  const std::vector<Mesh>& meshes = model_.meshes();
 
   for (const Mesh& mesh : meshes) {
     glBindVertexArray(mesh.vao());
@@ -146,11 +135,11 @@ void StaticModel::Draw() const {
     glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
 
     // clang-format off
-      const Material& material = mesh.material();
-      shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
-      shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
-      shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
-      shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
+    const Material& material = mesh.material();
+    shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
+    shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
+    shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
+    shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
     // clang-format on
 
     glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
@@ -160,10 +149,93 @@ void StaticModel::Draw() const {
 }
 
 void StaticModel::SetRenderSettings() const {
-  glPatchParameteri(GL_PATCH_VERTICES, 3);
+  glPatchParameteri(GL_PATCH_VERTICES, to_underlying(model_.mesh_type()));
 }
 
 void StaticModel::ShowSettingsGUI() {
+  // TODO phong alpha
+  ImGui::Text("this model contains %d vertices and %d indices",
+              model_.meshes()[0].num_vertices(),
+              model_.meshes()[0].num_indices());
+}
+
+const Shader* StaticModel::GetShader() const {
+  return shader_;
+}
+
+const Model& StaticModel::model() const {
+  return model_;
+}
+
+void StaticModel::model(const Model& model) {
+  model_ = model;
+}
+
+const std::string& StaticModel::name() const {
+  return name_;
+}
+
+void StaticModel::name(const std::string& name) {
+  name_ = name;
+}
+
+// ---
+
+SubDivMesh::SubDivMesh(const std::string& name, const Model& model,
+                       const Shader* shader)
+    : name_("SubDiv | " + name),
+      base_model_(model),
+      shader_(shader),
+      subdiv_level_(0),
+      subdiv_algo_(sa::SubDiv::NONE),
+      current_subdiv_level_(0),
+      current_subdiv_algo_(sa::SubDiv::NONE)
+// subdiv_strategy_(nullptr)
+{
+  if (model.meshes().size() != 1) {
+    // invalid mesh for subdivision
+    // maybe log model mesh count and "did you intend to create a static model?"
+    throw;
+  }
+  LOG_TRACE("SubDivMesh(const std::string&, const Model&, const Shader*)");
+}
+
+SubDivMesh::~SubDivMesh() {
+  // delete subdiv_strategy_;
+  LOG_TRACE("~SubDivMesh()");
+}
+
+void SubDivMesh::Draw() const {
+  // TODO subdiv_model_
+  const Mesh& mesh = base_model_.meshes()[0];
+  // LOG_INFO("This model contains {} meshes", meshes.size());
+
+  glBindVertexArray(mesh.vao());
+
+  mesh.material().BindTextures();
+
+  glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
+  glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
+  glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
+
+  // clang-format off
+  const Material& material = mesh.material();
+  shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
+  shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
+  shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
+  shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
+  // clang-format on
+
+  glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
+
+  glBindVertexArray(0);
+}
+
+void SubDivMesh::SetRenderSettings() const {
+  glPatchParameteri(GL_PATCH_VERTICES, 3);
+}
+
+void SubDivMesh::ShowSettingsGUI() {
   ImGui::SliderInt("subdivision level", &subdiv_level_, 0, 5);
 
   if (ImGui::BeginCombo("subdivision algorithm",
@@ -191,22 +263,22 @@ void StaticModel::ShowSettingsGUI() {
   ImGui::Spacing();
 }
 
-const Shader* StaticModel::GetShader() const {
+const Shader* SubDivMesh::GetShader() const {
   return shader_;
 }
 
-const Model& StaticModel::model() const {
+const Model& SubDivMesh::model() const {
   return base_model_;
 }
 
-void StaticModel::model(const Model& model) {
+void SubDivMesh::model(const Model& model) {
   base_model_ = model;
 }
 
-const std::string& StaticModel::name() const {
+const std::string& SubDivMesh::name() const {
   return name_;
 }
 
-void StaticModel::name(const std::string& name) {
+void SubDivMesh::name(const std::string& name) {
   name_ = name;
 }

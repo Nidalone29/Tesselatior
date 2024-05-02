@@ -62,6 +62,10 @@ const unsigned int& Mesh::num_indices() const {
   return num_indices_;
 }
 
+const unsigned int& Mesh::num_vertices() const {
+  return vertices_.size();
+}
+
 const Material& Mesh::material() const {
   return material_;
 }

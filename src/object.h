@@ -63,13 +63,36 @@ class ProgressiveMesh : public IRenderableObject {
   const Shader* shader_;
 };
 
-// A Static Model that also supports uniform subdivision
-// owns and deletes a SubDiv Strategy
+// A Static Model composed of multiple meshes
 class StaticModel : public IRenderableObject {
  public:
   StaticModel(const std::string& name, const Model& model,
               const Shader* shader);
   ~StaticModel();
+
+  void Draw() const override;
+  const Shader* GetShader() const override;
+  void SetRenderSettings() const override;
+  void ShowSettingsGUI() override;
+
+  const Model& model() const override;
+  void model(const Model& model) override;
+  const std::string& name() const override;
+  void name(const std::string& name) override;
+
+ private:
+  std::string name_;
+  Model model_;
+  // Not owning
+  const Shader* shader_;
+};
+
+// A Model that also supports uniform subdivision (because there is only one
+// mesh). Owns and deletes a SubDiv Strategy
+class SubDivMesh : public IRenderableObject {
+ public:
+  SubDivMesh(const std::string& name, const Model& model, const Shader* shader);
+  ~SubDivMesh();
 
   void Draw() const override;
   const Shader* GetShader() const override;
