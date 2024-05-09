@@ -1,10 +1,8 @@
 #ifndef VERTEX_H
 #define VERTEX_H
 
-#include <vector>
 #include <glm/glm.hpp>
 
-struct Edge;
 struct Face;
 struct HalfEdge;
 
@@ -13,7 +11,7 @@ struct Vertex {
   glm::vec3 normal;       // Vertex normal (for phong shading)
   glm::vec2 text_coords;  // Coordinate di texture
 
-  HalfEdge* edge;  // one of it's outgoing halfedges
+  HalfEdge* edge;  // one of it's outgoing halfedge
 
   Vertex(float x, float y, float z, float xn, float yn, float zn, float s,
          float t);
@@ -25,10 +23,19 @@ struct HalfEdge {
   HalfEdge* next;
   HalfEdge* twin;  // opposite
   Vertex* vert;    // The vertex that the halfedge points to
-  Edge* edge;
   Face* face;
+
+  HalfEdge(Face* f) : next(nullptr), twin(nullptr), vert(nullptr), face(f) {
+    //
+  }
+
+  [[nodiscard]] bool IsBoundary() const {
+    return (twin == nullptr);
+  }
 };
 
+// with one of the halfedge we iterate in halfedge->next (3/4 times) for the
+// vertices
 struct Face {
   HalfEdge* halfedge;
 };

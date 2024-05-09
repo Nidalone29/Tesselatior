@@ -179,7 +179,7 @@ void Application::Init() {
   // TODO fix with std::make_unique and smart pointers
   renderer_ = new Renderer();
 
-  // pointers because if i copy to the vector then it's gonna destroy the local
+  // pointers because if I copy to the vector then it's gonna destroy the local
   // Shader in this scope, calling the destructor and deleting the shader
   // program
   Shader* default_shader = new Shader();  // 3 patch
@@ -202,19 +202,19 @@ void Application::Init() {
   terrain_shader->Init();
   shaders_.push_back(terrain_shader);
 
-  /*
   // init scenes
   Scene* flower_scene = new Scene("Flower");
-  Model flower_object(MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
-                      aiProcess_Triangulate);
+  Model* flower_object = new Model(
+      MESH_TYPE::TRIANGLES, "models/flower/flower.obj", aiProcess_Triangulate);
   Transform flower_t;
   flower_t.translate(0.0F, -4.0F, -15.0F);
   flower_t.rotate(-90.0F, 0.0F, 0.0F);
-  flower_object.transform(flower_t);
+  flower_object->transform(flower_t);
   StaticModel* sf = new StaticModel("flower", flower_object, default_shader);
   flower_scene->AddObject(sf);
 
-  Model dragon(MESH_TYPE::TRIANGLES, "models/dragon.obj");
+  // if this stack allocated model gets deleteted everything messes up
+  Model* dragon = new Model(MESH_TYPE::TRIANGLES, "models/dragon.obj");
   StaticModel* dragon_model = new StaticModel("dragon", dragon, default_shader);
   flower_scene->AddObject(dragon_model);
 
@@ -222,49 +222,17 @@ void Application::Init() {
   scenes_.push_back(flower_scene);
 
   Scene* teapot_scene = new Scene("Teapot");
-  Model teapot_object(MESH_TYPE::TRIANGLES, "models/teapot.obj",
-                      aiProcess_Triangulate);
+  Model* teapot_object = new Model(MESH_TYPE::TRIANGLES, "models/teapot.obj",
+                                   aiProcess_Triangulate);
   Transform teapot_t;
   teapot_t.translate(0.0F, -1.6F, -9.0F);
   teapot_t.rotate(0.0F, 0.0F, 0.0F);
-  teapot_object.transform(teapot_t);
+  teapot_object->transform(teapot_t);
   StaticModel* st = new StaticModel("teapot", teapot_object, default_shader);
   teapot_scene->AddObject(st);
   // there is probably a more efficient way of doing this
   scenes_.push_back(teapot_scene);
-  */
 
-  Scene* cube_scene = new Scene("Cubes");
-
-  // questo dovrebbe avere 8 vertici e
-  Model cube_tri_model(MESH_TYPE::TRIANGLES, "models/cube/cube.obj",
-                       aiProcess_JoinIdenticalVertices | aiProcess_DropNormals |
-                           aiProcess_GenSmoothNormals);
-  Transform cube_tri_t;
-  cube_tri_t.translate(2.0F, 0.0F, 0.0F);
-  cube_tri_model.transform(cube_tri_t);
-  StaticModel* sf = new StaticModel("cube tri", cube_tri_model, default_shader);
-  cube_scene->AddObject(sf);
-
-  Model new_cube(MESH_TYPE::TRIANGLES, "models/cube/new_cube.obj",
-                 aiProcess_JoinIdenticalVertices);
-  Transform cube_tri_t2;
-  cube_tri_t.translate(0.0F, 2.0F, 0.0F);
-  new_cube.transform(cube_tri_t);
-  StaticModel* sf34 = new StaticModel("new cube tri", new_cube, default_shader);
-  cube_scene->AddObject(sf34);
-
-  Model cube_quad_model(MESH_TYPE::QUADS, "models/cube/cube_quad.obj",
-                        aiProcess_JoinIdenticalVertices);
-  Transform flower_t;
-  flower_t.translate(-2.0F, 0.0F, 0.0F);
-  cube_quad_model.transform(flower_t);
-  // it should not be terrain shader but whatever this is temp
-  StaticModel* sf2 =
-      new StaticModel("cube quad", cube_quad_model, terrain_shader);
-  cube_scene->AddObject(sf2);
-
-  scenes_.push_back(cube_scene);
   number_of_scenes_ = static_cast<int>(scenes_.size());
 
   IMGUI_CHECKVERSION();

@@ -1,6 +1,7 @@
 #include "model.h"
 
 #include <filesystem>
+#include <map>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -28,77 +29,117 @@ Model::~Model() {
  * https://assimp.sourceforge.net/lib_html/postprocess_8h.html#a64795260b95f5a4b3f3dc1be4f52e410
  */
 void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
-  Assimp::Importer Importer;
+  using Uint = unsigned int;
+  Assimp::Importer importer;
 
   // flags set to 0 for now, probably have to set them at some point if ASSIMP
   // doesn't deal with different file formats
-  const aiScene* pScene =
-      Importer.ReadFile(model_path_.string().c_str(), flags);
+  const aiScene* p_scene =
+      importer.ReadFile(model_path_.string().c_str(), flags);
 
-  if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
-      !pScene->mRootNode) {
-    LOG_ERROR("ASSIMP Error: {}", Importer.GetErrorString());
+  if (!p_scene || p_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
+      !p_scene->mRootNode) {
+    LOG_ERROR("ASSIMP Error: {}", importer.GetErrorString());
     throw MeshImportException();
   }
 
   LOG_INFO("The number of embedded textures in the current file is: {}",
-           pScene->mNumTextures);
+           p_scene->mNumTextures);
 
-  for (int i = 0; i < pScene->mNumMeshes; i++) {
-    const aiMesh* paiMesh = pScene->mMeshes[i];
+  for (int i = 0; i < p_scene->mNumMeshes; i++) {
+    const aiMesh* pai_mesh = p_scene->mMeshes[i];
 
     const aiVector3D zero_3d(0.0F, 0.0F, 0.0F);
 
-    std::vector<Vertex> Vertices;
-    std::vector<unsigned int> Indices;
+    // I only care about the vertices for being contiguous since it is required
+    // for OpenGL for rendering
+    std::vector<Vertex>* vertices = new std::vector<Vertex>();
+    std::vector<HalfEdge*>* halfedges = new std::vector<HalfEdge*>();
+    std::vector<Face*>* faces = new std::vector<Face*>();
+    std::vector<Uint> indices;
 
-    for (unsigned int j = 0; j < paiMesh->mNumVertices; j++) {
-      const aiVector3D* pPos = &(paiMesh->mVertices[j]);
-      const aiVector3D* pNormal = &(paiMesh->mNormals[j]);
-      const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0)
-                                        ? &(paiMesh->mTextureCoords[0][j])
-                                        : &zero_3d;
+    vertices->reserve(pai_mesh->mNumVertices);
+    halfedges->reserve(to_underlying(type) * pai_mesh->mNumFaces);
+    faces->reserve(pai_mesh->mNumFaces);
+    indices.reserve(to_underlying(type) * pai_mesh->mNumFaces);
 
-      Vertices.emplace_back(glm::vec3(pPos->x, pPos->y, pPos->z),
-                            glm::vec3(pNormal->x, pNormal->y, pNormal->z),
-                            glm::vec2(pTexCoord->x, pTexCoord->y));
+    // std::vector<unsigned int> indices;
+    // indices.reserve();
+
+    for (Uint j = 0; j < pai_mesh->mNumVertices; j++) {
+      const aiVector3D* p_pos = &(pai_mesh->mVertices[j]);
+      const aiVector3D* p_normal = &(pai_mesh->mNormals[j]);
+      const aiVector3D* p_tex_coord = pai_mesh->HasTextureCoords(0)
+                                          ? &(pai_mesh->mTextureCoords[0][j])
+                                          : &zero_3d;
+
+      vertices->emplace_back(glm::vec3(p_pos->x, p_pos->y, p_pos->z),
+                             glm::vec3(p_normal->x, p_normal->y, p_normal->z),
+                             glm::vec2(p_tex_coord->x, p_tex_coord->y));
     }
 
-    for (unsigned int j = 0; j < paiMesh->mNumFaces; j++) {
-      const aiFace& Face = paiMesh->mFaces[j];
+    // edges map
+    std::map<std::pair<Uint, Uint>, HalfEdge*> edges_m;
+
+    for (Uint j = 0; j < pai_mesh->mNumFaces; j++) {
+      const aiFace& ai_face = pai_mesh->mFaces[j];
+
+      std::pair<Uint, Uint> x;
+      std::pair<Uint, Uint> s;  // swapped
+      std::vector<int> current_indices;
+      Face* f = new Face();
+      faces->push_back(f);
 
       switch (type) {
         case MESH_TYPE::TRIANGLES:
-          assert(Face.mNumIndices == to_underlying(MESH_TYPE::TRIANGLES));
-          Indices.push_back(Face.mIndices[0]);
-          Indices.push_back(Face.mIndices[1]);
-          Indices.push_back(Face.mIndices[2]);
+          assert(ai_face.mNumIndices == to_underlying(MESH_TYPE::TRIANGLES));
+          current_indices = {0, 1, 2};
           break;
         case MESH_TYPE::QUADS:
-          assert(Face.mNumIndices == to_underlying(MESH_TYPE::QUADS));
+          assert(ai_face.mNumIndices == to_underlying(MESH_TYPE::QUADS));
           // For some reason the first 2 indices need to be swapped otherwise
           // the hardware tessellator does not triangulate the quad properly
-          Indices.push_back(Face.mIndices[1]);
-          Indices.push_back(Face.mIndices[0]);
-          Indices.push_back(Face.mIndices[2]);
-          Indices.push_back(Face.mIndices[3]);
+          current_indices = {1, 0, 2, 3};
           break;
         default:
+          // TODO unsupported polygon type
           throw;
           break;
       }
-    }
 
-    unsigned int num_indices_ = Indices.size();
+      HalfEdge* current_hf;
+      for (int k = 0; k < current_indices.size(); k++) {
+        indices.push_back(ai_face.mIndices[k]);
+
+        x = {ai_face.mIndices[k],
+             ai_face.mIndices[(k + 1) % to_underlying(type)]};
+        s = {x.second, x.first};
+        current_hf = new HalfEdge(f);
+        edges_m[x] = current_hf;
+        f->halfedge = current_hf;
+
+        // This works because I added the vertices in the same order of Assimp
+        current_hf->vert = &vertices->at(x.second);
+        vertices->at(x.first).edge = current_hf;
+
+        if (edges_m.find(s) != edges_m.end()) {
+          edges_m[x]->twin = edges_m[s];
+          edges_m[s]->twin = edges_m[x];
+        }
+
+        halfedges->push_back(current_hf);
+        current_hf = current_hf->next;
+      }
+    }
 
     // NOTE A mesh has one and only one material
 
     // NOTE If a material has not been found by Assimp, it loads a
-    // "DefaultMaterial" (with ambient 0, diffuse 0.6 and specular 0.6... and i
+    // "DefaultMaterial" (with ambient 0, diffuse 0.6 and specular 0.6... and I
     // think it even changes from format to format, for example a .blend file
     // has a different default material than a .obj file)
-    const unsigned int material_i = paiMesh->mMaterialIndex;
-    const aiMaterial* material = pScene->mMaterials[material_i];
+    const unsigned int material_i = pai_mesh->mMaterialIndex;
+    const aiMaterial* material = p_scene->mMaterials[material_i];
     LOG_INFO("Processing material: {}", material->GetName().C_Str());
     Material x;
 
@@ -126,7 +167,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
                       diffuse_path) == aiReturn_SUCCESS) {
       x.diffuse_reflectivity(glm::vec3(1.0F, 1.0F, 1.0F));
       if (const auto* _texture =
-              pScene->GetEmbeddedTexture(diffuse_path.C_Str())) {
+              p_scene->GetEmbeddedTexture(diffuse_path.C_Str())) {
         // returned pointer is not null, aka the texture is embedded
         // the texture is compressed (png, jpeg...), so we load it with stb
         if (_texture->mHeight == 0) {
@@ -159,7 +200,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
     if (material->Get(AI_MATKEY_TEXTURE(aiTextureType_DISPLACEMENT, 0),
                       displacement_path) == aiReturn_SUCCESS) {
       if (const auto* _texture =
-              pScene->GetEmbeddedTexture(displacement_path.C_Str())) {
+              p_scene->GetEmbeddedTexture(displacement_path.C_Str())) {
         // returned pointer is not null, aka the texture is embedded
         // the texture is compressed (png, jpeg...), so we load it with stb
         if (_texture->mHeight == 0) {
@@ -174,10 +215,10 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
           // x.AddTexture(Texture(TEXTURE_TYPE::DISPLACEMENT));
         }
       } else {
-        //! For some reason ASSIMP does NOT find a diffuse texture in a obj
-        //! material file (even if specified with disp as per
+        //! For some reason ASSIMP does NOT find a displacement  texture in a
+        //! obj material file (even if it is specified with disp as per
         //! https://en.wikipedia.org/wiki/Wavefront_.obj_file#Texture_maps)
-        // the texture could be an external file, so we try to load it
+        // The texture could be an external file, so we try to load it
         std::filesystem::path texture_path = model_path_;
         texture_path.replace_filename(displacement_path.data);
         // if we can't find a texture with this path, then there will still be
@@ -189,7 +230,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
       // Texture texture(Texture(TEXTURE_TYPE::DISPLACEMENT));
     }
 
-    meshes_.emplace_back(Vertices, Indices, num_indices_, x);
+    meshes_.emplace_back(vertices, halfedges, faces, indices, x);
   }
 }
 

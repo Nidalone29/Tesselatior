@@ -15,10 +15,11 @@ Terrain::Terrain() : shader_(nullptr) {
 
 Terrain::~Terrain() {  //
   LOG_TRACE("~Terrain()");
+  delete model_;
 }
 
 void Terrain::Draw() const {
-  const std::vector<Mesh>& meshes = model_.meshes();
+  const std::vector<Mesh>& meshes = model_->meshes();
   // LOG_INFO("This model contains {} meshes", meshes.size());
 
   for (const Mesh& mesh : meshes) {
@@ -56,12 +57,8 @@ void Terrain::ShowSettingsGUI() {
   //
 }
 
-const Model& Terrain::model() const {
+const Model* Terrain::model() const {
   return model_;
-}
-
-void Terrain::model(const Model& model) {
-  model_ = model;
 }
 
 const std::string& Terrain::name() const {
@@ -80,6 +77,7 @@ ProgressiveMesh::ProgressiveMesh() : shader_(nullptr) {
 
 ProgressiveMesh::~ProgressiveMesh() {  //
   LOG_TRACE("~ProgressiveMesh()");
+  delete model_;
 }
 
 void ProgressiveMesh::Draw() const {}
@@ -94,12 +92,8 @@ const Shader* ProgressiveMesh::GetShader() const {
   return shader_;
 }
 
-const Model& ProgressiveMesh::model() const {
+const Model* ProgressiveMesh::model() const {
   return model_;
-}
-
-void ProgressiveMesh::model(const Model& model) {
-  model_ = model;
 }
 
 const std::string& ProgressiveMesh::name() const {
@@ -112,7 +106,7 @@ void ProgressiveMesh::name(const std::string& name) {
 
 // ---
 
-StaticModel::StaticModel(const std::string& name, const Model& model,
+StaticModel::StaticModel(const std::string& name, Model* model,
                          const Shader* shader)
     : name_("Static | " + name), model_(model), shader_(shader) {
   LOG_TRACE("StaticModel(const std::string&, const Model&, const Shader*)");
@@ -120,10 +114,11 @@ StaticModel::StaticModel(const std::string& name, const Model& model,
 
 StaticModel::~StaticModel() {
   LOG_TRACE("~StaticModel()");
+  delete model_;
 }
 
 void StaticModel::Draw() const {
-  const std::vector<Mesh>& meshes = model_.meshes();
+  const std::vector<Mesh>& meshes = model_->meshes();
 
   for (const Mesh& mesh : meshes) {
     glBindVertexArray(mesh.vao());
@@ -149,26 +144,22 @@ void StaticModel::Draw() const {
 }
 
 void StaticModel::SetRenderSettings() const {
-  glPatchParameteri(GL_PATCH_VERTICES, to_underlying(model_.mesh_type()));
+  glPatchParameteri(GL_PATCH_VERTICES, to_underlying(model_->mesh_type()));
 }
 
 void StaticModel::ShowSettingsGUI() {
   // TODO phong alpha
   ImGui::Text("this model contains %d vertices and %d indices",
-              model_.meshes()[0].num_vertices(),
-              model_.meshes()[0].num_indices());
+              model_->meshes()[0].num_vertices(),
+              model_->meshes()[0].num_indices());
 }
 
 const Shader* StaticModel::GetShader() const {
   return shader_;
 }
 
-const Model& StaticModel::model() const {
+const Model* StaticModel::model() const {
   return model_;
-}
-
-void StaticModel::model(const Model& model) {
-  model_ = model;
 }
 
 const std::string& StaticModel::name() const {
@@ -181,7 +172,7 @@ void StaticModel::name(const std::string& name) {
 
 // ---
 
-SubDivMesh::SubDivMesh(const std::string& name, const Model& model,
+SubDivMesh::SubDivMesh(const std::string& name, Model* model,
                        const Shader* shader)
     : name_("SubDiv | " + name),
       base_model_(model),
@@ -192,7 +183,7 @@ SubDivMesh::SubDivMesh(const std::string& name, const Model& model,
       current_subdiv_algo_(sa::SubDiv::NONE)
 // subdiv_strategy_(nullptr)
 {
-  if (model.meshes().size() != 1) {
+  if (model->meshes().size() != 1) {
     // invalid mesh for subdivision
     // maybe log model mesh count and "did you intend to create a static model?"
     throw;
@@ -201,13 +192,15 @@ SubDivMesh::SubDivMesh(const std::string& name, const Model& model,
 }
 
 SubDivMesh::~SubDivMesh() {
-  // delete subdiv_strategy_;
   LOG_TRACE("~SubDivMesh()");
+  delete base_model_;
+  // delete subdiv_model_;
+  // delete subdiv_strategy_;
 }
 
 void SubDivMesh::Draw() const {
   // TODO subdiv_model_
-  const Mesh& mesh = base_model_.meshes()[0];
+  const Mesh& mesh = base_model_->meshes()[0];
   // LOG_INFO("This model contains {} meshes", meshes.size());
 
   glBindVertexArray(mesh.vao());
@@ -263,16 +256,12 @@ void SubDivMesh::ShowSettingsGUI() {
   ImGui::Spacing();
 }
 
-const Shader* SubDivMesh::GetShader() const {
-  return shader_;
-}
-
-const Model& SubDivMesh::model() const {
+const Model* SubDivMesh::model() const {
   return base_model_;
 }
 
-void SubDivMesh::model(const Model& model) {
-  base_model_ = model;
+const Shader* SubDivMesh::GetShader() const {
+  return shader_;
 }
 
 const std::string& SubDivMesh::name() const {

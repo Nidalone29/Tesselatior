@@ -13,8 +13,7 @@ class IRenderableObject {
   virtual void SetRenderSettings() const = 0;
   virtual void ShowSettingsGUI() = 0;
 
-  virtual const Model& model() const = 0;
-  virtual void model(const Model& model) = 0;
+  virtual const Model* model() const = 0;
   virtual const std::string& name() const = 0;
   virtual void name(const std::string& name) = 0;
 };
@@ -29,14 +28,13 @@ class Terrain : public IRenderableObject {
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
 
-  const Model& model() const override;
-  void model(const Model& model) override;
+  const Model* model() const override;
   const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
   std::string name_;
-  Model model_;
+  Model* model_;
   // Not owning
   const Shader* shader_;
 };
@@ -51,14 +49,13 @@ class ProgressiveMesh : public IRenderableObject {
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
 
-  const Model& model() const override;
-  void model(const Model& model) override;
+  const Model* model() const override;
   const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
   std::string name_;
-  Model model_;
+  Model* model_;
   // Not owning
   const Shader* shader_;
 };
@@ -66,8 +63,7 @@ class ProgressiveMesh : public IRenderableObject {
 // A Static Model composed of multiple meshes
 class StaticModel : public IRenderableObject {
  public:
-  StaticModel(const std::string& name, const Model& model,
-              const Shader* shader);
+  StaticModel(const std::string& name, Model* model, const Shader* shader);
   ~StaticModel();
 
   void Draw() const override;
@@ -75,14 +71,13 @@ class StaticModel : public IRenderableObject {
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
 
-  const Model& model() const override;
-  void model(const Model& model) override;
+  const Model* model() const override;
   const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
   std::string name_;
-  Model model_;
+  Model* model_;
   // Not owning
   const Shader* shader_;
 };
@@ -91,7 +86,7 @@ class StaticModel : public IRenderableObject {
 // mesh). Owns and deletes a SubDiv Strategy
 class SubDivMesh : public IRenderableObject {
  public:
-  SubDivMesh(const std::string& name, const Model& model, const Shader* shader);
+  SubDivMesh(const std::string& name, Model* model, const Shader* shader);
   ~SubDivMesh();
 
   void Draw() const override;
@@ -99,8 +94,7 @@ class SubDivMesh : public IRenderableObject {
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
 
-  const Model& model() const override;
-  void model(const Model& model) override;
+  const Model* model() const override;
   const std::string& name() const override;
   void name(const std::string& name) override;
 
@@ -108,11 +102,11 @@ class SubDivMesh : public IRenderableObject {
   std::string name_;
   // To submit to the subdivision algorithm (it always re-starts from the base
   // model because it's easier)
-  Model base_model_;
+  Model* base_model_;
   // Not owning
   const Shader* shader_;
   // To be rendered
-  Model subdiv_model_;
+  Model* subdiv_model_;
   // To be submitted to subdivision algorithm
   int subdiv_level_;
   sa::SubDiv subdiv_algo_;

@@ -33,21 +33,20 @@ class Mesh {
  public:
   Mesh() = delete;  // can't create an empty mesh
 
-  /**
-   * @brief Construct a new Mesh object
-   *
-   * @param vertices
-   * @param indices
-   * @param material
-   */
-  Mesh(const std::vector<Vertex>& vertices,
-       const std::vector<unsigned int>& indices, const unsigned int num_indices,
+  Mesh(std::vector<Vertex>* vertices, std::vector<HalfEdge*>* halfedges,
+       std::vector<Face*>* faces, std::vector<unsigned int> indices,
        const Material& material);
   ~Mesh();
 
+  // TODO deep copy
+  Mesh(const Mesh& other) = delete;
+  Mesh& operator=(const Mesh& other) = delete;
+  Mesh(Mesh&& other) = default;
+  Mesh& operator=(Mesh&& other) = default;
+
   const GLuint& vao() const;
-  const unsigned int& num_indices() const;
-  const unsigned int& num_vertices() const;
+  unsigned int num_indices() const;
+  unsigned int num_vertices() const;
   const Material& material() const;
   void material(const Material& material);
 
@@ -56,11 +55,11 @@ class Mesh {
   GLuint VBO_;  // Vertex Buffer Object
   GLuint IBO_;  // Index Buffer Object
 
-  std::vector<Vertex> vertices_;
-  std::vector<HalfEdge> half_edges_;
+  std::vector<Vertex>* vertices_;
+  std::vector<HalfEdge*>* half_edges_;
+  std::vector<Face*>* faces_;
 
   std::vector<unsigned int> indices_;
-  unsigned int num_indices_;
 
   // Rendering properties
   Material material_;

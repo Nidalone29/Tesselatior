@@ -12,10 +12,10 @@ class Model {
   Model(const MESH_TYPE type, const std::filesystem::path& path,
         unsigned int flags = 0);
   ~Model();
-  Model(const Model& other) = default;
-  Model& operator=(const Model& other) = default;
-  Model(Model&& other) = default;
-  Model& operator=(Model&& other) = default;
+  Model(const Model& other) = delete;
+  Model& operator=(const Model& other) = delete;
+  Model(Model&& other) = delete;
+  Model& operator=(Model&& other) = delete;
 
   const std::vector<Mesh>& meshes() const;
   const MESH_TYPE& mesh_type() const;

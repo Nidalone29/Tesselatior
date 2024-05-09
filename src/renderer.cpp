@@ -72,7 +72,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera) const {
                             static_cast<float>(tess_level_));
     shader->SetUniformFloat("displacement_height", displacement_height_);
 
-    shader->SetUniformMat4("Model2World", o->model().transform().matrix());
+    shader->SetUniformMat4("Model2World", o->model()->transform().matrix());
 
     // clang-format off
     const AmbientLight& ambient_light = scene.ambient_light();
