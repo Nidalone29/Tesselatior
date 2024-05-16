@@ -2,6 +2,7 @@
 #define MODEL_H
 
 #include <filesystem>
+#include <initializer_list>
 
 #include "mesh.h"
 #include "transform.h"
@@ -18,6 +19,7 @@ class Model {
   Model& operator=(Model&& other) = delete;
 
   const std::vector<Mesh>& meshes() const;
+  void meshes(const std::initializer_list<Mesh>& in);
   const MESH_TYPE& mesh_type() const;
   const Transform& transform() const;
   void transform(const Transform& transform);

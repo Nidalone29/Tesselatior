@@ -179,10 +179,10 @@ SubDivMesh::SubDivMesh(const std::string& name, Model* model,
       shader_(shader),
       subdiv_level_(0),
       subdiv_algo_(sa::SubDiv::NONE),
+      subdiv_model_(nullptr),
+      subdiv_strategy_(nullptr),
       current_subdiv_level_(0),
-      current_subdiv_algo_(sa::SubDiv::NONE)
-// subdiv_strategy_(nullptr)
-{
+      current_subdiv_algo_(sa::SubDiv::NONE) {
   if (model->meshes().size() != 1) {
     // invalid mesh for subdivision
     // maybe log model mesh count and "did you intend to create a static model?"
@@ -194,13 +194,13 @@ SubDivMesh::SubDivMesh(const std::string& name, Model* model,
 SubDivMesh::~SubDivMesh() {
   LOG_TRACE("~SubDivMesh()");
   delete base_model_;
-  // delete subdiv_model_;
-  // delete subdiv_strategy_;
+  delete subdiv_model_;
+  delete subdiv_strategy_;
 }
 
 void SubDivMesh::Draw() const {
   // TODO subdiv_model_
-  const Mesh& mesh = base_model_->meshes()[0];
+  const Mesh& mesh = base_model_->meshes().at(0);
   // LOG_INFO("This model contains {} meshes", meshes.size());
 
   glBindVertexArray(mesh.vao());
@@ -248,9 +248,22 @@ void SubDivMesh::ShowSettingsGUI() {
   ImGui::Text("Current subdiv level is %d", current_subdiv_level_);
 
   if (ImGui::Button("Apply Subdivision!")) {
-    // TODO call to subdivision
+    delete subdiv_strategy_;
+    delete subdiv_model_;
+
     current_subdiv_algo_ = subdiv_algo_;
     current_subdiv_level_ = subdiv_level_;
+
+    switch (current_subdiv_algo_) {
+      case sa::SubDiv::LOOP:
+        subdiv_strategy_ = new LoopSubdiv();
+        break;
+      default:
+        throw;
+        break;
+    }
+    subdiv_model_ =
+        subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
   }
 
   ImGui::Spacing();

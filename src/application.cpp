@@ -215,7 +215,7 @@ void Application::Init() {
 
   // if this stack allocated model gets deleteted everything messes up
   Model* dragon = new Model(MESH_TYPE::TRIANGLES, "models/dragon.obj");
-  StaticModel* dragon_model = new StaticModel("dragon", dragon, default_shader);
+  SubDivMesh* dragon_model = new SubDivMesh("dragon", dragon, default_shader);
   flower_scene->AddObject(dragon_model);
 
   //  there is probably a more efficient way of doing this

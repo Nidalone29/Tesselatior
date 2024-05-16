@@ -38,9 +38,8 @@ class Mesh {
        const Material& material);
   ~Mesh();
 
-  // TODO deep copy
-  Mesh(const Mesh& other) = delete;
-  Mesh& operator=(const Mesh& other) = delete;
+  Mesh(const Mesh& other);
+  Mesh& operator=(const Mesh& other);
   Mesh(Mesh&& other) = default;
   Mesh& operator=(Mesh&& other) = default;
 
@@ -51,6 +50,9 @@ class Mesh {
   void material(const Material& material);
 
  private:
+  void GenerateOpenGLBuffers();
+  void ClearOpenGLBuffers();
+
   GLuint VAO_;  // Vertex Array Object
   GLuint VBO_;  // Vertex Buffer Object
   GLuint IBO_;  // Index Buffer Object

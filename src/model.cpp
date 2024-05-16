@@ -63,9 +63,6 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
     faces->reserve(pai_mesh->mNumFaces);
     indices.reserve(to_underlying(type) * pai_mesh->mNumFaces);
 
-    // std::vector<unsigned int> indices;
-    // indices.reserve();
-
     for (Uint j = 0; j < pai_mesh->mNumVertices; j++) {
       const aiVector3D* p_pos = &(pai_mesh->mVertices[j]);
       const aiVector3D* p_normal = &(pai_mesh->mNormals[j]);
@@ -236,6 +233,10 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
 
 const std::vector<Mesh>& Model::meshes() const {
   return meshes_;
+}
+
+void Model::meshes(const std::initializer_list<Mesh>& in) {
+  meshes_ = in;
 }
 
 const MESH_TYPE& Model::mesh_type() const {

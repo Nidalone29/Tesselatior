@@ -7,9 +7,9 @@ struct Face;
 struct HalfEdge;
 
 struct Vertex {
-  glm::vec3 position;     // Coordinate spaziali
-  glm::vec3 normal;       // Vertex normal (for phong shading)
-  glm::vec2 text_coords;  // Coordinate di texture
+  glm::vec3 position;     // spatial coordinates
+  glm::vec3 normal;       // vertex normal (for phong shading)
+  glm::vec2 text_coords;  // texture coordinates
 
   HalfEdge* edge;  // one of it's outgoing halfedge
 

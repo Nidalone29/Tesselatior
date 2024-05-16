@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+#include "../model.h"
+
 // sa stands for subdivision algorithms
 namespace sa {
 
@@ -37,14 +39,14 @@ class ISubdivision {
  public:
   virtual ~ISubdivision() = 0;
 
-  // virtual const Model& subdivide(const SubDivMesh& in, int n_steps) = 0;
+  virtual Mesh* subdivide(const Model* in, int n_steps) = 0;
 
  private:
 };
 
 class LoopSubdiv : public ISubdivision {
  public:
-  // const Model& subdivide(const SubDivMesh& in, int n_steps) override;
+  Mesh* subdivide(const Model* in, int n_steps) override;
 
  private:
 };

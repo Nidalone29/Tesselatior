@@ -106,14 +106,14 @@ class SubDivMesh : public IRenderableObject {
   // Not owning
   const Shader* shader_;
   // To be rendered
-  Model* subdiv_model_;
+  Mesh* subdiv_model_;
   // To be submitted to subdivision algorithm
   int subdiv_level_;
   sa::SubDiv subdiv_algo_;
   // To be shown in UI
   int current_subdiv_level_;
   sa::SubDiv current_subdiv_algo_;
-  // ISubdivision* subdiv_strategy_;
+  ISubdivision* subdiv_strategy_;
 };
 
 #endif  // OBJECT_H
