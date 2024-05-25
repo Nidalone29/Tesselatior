@@ -33,9 +33,9 @@ class Mesh {
  public:
   Mesh() = delete;  // can't create an empty mesh
 
-  Mesh(std::vector<Vertex>* vertices, std::vector<HalfEdge*>* halfedges,
-       std::vector<Face*>* faces, std::vector<unsigned int> indices,
-       const Material& material);
+  Mesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
+       std::vector<HalfEdge*>* halfedges, std::vector<Face*>* faces,
+       std::vector<Edge*>* edges, const Material& material);
   ~Mesh();
 
   Mesh(const Mesh& other);
@@ -46,22 +46,32 @@ class Mesh {
   const GLuint& vao() const;
   unsigned int num_indices() const;
   unsigned int num_vertices() const;
+
+  std::vector<Vertex*>* vertices();
+  std::vector<HalfEdge*>* half_edges();
+  std::vector<Face*>* faces();
+  std::vector<Edge*>* edges();
+
   const Material& material() const;
   void material(const Material& material);
 
+  void split(Edge* e);
+
  private:
+  [[nodiscard]] std::vector<unsigned int>* CreateIndexBuffer() const;
+  [[nodiscard]] std::vector<Vertex>* CreateVertexBuffer() const;
   void GenerateOpenGLBuffers();
+
   void ClearOpenGLBuffers();
 
   GLuint VAO_;  // Vertex Array Object
   GLuint VBO_;  // Vertex Buffer Object
   GLuint IBO_;  // Index Buffer Object
 
-  std::vector<Vertex>* vertices_;
+  std::vector<Vertex*>* vertices_;
   std::vector<HalfEdge*>* half_edges_;
   std::vector<Face*>* faces_;
-
-  std::vector<unsigned int> indices_;
+  std::vector<Edge*>* edges_;
 
   // Rendering properties
   Material material_;

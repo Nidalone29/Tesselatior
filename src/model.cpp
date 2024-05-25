@@ -53,15 +53,14 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
 
     // I only care about the vertices for being contiguous since it is required
     // for OpenGL for rendering
-    std::vector<Vertex>* vertices = new std::vector<Vertex>();
+    std::vector<Vertex*>* vertices = new std::vector<Vertex*>();
     std::vector<HalfEdge*>* halfedges = new std::vector<HalfEdge*>();
     std::vector<Face*>* faces = new std::vector<Face*>();
-    std::vector<Uint> indices;
+    std::vector<Edge*>* edges = new std::vector<Edge*>();
 
     vertices->reserve(pai_mesh->mNumVertices);
     halfedges->reserve(to_underlying(type) * pai_mesh->mNumFaces);
     faces->reserve(pai_mesh->mNumFaces);
-    indices.reserve(to_underlying(type) * pai_mesh->mNumFaces);
 
     for (Uint j = 0; j < pai_mesh->mNumVertices; j++) {
       const aiVector3D* p_pos = &(pai_mesh->mVertices[j]);
@@ -70,9 +69,10 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
                                           ? &(pai_mesh->mTextureCoords[0][j])
                                           : &zero_3d;
 
-      vertices->emplace_back(glm::vec3(p_pos->x, p_pos->y, p_pos->z),
+      Vertex* x = new Vertex(glm::vec3(p_pos->x, p_pos->y, p_pos->z),
                              glm::vec3(p_normal->x, p_normal->y, p_normal->z),
                              glm::vec2(p_tex_coord->x, p_tex_coord->y));
+      vertices->push_back(x);
     }
 
     // edges map
@@ -83,7 +83,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
 
       std::pair<Uint, Uint> x;
       std::pair<Uint, Uint> s;  // swapped
-      std::vector<int> current_indices;
+      std::vector<Uint> current_indices;
       Face* f = new Face();
       faces->push_back(f);
 
@@ -105,30 +105,43 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
       }
 
       HalfEdge* current_hf;
+      std::vector<HalfEdge*> faces_halfedges;
       for (int k = 0; k < current_indices.size(); k++) {
-        indices.push_back(ai_face.mIndices[k]);
-
         x = {ai_face.mIndices[k],
              ai_face.mIndices[(k + 1) % to_underlying(type)]};
         s = {x.second, x.first};
         current_hf = new HalfEdge(f);
-        edges_m[x] = current_hf;
+        faces_halfedges.push_back(current_hf);
         f->halfedge = current_hf;
 
         // This works because I added the vertices in the same order of Assimp
-        current_hf->vert = &vertices->at(x.second);
-        vertices->at(x.first).edge = current_hf;
+        current_hf->vert = vertices->at(x.second);
+        vertices->at(x.first)->halfedge = current_hf;
 
         if (edges_m.find(s) != edges_m.end()) {
-          edges_m[x]->twin = edges_m[s];
-          edges_m[s]->twin = edges_m[x];
+          current_hf->twin = edges_m[s];
+          edges_m[s]->twin = current_hf;
+        } else {
+          edges_m[x] = current_hf;
         }
 
         halfedges->push_back(current_hf);
         current_hf = current_hf->next;
       }
+
+      // setting the next
+      for (int z = 0; z < faces_halfedges.size(); z++) {
+        faces_halfedges[z]->next =
+            faces_halfedges[(z + 1) % faces_halfedges.size()];
+      }
     }
 
+    edges->reserve(edges_m.size());
+    for (const auto [_, he] : edges_m) {
+      Edge* e = new Edge();
+      e->halfedge = he;
+      edges->push_back(e);
+    }
     // NOTE A mesh has one and only one material
 
     // NOTE If a material has not been found by Assimp, it loads a
@@ -227,7 +240,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
       // Texture texture(Texture(TEXTURE_TYPE::DISPLACEMENT));
     }
 
-    meshes_.emplace_back(vertices, halfedges, faces, indices, x);
+    meshes_.emplace_back(type, vertices, halfedges, faces, edges, x);
   }
 }
 

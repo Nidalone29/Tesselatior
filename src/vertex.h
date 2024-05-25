@@ -11,7 +11,7 @@ struct Vertex {
   glm::vec3 normal;       // vertex normal (for phong shading)
   glm::vec2 text_coords;  // texture coordinates
 
-  HalfEdge* edge;  // one of it's outgoing halfedge
+  HalfEdge* halfedge;  // one of it's outgoing halfedge
 
   Vertex(float x, float y, float z, float xn, float yn, float zn, float s,
          float t);
@@ -25,7 +25,8 @@ struct HalfEdge {
   Vertex* vert;    // The vertex that the halfedge points to
   Face* face;
 
-  HalfEdge(Face* f) : next(nullptr), twin(nullptr), vert(nullptr), face(f) {
+  explicit HalfEdge(Face* f)
+      : next(nullptr), twin(nullptr), vert(nullptr), face(f) {
     //
   }
 
@@ -37,6 +38,10 @@ struct HalfEdge {
 // with one of the halfedge we iterate in halfedge->next (3/4 times) for the
 // vertices
 struct Face {
+  HalfEdge* halfedge;
+};
+
+struct Edge {
   HalfEdge* halfedge;
 };
 

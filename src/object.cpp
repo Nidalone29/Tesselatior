@@ -262,8 +262,8 @@ void SubDivMesh::ShowSettingsGUI() {
         throw;
         break;
     }
-    subdiv_model_ =
-        subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
+    // subdiv_model_ =
+    //    subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
   }
 
   ImGui::Spacing();
