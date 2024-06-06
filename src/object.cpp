@@ -183,12 +183,13 @@ SubDivMesh::SubDivMesh(const std::string& name, Model* model,
       subdiv_strategy_(nullptr),
       current_subdiv_level_(0),
       current_subdiv_algo_(sa::SubDiv::NONE) {
+  LOG_TRACE("SubDivMesh(const std::string&, const Model&, const Shader*)");
   if (model->meshes().size() != 1) {
     // invalid mesh for subdivision
     // maybe log model mesh count and "did you intend to create a static model?"
     throw;
   }
-  LOG_TRACE("SubDivMesh(const std::string&, const Model&, const Shader*)");
+  subdiv_model_ = new Mesh(model->meshes()[0]);
 }
 
 SubDivMesh::~SubDivMesh() {
@@ -200,26 +201,26 @@ SubDivMesh::~SubDivMesh() {
 
 void SubDivMesh::Draw() const {
   // TODO subdiv_model_
-  const Mesh& mesh = base_model_->meshes().at(0);
+  const Mesh* mesh = subdiv_model_;
   // LOG_INFO("This model contains {} meshes", meshes.size());
 
-  glBindVertexArray(mesh.vao());
+  glBindVertexArray(mesh->vao());
 
-  mesh.material().BindTextures();
+  mesh->material().BindTextures();
 
   glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
   glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
   glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
 
   // clang-format off
-  const Material& material = mesh.material();
+  const Material& material = mesh->material();
   shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
   shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
   shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
   shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
   // clang-format on
 
-  glDrawElements(GL_PATCHES, mesh.num_indices(), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_PATCHES, mesh->num_indices(), GL_UNSIGNED_INT, nullptr);
 
   glBindVertexArray(0);
 }
@@ -255,6 +256,9 @@ void SubDivMesh::ShowSettingsGUI() {
     current_subdiv_level_ = subdiv_level_;
 
     switch (current_subdiv_algo_) {
+      case sa::SubDiv::NONE:
+        LOG_INFO("No subdiv selected");
+        break;
       case sa::SubDiv::LOOP:
         subdiv_strategy_ = new LoopSubdiv();
         break;
@@ -262,10 +266,19 @@ void SubDivMesh::ShowSettingsGUI() {
         throw;
         break;
     }
-    // subdiv_model_ =
-    //    subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
+    subdiv_model_ =
+        subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
   }
 
+  ImGui::Spacing();
+
+  ImGui::Text("this subdivided model contains %d vertices and %d indices",
+              subdiv_model_->num_vertices(), subdiv_model_->num_indices());
+
+  ImGui::Text("this subdivided model contains %d edges",
+              subdiv_model_->edges()->size());
+  ImGui::Text("this subdivided model contains %d faces",
+              subdiv_model_->faces()->size());
   ImGui::Spacing();
 }
 

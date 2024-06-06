@@ -203,6 +203,7 @@ void Application::Init() {
   shaders_.push_back(terrain_shader);
 
   // init scenes
+  /*
   Scene* flower_scene = new Scene("Flower");
   Model* flower_object = new Model(
       MESH_TYPE::TRIANGLES, "models/flower/flower.obj", aiProcess_Triangulate);
@@ -232,7 +233,33 @@ void Application::Init() {
   teapot_scene->AddObject(st);
   // there is probably a more efficient way of doing this
   scenes_.push_back(teapot_scene);
+  */
 
+  Scene* cube_scene = new Scene("Cubes");
+
+  // questo dovrebbe avere 8 vertici e
+  Model* cube_tri_model =
+      new Model(MESH_TYPE::TRIANGLES, "models/cube/cube.obj",
+                aiProcess_JoinIdenticalVertices);
+  Transform cube_tri_t;
+  cube_tri_t.translate(5.0F, 0.0F, 0.0F);
+  cube_tri_model->transform(cube_tri_t);
+  SubDivMesh* sf = new SubDivMesh("cube tri", cube_tri_model, default_shader);
+  cube_scene->AddObject(sf);
+
+  Model* new_cube = new Model(MESH_TYPE::TRIANGLES, "models/sphere2.obj");
+  Transform cube_tri_t2;
+  cube_tri_t.translate(-5.0F, 0.0F, 0.0F);
+  new_cube->transform(cube_tri_t);
+  SubDivMesh* sf34 = new SubDivMesh("sfera", new_cube, default_shader);
+  cube_scene->AddObject(sf34);
+
+  Model* plane = new Model(MESH_TYPE::TRIANGLES, "models/plane_trig.obj",
+                           aiProcess_JoinIdenticalVertices);
+  SubDivMesh* plane_m = new SubDivMesh("plane", plane, default_shader);
+  cube_scene->AddObject(plane_m);
+
+  scenes_.push_back(cube_scene);
   number_of_scenes_ = static_cast<int>(scenes_.size());
 
   IMGUI_CHECKVERSION();

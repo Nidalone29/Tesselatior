@@ -1,9 +1,7 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <ostream>
 #include <vector>
-#include <cstring>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -56,11 +54,13 @@ class Mesh {
   void material(const Material& material);
 
   void split(Edge* e);
+  void flip(const Edge* e);
+
+  void GenerateOpenGLBuffers();
 
  private:
   [[nodiscard]] std::vector<unsigned int>* CreateIndexBuffer() const;
   [[nodiscard]] std::vector<Vertex>* CreateVertexBuffer() const;
-  void GenerateOpenGLBuffers();
 
   void ClearOpenGLBuffers();
 

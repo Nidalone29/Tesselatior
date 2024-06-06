@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 
+struct Edge;
 struct Face;
 struct HalfEdge;
 
@@ -17,16 +18,22 @@ struct Vertex {
          float t);
 
   Vertex(const glm::vec3& xyz, const glm::vec3& norm, const glm::vec2& txt);
+
+  [[nodiscard]] bool IsEven() const;
+  [[nodiscard]] bool IsOdd() const;
+  [[nodiscard]] int Valence() const;
 };
 
 struct HalfEdge {
   HalfEdge* next;
   HalfEdge* twin;  // opposite
   Vertex* vert;    // The vertex that the halfedge points to
+  // this halfedge belongs to a face and an edge
   Face* face;
+  Edge* edge;
 
   explicit HalfEdge(Face* f)
-      : next(nullptr), twin(nullptr), vert(nullptr), face(f) {
+      : next(nullptr), twin(nullptr), vert(nullptr), face(f), edge(nullptr) {
     //
   }
 

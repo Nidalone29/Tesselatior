@@ -72,6 +72,7 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
       Vertex* x = new Vertex(glm::vec3(p_pos->x, p_pos->y, p_pos->z),
                              glm::vec3(p_normal->x, p_normal->y, p_normal->z),
                              glm::vec2(p_tex_coord->x, p_tex_coord->y));
+
       vertices->push_back(x);
     }
 
@@ -126,7 +127,6 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
         }
 
         halfedges->push_back(current_hf);
-        current_hf = current_hf->next;
       }
 
       // setting the next
@@ -140,8 +140,13 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
     for (const auto [_, he] : edges_m) {
       Edge* e = new Edge();
       e->halfedge = he;
+      he->edge = e;
+      if (!he->IsBoundary()) {
+        he->twin->edge = e;
+      }
       edges->push_back(e);
     }
+
     // NOTE A mesh has one and only one material
 
     // NOTE If a material has not been found by Assimp, it loads a

@@ -1,9 +1,13 @@
 #include "mesh.h"
 
+#include <iostream>
 #include <unordered_map>
 #include <map>
+#include <unordered_set>
 
 #include <assimp/Importer.hpp>  // Assimp Importer object
+
+#include <glm/glm.hpp>
 
 #include "vertex.h"
 #include "logger.h"
@@ -22,60 +26,66 @@ Mesh::Mesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
       "Mesh(std::vector<Vertex>*, std::vector<HalfEdge*>*, "
       "std::vector<Face*>*, std::vector<Edge*>*, std::vector<unsigned int>*, "
       "const Material&)");
-  LOG_ERROR("VERTICES SIZE {}", vertices_->size());
-  LOG_ERROR("HF SIZE {}", half_edges_->size());
-  LOG_ERROR("FACES SIZE {}", faces_->size());
-  LOG_ERROR("EDGES SIZE {}", edges_->size());
   GenerateOpenGLBuffers();
 }
 
 Mesh::Mesh(const Mesh& other) : material_(other.material_), type_(other.type_) {
   LOG_TRACE("Mesh(const Mesh& other)");
+
   vertices_ = new std::vector<Vertex*>();
   half_edges_ = new std::vector<HalfEdge*>();
   faces_ = new std::vector<Face*>();
   edges_ = new std::vector<Edge*>();
+
   vertices_->reserve(other.vertices_->size());
   half_edges_->reserve(other.half_edges_->size());
   faces_->reserve(other.faces_->size());
   edges_->reserve(other.edges_->size());
 
   for (int i = 0; i < other.vertices_->size(); i++) {
-    vertices_->push_back(other.vertices_->at(i));
-    vertices_->at(i)->halfedge = nullptr;
+    Vertex* x = new Vertex(other.vertices_->at(i)->position,
+                           other.vertices_->at(i)->normal,
+                           other.vertices_->at(i)->text_coords);
+    vertices_->push_back(x);
   }
 
   using Uint = unsigned int;
-  std::vector<Uint>* indices_temp = CreateIndexBuffer();
+  std::vector<Uint>* indices_temp = other.CreateIndexBuffer();
 
   std::map<std::pair<Uint, Uint>, HalfEdge*> edges_m;
 
-  std::pair<Uint, Uint> x;
-  std::pair<Uint, Uint> s;  // swapped
-
-  for (int i = 0; i < indices_temp->size(); i += to_underlying(type_)) {
+  for (int i = 0; i < other.faces_->size(); i++) {
     HalfEdge* current_hf;
     Face* f = new Face();
     faces_->push_back(f);
+
+    std::pair<Uint, Uint> x;
+    std::pair<Uint, Uint> s;  // swapped
+
     std::vector<HalfEdge*> faces_halfedges;
+
     for (int k = 0; k < to_underlying(type_); k++) {
-      x = {indices_temp->at(i + k),
-           indices_temp->at((i + k + 1) % to_underlying(type_))};
+      x = {indices_temp->at(to_underlying(type_) * i + k),
+           indices_temp->at(to_underlying(type_) * i +
+                            ((k + 1) % to_underlying(type_)))};
       s = {x.second, x.first};
 
       current_hf = new HalfEdge(f);
-      edges_m[x] = current_hf;
+      faces_halfedges.push_back(current_hf);
       f->halfedge = current_hf;
+
       current_hf->vert = vertices_->at(x.second);
+      // LOG_ERROR(x.second);
       vertices_->at(x.first)->halfedge = current_hf;
 
       if (edges_m.find(s) != edges_m.end()) {
-        edges_m[x]->twin = edges_m[s];
-        edges_m[s]->twin = edges_m[x];
+        current_hf->twin = edges_m[s];
+        edges_m[s]->twin = current_hf;
+      } else {
+        edges_m[x] = current_hf;
       }
 
       half_edges_->push_back(current_hf);
-      current_hf = current_hf->next;
     }
 
     for (int z = 0; z < faces_halfedges.size(); z++) {
@@ -87,6 +97,10 @@ Mesh::Mesh(const Mesh& other) : material_(other.material_), type_(other.type_) {
   for (const auto [_, he] : edges_m) {
     Edge* e = new Edge();
     e->halfedge = he;
+    he->edge = e;
+    if (!he->IsBoundary()) {
+      he->twin->edge = e;
+    }
     edges_->push_back(e);
   }
 
@@ -108,8 +122,6 @@ Mesh& Mesh::operator=(const Mesh& other) {
     std::swap(this->faces_, temp.faces_);
     std::swap(this->edges_, temp.edges_);
     std::swap(this->material_, temp.material_);
-    // here temp will call its destructor, but with the empty variables it
-    // should be no problem
   }
 
   return *this;
@@ -117,6 +129,11 @@ Mesh& Mesh::operator=(const Mesh& other) {
 
 Mesh::~Mesh() {
   LOG_TRACE("~Mesh()");
+
+  for (Vertex* x : *vertices_) {
+    delete x;
+  }
+  delete vertices_;
 
   for (Face* x : *faces_) {
     delete x;
@@ -133,16 +150,12 @@ Mesh::~Mesh() {
   }
   delete half_edges_;
 
-  for (Vertex* x : *vertices_) {
-    delete x;
-  }
-  delete vertices_;
-
   // delete indices_;
   ClearOpenGLBuffers();
 }
 
 void Mesh::GenerateOpenGLBuffers() {
+  ClearOpenGLBuffers();
   std::vector<Vertex>* vertices = CreateVertexBuffer();
   std::vector<unsigned int>* indices = CreateIndexBuffer();
 
@@ -228,76 +241,271 @@ void Mesh::split(Edge* e) {
     throw;
   }
 
-  Face* f0 = e->halfedge->face;
+  if (e->halfedge->IsBoundary()) {
+    Face* f0 = e->halfedge->face;
+    HalfEdge* h0 = e->halfedge;  // this is the boundary 100%
+    HalfEdge* h1 = e->halfedge->next;
+    HalfEdge* h2 = e->halfedge->next->next;
+
+    Vertex* v0 = h0->vert;
+    Vertex* v1 = h1->vert;
+    Vertex* v2 = h2->vert;
+
+    // 1 new face
+    Face* f1 = new Face();
+
+    // 3 new halfedges
+    HalfEdge* h3 = new HalfEdge(f0);
+    HalfEdge* h4 = new HalfEdge(f1);
+    HalfEdge* h5 = new HalfEdge(f1);
+
+    // update halfedges faces
+    h1->face = f1;
+    // update halfedges successors
+    h1->next = h4;
+    h4->next = h5;
+    h5->next = h1;
+
+    h0->next = h3;
+    h3->next = h2;
+    h2->next = h0;
+
+    // update hafledges twins
+    h3->twin = h4;
+    h4->twin = h3;
+
+    // new edge
+    // 2 new edges
+    Edge* e3 = new Edge();
+    e3->halfedge = h5;
+    Edge* e4 = new Edge();
+    e4->halfedge = h4;
+
+    // set halfedges edges
+    h4->edge = e4;
+    h5->edge = e3;
+
+    h3->edge = e4;
+
+    // 1 new vertex
+    // Let's just try like this
+    glm::vec3 new_pos = glm::mix(v0->position, v2->position, 0.5F);
+    glm::vec3 new_norm = glm::mix(v0->normal, v2->normal, 0.5F);
+    glm::vec2 new_uv = glm::mix(v0->text_coords, v2->text_coords, 0.5F);
+    Vertex* v3 = new Vertex(new_pos, new_norm, new_uv);
+    vertices_->push_back(v3);
+    v3->halfedge = h3;
+
+    f1->halfedge = h1;
+    f0->halfedge = h0;
+
+    h4->vert = v3;
+    h5->vert = v0;
+    h1->vert = v1;
+
+    h3->vert = v1;
+    h2->vert = v2;
+    h0->vert = v3;
+
+    faces_->push_back(f1);
+    half_edges_->push_back(h3);
+    half_edges_->push_back(h4);
+    half_edges_->push_back(h5);
+    edges_->push_back(e3);
+    edges_->push_back(e4);
+  } else {  // [[likely]]
+    Face* f0 = e->halfedge->face;
+    HalfEdge* h0 = e->halfedge->next->next;
+    HalfEdge* h1 = e->halfedge;
+    HalfEdge* h2 = e->halfedge->next;
+
+    Face* f1 = e->halfedge->twin->face;
+    HalfEdge* h3 = e->halfedge->twin;
+    HalfEdge* h4 = e->halfedge->twin->next;
+    HalfEdge* h5 = e->halfedge->twin->next->next;
+
+    Vertex* v0 = h0->vert;
+    Vertex* v1 = h1->vert;
+    Vertex* v2 = h2->vert;
+    Vertex* v3 = h4->vert;
+    // 2 new faces
+    Face* f2 = new Face();
+    Face* f3 = new Face();
+
+    // 6 new halfedges
+    HalfEdge* h6 = new HalfEdge(f0);
+    HalfEdge* h7 = new HalfEdge(f2);
+    HalfEdge* h8 = new HalfEdge(f2);
+    HalfEdge* h9 = new HalfEdge(f3);
+    HalfEdge* h10 = new HalfEdge(f3);
+    HalfEdge* h11 = new HalfEdge(f1);
+
+    // update old halfedges faces
+    h0->face = f2;
+    h4->face = f3;
+
+    // successors
+    // f0
+    h1->next = h2;
+    h2->next = h6;
+    h6->next = h1;
+    // f1
+    h3->next = h11;
+    h11->next = h5;
+    h5->next = h3;
+    //  f2
+    h7->next = h0;
+    h0->next = h8;
+    h8->next = h7;
+    // f3
+    h9->next = h4;
+    h4->next = h10;
+    h10->next = h9;
+
+    // update new halfedges twins
+    // e1
+    h6->twin = h7;
+    h7->twin = h6;
+    // e2
+    h8->twin = h9;
+    h9->twin = h8;
+    // e3
+    h11->twin = h10;
+    h10->twin = h11;
+
+    // update faces
+    f0->halfedge = h1;
+    f1->halfedge = h3;
+    f2->halfedge = h8;
+    f3->halfedge = h9;
+
+    // 3 new edges
+    Edge* e5 = new Edge();
+    e5->halfedge = h7;
+    Edge* e6 = new Edge();
+    e6->halfedge = h8;
+    Edge* e7 = new Edge();
+    e7->halfedge = h10;
+
+    // set halfedges edges
+    h6->edge = e5;
+    h7->edge = e5;
+    h8->edge = e6;
+    h9->edge = e6;
+    h10->edge = e7;
+    h11->edge = e7;
+
+    h1->edge = e;
+    h3->edge = e;
+
+    // 1 new vertex
+    // Let's just try like this
+    glm::vec3 new_pos = glm::mix(v1->position, v0->position, 0.5F);
+    glm::vec3 new_norm = glm::mix(v1->normal, v0->normal, 0.5F);
+    glm::vec2 new_uv = glm::mix(v1->text_coords, v0->text_coords, 0.5F);
+    Vertex* v4 = new Vertex(new_pos, new_norm, new_uv);
+    v4->halfedge = h1;
+
+    vertices_->push_back(v4);
+
+    // vertex
+
+    // vertices
+    // f0
+    h2->vert = v2;
+    h6->vert = v4;
+    h1->vert = v1;
+    // f1
+    h3->vert = v4;
+    h11->vert = v3;
+    h5->vert = v1;
+    //  f2
+    h7->vert = v2;
+    h0->vert = v0;
+    h8->vert = v4;
+    //  f3
+    h9->vert = v0;
+    h4->vert = v3;
+    h10->vert = v4;
+
+    faces_->push_back(f2);
+    faces_->push_back(f3);
+    half_edges_->push_back(h6);
+    half_edges_->push_back(h7);
+    half_edges_->push_back(h8);
+    half_edges_->push_back(h9);
+    half_edges_->push_back(h10);
+    half_edges_->push_back(h11);
+
+    // this edge is the other half of the original edge
+    edges_->push_back(e6);
+
+    // and these ones are new
+    edges_->push_back(e5);
+    edges_->push_back(e7);
+  }
+}
+
+void Mesh::flip(const Edge* e) {
+  if (e->halfedge->IsBoundary()) {
+    LOG_ERROR("YOU CAN'T FLIP A BOUNDARY EDGE");
+    throw;
+  }
+
+  // f0
   HalfEdge* h0 = e->halfedge;
   HalfEdge* h1 = e->halfedge->next;
   HalfEdge* h2 = e->halfedge->next->next;
 
-  Face* f1 = e->halfedge->twin->face;
+  // f1
   HalfEdge* h3 = e->halfedge->twin;
   HalfEdge* h4 = e->halfedge->twin->next;
   HalfEdge* h5 = e->halfedge->twin->next->next;
 
-  Vertex* v0 = e->halfedge->vert;
-  Vertex* v1 = e->halfedge->next->vert;
-  Vertex* v2 = e->halfedge->twin->vert;
-  Vertex* v3 = e->halfedge->twin->next->vert;
+  Vertex* v0 = h0->vert;
+  Vertex* v1 = h1->vert;
+  Vertex* v2 = h2->vert;
+  Vertex* v3 = h4->vert;
 
-  // 2 new faces
-  Face* f2 = new Face();
-  Face* f3 = new Face();
+  // twins
+  HalfEdge* t1 = h1->twin;
+  HalfEdge* t2 = h2->twin;
+  HalfEdge* t3 = h4->twin;
+  HalfEdge* t4 = h5->twin;
 
-  // 6 new halfedges
-  HalfEdge* h6 = new HalfEdge(f0);
-  HalfEdge* h7 = new HalfEdge(f2);
-  HalfEdge* h8 = new HalfEdge(f2);
-  HalfEdge* h9 = new HalfEdge(f1);
-  HalfEdge* h10 = new HalfEdge(f3);
-  HalfEdge* h11 = new HalfEdge(f3);
-  // update old halfedges faces
-  h2->face = f2;
-  h4->face = f3;
-  // update old halfedges successors
-  h1->next = h6;
-  h2->next = h8;
-  h3->next = h9;
-  h4->next = h10;
-  // update new halfedges successors
-  h6->next = h0;
-  h7->next = h2;
-  h8->next = h7;
-  h11->next = h4;
-  h10->next = h11;
-  h9->next = h5;
-  // update new halfedges twins
-  h6->twin = h7;
-  h7->twin = h6;
-  h8->twin = h11;
-  h11->twin = h8;
-  h9->twin = h10;
-  h10->twin = h9;
+  Edge* e2 = h2->edge;
+  Edge* e4 = h5->edge;
 
-  // 3 new edges
-  Edge* e1 = new Edge();
-  e1->halfedge = h7;
-  Edge* e2 = new Edge();
-  e2->halfedge = h8;
-  Edge* e3 = new Edge();
-  e3->halfedge = h10;
+  assert(e2 != nullptr);
+  assert(e4 != nullptr);
 
-  // 1 new vertex
-  // for now only position, TODO check uv and normal
+  // f0
+  h0->next = h2;
+  h2->next = h1;
+  h1->next = h0;
 
-  glm::vec3 new_pos = glm::mix(v2->position, v0->position, 0.5F);
-  glm::vec3 new_norm = glm::mix(v2->normal, v0->normal, 0.5F);
-  glm::vec2 new_uv = glm::mix(v2->text_coords, v0->text_coords, 0.5F);
-  Vertex* v4 = new Vertex(new_pos, new_norm, new_uv);
+  // f1
+  h3->next = h5;
+  h5->next = h4;
+  h4->next = h3;
 
-  // this might be a relocation... invalidating every pointer to vert... BRUH
-  // what do I do???
-  // ffs...
-  // AAAAAAAAAAAAAAAAAAAAAAAH
-  // vertices_->emplace_back(new_pos, new_norm, new_uv);
+  // f0
+  h0->vert = v3;
+  h2->vert = v0;
+  h1->vert = v1;
+
+  // f1
+  h3->vert = v1;
+  h5->vert = v2;
+  h4->vert = v3;
+
+  h1->twin = t1;
+  h5->twin = t2;
+  h4->twin = t3;
+  h2->twin = t4;
+
+  e2->halfedge = h5;
+  e4->halfedge = h2;
 }
 
 // you have the responsibility to delete the vector
@@ -305,12 +513,14 @@ std::vector<unsigned int>* Mesh::CreateIndexBuffer() const {
   std::vector<unsigned int>* index_buffer = new std::vector<unsigned int>();
   index_buffer->reserve(faces_->size() * to_underlying(type_));
 
-  std::map<Vertex*, unsigned int> added_verts;
+  std::unordered_map<Vertex*, unsigned int> added_verts;
 
   int i = 0;
   for (Face* x : *faces_) {
     HalfEdge* curr = x->halfedge;
+
     for (int j = 0; j < to_underlying(type_); j++) {
+      // vertex not found
       if (added_verts.find(curr->vert) == added_verts.end()) {
         added_verts[curr->vert] = i;
         i++;
@@ -320,18 +530,29 @@ std::vector<unsigned int>* Mesh::CreateIndexBuffer() const {
     }
   }
 
-  LOG_ERROR(index_buffer->size());
   return index_buffer;
 }
 
 // you have the responsibility to delete the vector
 std::vector<Vertex>* Mesh::CreateVertexBuffer() const {
-  std::vector<Vertex>* vert_buffer = new std::vector<Vertex>();
-  vert_buffer->reserve(vertices_->size());
+  std::vector<Vertex>* vertex_buffer = new std::vector<Vertex>();
+  vertex_buffer->reserve(vertices_->size());
 
-  for (Vertex* x : *vertices_) {
-    vert_buffer->push_back(*x);
+  std::unordered_set<Vertex*> added_verts;
+
+  int i = 0;
+  for (Face* x : *faces_) {
+    HalfEdge* curr = x->halfedge;
+
+    for (int j = 0; j < to_underlying(type_); j++) {
+      // vertex not found
+      if (added_verts.find(curr->vert) == added_verts.end()) {
+        added_verts.insert(curr->vert);
+        vertex_buffer->push_back(*curr->vert);
+      }
+      curr = curr->next;
+    }
   }
 
-  return vert_buffer;
+  return vertex_buffer;
 }
