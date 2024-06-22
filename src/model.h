@@ -12,6 +12,10 @@ class Model {
   Model() = default;
   Model(const MESH_TYPE type, const std::filesystem::path& path,
         unsigned int flags = 0);
+
+  Model(const MESH_TYPE in_type, const std::vector<Vertex>& in_vertices,
+        const std::vector<unsigned int>& in_indices);
+
   ~Model();
   Model(const Model& other) = delete;
   Model& operator=(const Model& other) = delete;

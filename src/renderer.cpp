@@ -22,7 +22,7 @@ Renderer::Renderer()
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
+  glClearColor(1.0F, 1.0F, 1.0F, 1.0F);
 
   glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &max_tessel_level_);
 

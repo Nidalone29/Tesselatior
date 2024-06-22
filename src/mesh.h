@@ -44,6 +44,7 @@ class Mesh {
   const GLuint& vao() const;
   unsigned int num_indices() const;
   unsigned int num_vertices() const;
+  MESH_TYPE type() const;
 
   std::vector<Vertex*>* vertices();
   std::vector<HalfEdge*>* half_edges();
@@ -53,7 +54,13 @@ class Mesh {
   const Material& material() const;
   void material(const Material& material);
 
-  void split(Edge* e);
+  /**
+   * @brief
+   * @param e edge to be split
+   * @param new_vert the position of the new vertex in the split (along the
+   * edge)
+   */
+  void split(Edge* e, const Vertex& new_vert);
   void flip(const Edge* e);
 
   void GenerateOpenGLBuffers();

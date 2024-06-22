@@ -237,7 +237,6 @@ void Application::Init() {
 
   Scene* cube_scene = new Scene("Cubes");
 
-  // questo dovrebbe avere 8 vertici e
   Model* cube_tri_model =
       new Model(MESH_TYPE::TRIANGLES, "models/cube/cube.obj",
                 aiProcess_JoinIdenticalVertices);
@@ -259,7 +258,48 @@ void Application::Init() {
   SubDivMesh* plane_m = new SubDivMesh("plane", plane, default_shader);
   cube_scene->AddObject(plane_m);
 
+  std::vector<Vertex> c_vertices = {
+      {glm::vec3(-2.0F, 2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, 2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, 2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(-2.0F, -2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, -2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(-2.0F, 2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(-2.0F, -2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, -2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
+       glm::vec2(0.0F, 0.0F)},
+  };
+  std::vector<unsigned int> c_indices = {
+      0, 1, 2,  //
+      1, 3, 4,  //
+      5, 6, 3,  //
+      7, 3, 6,  //
+      2, 4, 7,  //
+      0, 7, 6,  //
+      0, 5, 1,  //
+      1, 5, 3,  //
+      5, 0, 6,  //
+      7, 4, 3,  //
+      2, 1, 4,  //
+      0, 2, 7,  //
+  };
+
+  Scene* manifolds = new Scene("Manifolds");
+  Model* personal_cube = new Model(MESH_TYPE::TRIANGLES, c_vertices, c_indices);
+  SubDivMesh* subdiv_cube =
+      new SubDivMesh("manifold_cube", personal_cube, default_shader);
+  manifolds->AddObject(subdiv_cube);
+
+  scenes_.push_back(manifolds);
   scenes_.push_back(cube_scene);
+
   number_of_scenes_ = static_cast<int>(scenes_.size());
 
   IMGUI_CHECKVERSION();
@@ -447,8 +487,9 @@ void Application::DrawImGuiLayer() {
 
   ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2);
 
-  // Making the window a dosckpace
+  // Making the window a dockspace
   ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspace_flags);
+
   // the menu bar
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
@@ -461,7 +502,7 @@ void Application::DrawImGuiLayer() {
     ImGui::EndMainMenuBar();
   }
 
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
 
   DrawControls();
   DrawViewport();

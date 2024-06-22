@@ -8,6 +8,7 @@
 #include <assimp/Importer.hpp>  // Assimp Importer object
 
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 
 #include "vertex.h"
 #include "logger.h"
@@ -211,6 +212,10 @@ unsigned int Mesh::num_vertices() const {
   return vertices_->size();
 }
 
+MESH_TYPE Mesh::type() const {
+  return type_;
+}
+
 std::vector<Vertex*>* Mesh::vertices() {
   return vertices_;
 }
@@ -235,7 +240,7 @@ void Mesh::material(const Material& material) {
   material_ = material;
 }
 
-void Mesh::split(Edge* e) {
+void Mesh::split(Edge* e, const Vertex& new_vert) {
   if (type_ == MESH_TYPE::QUADS) {
     // TODO REFACTOR
     throw;
@@ -289,10 +294,8 @@ void Mesh::split(Edge* e) {
 
     // 1 new vertex
     // Let's just try like this
-    glm::vec3 new_pos = glm::mix(v0->position, v2->position, 0.5F);
-    glm::vec3 new_norm = glm::mix(v0->normal, v2->normal, 0.5F);
-    glm::vec2 new_uv = glm::mix(v0->text_coords, v2->text_coords, 0.5F);
-    Vertex* v3 = new Vertex(new_pos, new_norm, new_uv);
+    Vertex* v3 =
+        new Vertex(new_vert.position, new_vert.normal, new_vert.text_coords);
     vertices_->push_back(v3);
     v3->halfedge = h3;
 
@@ -315,24 +318,48 @@ void Mesh::split(Edge* e) {
     edges_->push_back(e4);
   } else {  // [[likely]]
     Face* f0 = e->halfedge->face;
-    HalfEdge* h0 = e->halfedge->next->next;
-    HalfEdge* h1 = e->halfedge;
-    HalfEdge* h2 = e->halfedge->next;
+    HalfEdge* h0 = e->halfedge;
+    HalfEdge* h1 = e->halfedge->next;
+    HalfEdge* h2 = e->halfedge->next->next;
 
     Face* f1 = e->halfedge->twin->face;
     HalfEdge* h3 = e->halfedge->twin;
     HalfEdge* h4 = e->halfedge->twin->next;
     HalfEdge* h5 = e->halfedge->twin->next->next;
 
-    Vertex* v0 = h0->vert;
+    Vertex* v0 = h3->vert;
     Vertex* v1 = h1->vert;
-    Vertex* v2 = h2->vert;
+    Vertex* v2 = h0->vert;
     Vertex* v3 = h4->vert;
+    assert(v0 == h2->vert);
+    assert(v2 == h5->vert);
+
+    HalfEdge* t1 = h2->twin;
+    HalfEdge* t2 = h1->twin;
+    HalfEdge* t3 = h5->twin;
+    HalfEdge* t4 = h4->twin;
+
+    Edge* e1 = h2->edge;
+    Edge* e2 = h1->edge;
+    Edge* e3 = h5->edge;
+    Edge* e4 = h4->edge;
+    assert(e1 == t1->edge);
+    assert(e2 == t2->edge);
+    assert(e3 == t3->edge);
+    assert(e4 == t4->edge);
+
+    // now building the splitted face
     // 2 new faces
     Face* f2 = new Face();
     Face* f3 = new Face();
 
     // 6 new halfedges
+    h0->face = f0;
+    h1->face = f2;
+    h2->face = f0;
+    h3->face = f1;
+    h4->face = f1;
+    h5->face = f3;
     HalfEdge* h6 = new HalfEdge(f0);
     HalfEdge* h7 = new HalfEdge(f2);
     HalfEdge* h8 = new HalfEdge(f2);
@@ -340,54 +367,71 @@ void Mesh::split(Edge* e) {
     HalfEdge* h10 = new HalfEdge(f3);
     HalfEdge* h11 = new HalfEdge(f1);
 
-    // update old halfedges faces
-    h0->face = f2;
-    h4->face = f3;
-
-    // successors
-    // f0
-    h1->next = h2;
-    h2->next = h6;
-    h6->next = h1;
-    // f1
-    h3->next = h11;
-    h11->next = h5;
-    h5->next = h3;
-    //  f2
-    h7->next = h0;
-    h0->next = h8;
-    h8->next = h7;
-    // f3
-    h9->next = h4;
-    h4->next = h10;
-    h10->next = h9;
-
-    // update new halfedges twins
-    // e1
-    h6->twin = h7;
-    h7->twin = h6;
-    // e2
-    h8->twin = h9;
-    h9->twin = h8;
-    // e3
-    h11->twin = h10;
-    h10->twin = h11;
-
-    // update faces
-    f0->halfedge = h1;
-    f1->halfedge = h3;
-    f2->halfedge = h8;
-    f3->halfedge = h9;
-
     // 3 new edges
     Edge* e5 = new Edge();
-    e5->halfedge = h7;
+    e5->halfedge = h6;
     Edge* e6 = new Edge();
     e6->halfedge = h8;
     Edge* e7 = new Edge();
     e7->halfedge = h10;
 
+    // successors
+    // f0
+    h0->next = h6;
+    h6->next = h2;
+    h2->next = h0;
+    // f1
+    h3->next = h4;
+    h4->next = h11;
+    h11->next = h3;
+    //  f2
+    h7->next = h8;
+    h8->next = h1;
+    h1->next = h7;
+    // f3
+    h9->next = h10;
+    h10->next = h5;
+    h5->next = h9;
+
+    // twins
+    // e
+    h0->twin = h3;
+    h3->twin = h0;
+    // e1
+    h2->twin = t1;
+    t1->twin = h2;
+    // e2
+    h1->twin = t2;
+    t2->twin = h1;
+    // e3
+    h5->twin = t3;
+    t3->twin = h5;
+    // e4
+    h4->twin = t4;
+    t4->twin = h4;
+    // e5
+    h6->twin = h7;
+    h7->twin = h6;
+    // e6
+    h8->twin = h9;
+    h9->twin = h8;
+    // e7
+    h10->twin = h11;
+    h11->twin = h10;
+
+    // update faces
+    f0->halfedge = h0;
+    f1->halfedge = h4;
+    f2->halfedge = h7;
+    f3->halfedge = h9;
+
     // set halfedges edges
+    h0->edge = e;
+    h1->edge = e2;
+    h2->edge = e1;
+    h3->edge = e;
+    h4->edge = e4;
+    h5->edge = e3;
     h6->edge = e5;
     h7->edge = e5;
     h8->edge = e6;
@@ -395,39 +439,37 @@ void Mesh::split(Edge* e) {
     h10->edge = e7;
     h11->edge = e7;
 
-    h1->edge = e;
-    h3->edge = e;
-
-    // 1 new vertex
-    // Let's just try like this
-    glm::vec3 new_pos = glm::mix(v1->position, v0->position, 0.5F);
-    glm::vec3 new_norm = glm::mix(v1->normal, v0->normal, 0.5F);
-    glm::vec2 new_uv = glm::mix(v1->text_coords, v0->text_coords, 0.5F);
-    Vertex* v4 = new Vertex(new_pos, new_norm, new_uv);
-    v4->halfedge = h1;
-
-    vertices_->push_back(v4);
-
-    // vertex
+    Vertex* v4 =
+        new Vertex(new_vert.position, new_vert.normal, new_vert.text_coords);
+    v4->halfedge = h10;
+    v0->halfedge = h0;
+    v1->halfedge = h7;
+    v2->halfedge = h9;
+    v3->halfedge = h5;
 
     // vertices
     // f0
-    h2->vert = v2;
-    h6->vert = v4;
-    h1->vert = v1;
+    h0->vert = v4;
+    h6->vert = v1;
+    h2->vert = v0;
     // f1
-    h3->vert = v4;
-    h11->vert = v3;
-    h5->vert = v1;
-    //  f2
-    h7->vert = v2;
-    h0->vert = v0;
-    h8->vert = v4;
-    //  f3
-    h9->vert = v0;
+    h3->vert = v0;
     h4->vert = v3;
-    h10->vert = v4;
+    h11->vert = v4;
+    //  f2
+    h7->vert = v4;
+    h8->vert = v2;
+    h1->vert = v1;
+    // f3
+    h9->vert = v4;
+    h10->vert = v3;
+    h5->vert = v2;
+    assert(t1->vert == v1);
+    assert(t2->vert == v2);
+    assert(t3->vert == v3);
+    assert(t4->vert == v0);
 
+    vertices_->push_back(v4);
     faces_->push_back(f2);
     faces_->push_back(f3);
     half_edges_->push_back(h6);
@@ -462,6 +504,9 @@ void Mesh::flip(const Edge* e) {
   HalfEdge* h4 = e->halfedge->twin->next;
   HalfEdge* h5 = e->halfedge->twin->next->next;
 
+  Face* f0 = e->halfedge->face;
+  Face* f1 = e->halfedge->twin->face;
+
   Vertex* v0 = h0->vert;
   Vertex* v1 = h1->vert;
   Vertex* v2 = h2->vert;
@@ -473,39 +518,49 @@ void Mesh::flip(const Edge* e) {
   HalfEdge* t3 = h4->twin;
   HalfEdge* t4 = h5->twin;
 
-  Edge* e2 = h2->edge;
-  Edge* e4 = h5->edge;
-
-  assert(e2 != nullptr);
-  assert(e4 != nullptr);
-
   // f0
-  h0->next = h2;
-  h2->next = h1;
+  h0->next = h5;
+  h5->next = h1;
   h1->next = h0;
 
   // f1
-  h3->next = h5;
-  h5->next = h4;
+  h3->next = h2;
+  h2->next = h4;
   h4->next = h3;
 
-  // f0
+  // vertices
   h0->vert = v3;
-  h2->vert = v0;
-  h1->vert = v1;
-
-  // f1
   h3->vert = v1;
-  h5->vert = v2;
+
+  h1->vert = v1;
+  h5->vert = v0;
+
+  h2->vert = v2;
   h4->vert = v3;
 
-  h1->twin = t1;
-  h5->twin = t2;
-  h4->twin = t3;
-  h2->twin = t4;
+  // faces
+  // f0
+  h0->face = f0;
+  h5->face = f0;
+  h1->face = f0;
 
-  e2->halfedge = h5;
-  e4->halfedge = h2;
+  // f1
+  h3->face = f1;
+  h2->face = f1;
+  h4->face = f1;
+
+  f0->halfedge = h0;
+  f1->halfedge = h3;
+
+  v0->halfedge = h1;
+  v1->halfedge = h2;
+  v2->halfedge = h4;
+  v3->halfedge = h5;
+
+  h4->twin = t3;
+  h5->twin = t4;
+  h1->twin = t1;
+  h2->twin = t2;
 }
 
 // you have the responsibility to delete the vector

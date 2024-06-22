@@ -1,6 +1,7 @@
 #ifndef MY_IMGUICONFIG
 #define MY_IMGUICONFIG
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 
 #define IM_VEC2_CLASS_EXTRA                                \

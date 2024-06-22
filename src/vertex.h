@@ -1,6 +1,7 @@
 #ifndef VERTEX_H
 #define VERTEX_H
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 
 struct Edge;
@@ -14,6 +15,7 @@ struct Vertex {
 
   HalfEdge* halfedge;  // one of it's outgoing halfedge
 
+  Vertex() = default;
   Vertex(float x, float y, float z, float xn, float yn, float zn, float s,
          float t);
 
@@ -22,6 +24,7 @@ struct Vertex {
   [[nodiscard]] bool IsEven() const;
   [[nodiscard]] bool IsOdd() const;
   [[nodiscard]] int Valence() const;
+  [[nodiscard]] bool IsBoundary() const;
 };
 
 struct HalfEdge {
