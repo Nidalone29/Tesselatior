@@ -22,8 +22,8 @@ class Model {
   Model(Model&& other) = delete;
   Model& operator=(Model&& other) = delete;
 
-  const std::vector<Mesh>& meshes() const;
-  void meshes(const std::initializer_list<Mesh>& in);
+  const std::vector<TriMesh>& meshes() const;
+  void meshes(const std::initializer_list<TriMesh>& in);
   const MESH_TYPE& mesh_type() const;
   const Transform& transform() const;
   void transform(const Transform& transform);
@@ -34,7 +34,7 @@ class Model {
   MESH_TYPE type_;
   // 1 to n meshes (for static meshes)
   // only 1 for progressive, subdiv and terrain
-  std::vector<Mesh> meshes_;
+  std::vector<TriMesh> meshes_;
   // be applied to all meshes of the model
   Transform transform_;
 

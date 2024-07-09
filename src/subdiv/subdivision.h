@@ -39,14 +39,7 @@ class ISubdivision {
  public:
   virtual ~ISubdivision() = 0;
 
-  virtual Mesh* subdivide(const Model* in, int n_steps) = 0;
-
- private:
-};
-
-class LoopSubdiv : public ISubdivision {
- public:
-  Mesh* subdivide(const Model* in, int n_steps) override;
+  virtual TriMesh* subdivide(const Model* in, int n_steps) = 0;
 
  private:
 };

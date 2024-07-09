@@ -4,6 +4,7 @@
 
 #include "logger.h"
 #include "utilities.h"
+#include "subdiv/loop.h"
 
 IRenderableObject::~IRenderableObject() {
   //
@@ -19,10 +20,10 @@ Terrain::~Terrain() {  //
 }
 
 void Terrain::Draw() const {
-  const std::vector<Mesh>& meshes = model_->meshes();
+  const std::vector<TriMesh>& meshes = model_->meshes();
   // LOG_INFO("This model contains {} meshes", meshes.size());
 
-  for (const Mesh& mesh : meshes) {
+  for (const TriMesh& mesh : meshes) {
     glBindVertexArray(mesh.vao());
 
     mesh.material().BindTextures();
@@ -118,9 +119,9 @@ StaticModel::~StaticModel() {
 }
 
 void StaticModel::Draw() const {
-  const std::vector<Mesh>& meshes = model_->meshes();
+  const std::vector<TriMesh>& meshes = model_->meshes();
 
-  for (const Mesh& mesh : meshes) {
+  for (const TriMesh& mesh : meshes) {
     glBindVertexArray(mesh.vao());
 
     mesh.material().BindTextures();
@@ -189,7 +190,7 @@ SubDivMesh::SubDivMesh(const std::string& name, Model* model,
     // maybe log model mesh count and "did you intend to create a static model?"
     throw;
   }
-  subdiv_model_ = new Mesh(model->meshes()[0]);
+  subdiv_model_ = new TriMesh(model->meshes()[0]);
 }
 
 SubDivMesh::~SubDivMesh() {
@@ -201,7 +202,7 @@ SubDivMesh::~SubDivMesh() {
 
 void SubDivMesh::Draw() const {
   // TODO subdiv_model_
-  const Mesh* mesh = subdiv_model_;
+  const TriMesh* mesh = subdiv_model_;
   // LOG_INFO("This model contains {} meshes", meshes.size());
 
   glBindVertexArray(mesh->vao());

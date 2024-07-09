@@ -352,11 +352,11 @@ void Model::LoadMeshes(const MESH_TYPE type, unsigned int flags) {
   }
 }
 
-const std::vector<Mesh>& Model::meshes() const {
+const std::vector<TriMesh>& Model::meshes() const {
   return meshes_;
 }
 
-void Model::meshes(const std::initializer_list<Mesh>& in) {
+void Model::meshes(const std::initializer_list<TriMesh>& in) {
   meshes_ = in;
 }
 

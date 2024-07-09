@@ -14,9 +14,13 @@
 #include "logger.h"
 #include "utilities.h"
 
-Mesh::Mesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
-           std::vector<HalfEdge*>* halfedges, std::vector<Face*>* faces,
-           std::vector<Edge*>* edges, const Material& material)
+Mesh::~Mesh() {
+  //
+}
+
+TriMesh::TriMesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
+                 std::vector<HalfEdge*>* halfedges, std::vector<Face*>* faces,
+                 std::vector<Edge*>* edges, const Material& material)
     : vertices_(vertices),
       half_edges_(halfedges),
       faces_(faces),
@@ -30,7 +34,8 @@ Mesh::Mesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
   GenerateOpenGLBuffers();
 }
 
-Mesh::Mesh(const Mesh& other) : material_(other.material_), type_(other.type_) {
+TriMesh::TriMesh(const TriMesh& other)
+    : material_(other.material_), type_(other.type_) {
   LOG_TRACE("Mesh(const Mesh& other)");
 
   vertices_ = new std::vector<Vertex*>();
@@ -110,10 +115,10 @@ Mesh::Mesh(const Mesh& other) : material_(other.material_), type_(other.type_) {
   GenerateOpenGLBuffers();
 }
 
-Mesh& Mesh::operator=(const Mesh& other) {
+TriMesh& TriMesh::operator=(const TriMesh& other) {
   LOG_TRACE("Mesh& operator=(const Mesh& other)");
   if (this != &other) {
-    Mesh temp(other);
+    TriMesh temp(other);
     std::swap(this->IBO_, temp.IBO_);
     std::swap(this->VAO_, temp.VAO_);
     std::swap(this->VBO_, temp.VBO_);
@@ -128,7 +133,7 @@ Mesh& Mesh::operator=(const Mesh& other) {
   return *this;
 }
 
-Mesh::~Mesh() {
+TriMesh::~TriMesh() {
   LOG_TRACE("~Mesh()");
 
   for (Vertex* x : *vertices_) {
@@ -155,7 +160,7 @@ Mesh::~Mesh() {
   ClearOpenGLBuffers();
 }
 
-void Mesh::GenerateOpenGLBuffers() {
+void TriMesh::GenerateOpenGLBuffers() {
   ClearOpenGLBuffers();
   std::vector<Vertex>* vertices = CreateVertexBuffer();
   std::vector<unsigned int>* indices = CreateIndexBuffer();
@@ -194,377 +199,70 @@ void Mesh::GenerateOpenGLBuffers() {
   delete indices;
 }
 
-void Mesh::ClearOpenGLBuffers() {
+void TriMesh::ClearOpenGLBuffers() {
   glDeleteBuffers(1, &VBO_);
   glDeleteBuffers(1, &IBO_);
   glDeleteVertexArrays(1, &VAO_);
 }
 
-const GLuint& Mesh::vao() const {
+const GLuint& TriMesh::vao() const {
   return VAO_;
 }
 
-unsigned int Mesh::num_indices() const {
+unsigned int TriMesh::num_indices() const {
   return faces_->size() * to_underlying(type_);
 }
 
-unsigned int Mesh::num_vertices() const {
+unsigned int TriMesh::num_vertices() const {
   return vertices_->size();
 }
 
-MESH_TYPE Mesh::type() const {
+MESH_TYPE TriMesh::type() const {
   return type_;
 }
 
-std::vector<Vertex*>* Mesh::vertices() {
+std::vector<Vertex*>* TriMesh::vertices() {
   return vertices_;
 }
 
-std::vector<HalfEdge*>* Mesh::half_edges() {
+std::vector<HalfEdge*>* TriMesh::half_edges() {
   return half_edges_;
 }
 
-std::vector<Face*>* Mesh::faces() {
+std::vector<Face*>* TriMesh::faces() {
   return faces_;
 }
 
-std::vector<Edge*>* Mesh::edges() {
+std::vector<Edge*>* TriMesh::edges() {
   return edges_;
 }
 
-const Material& Mesh::material() const {
+const Material& TriMesh::material() const {
   return material_;
 }
 
-void Mesh::material(const Material& material) {
+void TriMesh::material(const Material& material) {
   material_ = material;
 }
 
-void Mesh::split(Edge* e, const Vertex& new_vert) {
-  if (type_ == MESH_TYPE::QUADS) {
-    // TODO REFACTOR
-    throw;
-  }
-
-  if (e->halfedge->IsBoundary()) {
-    Face* f0 = e->halfedge->face;
-    HalfEdge* h0 = e->halfedge;  // this is the boundary 100%
-    HalfEdge* h1 = e->halfedge->next;
-    HalfEdge* h2 = e->halfedge->next->next;
-
-    Vertex* v0 = h0->vert;
-    Vertex* v1 = h1->vert;
-    Vertex* v2 = h2->vert;
-
-    // 1 new face
-    Face* f1 = new Face();
-
-    // 3 new halfedges
-    HalfEdge* h3 = new HalfEdge(f0);
-    HalfEdge* h4 = new HalfEdge(f1);
-    HalfEdge* h5 = new HalfEdge(f1);
-
-    // update halfedges faces
-    h1->face = f1;
-    // update halfedges successors
-    h1->next = h4;
-    h4->next = h5;
-    h5->next = h1;
-
-    h0->next = h3;
-    h3->next = h2;
-    h2->next = h0;
-
-    // update hafledges twins
-    h3->twin = h4;
-    h4->twin = h3;
-
-    // new edge
-    // 2 new edges
-    Edge* e3 = new Edge();
-    e3->halfedge = h5;
-    Edge* e4 = new Edge();
-    e4->halfedge = h4;
-
-    // set halfedges edges
-    h4->edge = e4;
-    h5->edge = e3;
-
-    h3->edge = e4;
-
-    // 1 new vertex
-    // Let's just try like this
-    Vertex* v3 =
-        new Vertex(new_vert.position, new_vert.normal, new_vert.text_coords);
-    vertices_->push_back(v3);
-    v3->halfedge = h3;
-
-    f1->halfedge = h1;
-    f0->halfedge = h0;
-
-    h4->vert = v3;
-    h5->vert = v0;
-    h1->vert = v1;
-
-    h3->vert = v1;
-    h2->vert = v2;
-    h0->vert = v3;
-
-    faces_->push_back(f1);
-    half_edges_->push_back(h3);
-    half_edges_->push_back(h4);
-    half_edges_->push_back(h5);
-    edges_->push_back(e3);
-    edges_->push_back(e4);
-  } else {  // [[likely]]
-    Face* f0 = e->halfedge->face;
-    HalfEdge* h0 = e->halfedge;
-    HalfEdge* h1 = e->halfedge->next;
-    HalfEdge* h2 = e->halfedge->next->next;
-
-    Face* f1 = e->halfedge->twin->face;
-    HalfEdge* h3 = e->halfedge->twin;
-    HalfEdge* h4 = e->halfedge->twin->next;
-    HalfEdge* h5 = e->halfedge->twin->next->next;
-
-    Vertex* v0 = h3->vert;
-    Vertex* v1 = h1->vert;
-    Vertex* v2 = h0->vert;
-    Vertex* v3 = h4->vert;
-    assert(v0 == h2->vert);
-    assert(v2 == h5->vert);
-
-    HalfEdge* t1 = h2->twin;
-    HalfEdge* t2 = h1->twin;
-    HalfEdge* t3 = h5->twin;
-    HalfEdge* t4 = h4->twin;
-
-    Edge* e1 = h2->edge;
-    Edge* e2 = h1->edge;
-    Edge* e3 = h5->edge;
-    Edge* e4 = h4->edge;
-    assert(e1 == t1->edge);
-    assert(e2 == t2->edge);
-    assert(e3 == t3->edge);
-    assert(e4 == t4->edge);
-
-    // now building the splitted face
-    // 2 new faces
-    Face* f2 = new Face();
-    Face* f3 = new Face();
-
-    // 6 new halfedges
-    h0->face = f0;
-    h1->face = f2;
-    h2->face = f0;
-    h3->face = f1;
-    h4->face = f1;
-    h5->face = f3;
-    HalfEdge* h6 = new HalfEdge(f0);
-    HalfEdge* h7 = new HalfEdge(f2);
-    HalfEdge* h8 = new HalfEdge(f2);
-    HalfEdge* h9 = new HalfEdge(f3);
-    HalfEdge* h10 = new HalfEdge(f3);
-    HalfEdge* h11 = new HalfEdge(f1);
-
-    // 3 new edges
-    Edge* e5 = new Edge();
-    e5->halfedge = h6;
-    Edge* e6 = new Edge();
-    e6->halfedge = h8;
-    Edge* e7 = new Edge();
-    e7->halfedge = h10;
-
-    // successors
-    // f0
-    h0->next = h6;
-    h6->next = h2;
-    h2->next = h0;
-    // f1
-    h3->next = h4;
-    h4->next = h11;
-    h11->next = h3;
-    //  f2
-    h7->next = h8;
-    h8->next = h1;
-    h1->next = h7;
-    // f3
-    h9->next = h10;
-    h10->next = h5;
-    h5->next = h9;
-
-    // twins
-    // e
-    h0->twin = h3;
-    h3->twin = h0;
-    // e1
-    h2->twin = t1;
-    t1->twin = h2;
-    // e2
-    h1->twin = t2;
-    t2->twin = h1;
-    // e3
-    h5->twin = t3;
-    t3->twin = h5;
-    // e4
-    h4->twin = t4;
-    t4->twin = h4;
-    // e5
-    h6->twin = h7;
-    h7->twin = h6;
-    // e6
-    h8->twin = h9;
-    h9->twin = h8;
-    // e7
-    h10->twin = h11;
-    h11->twin = h10;
-
-    // update faces
-    f0->halfedge = h0;
-    f1->halfedge = h4;
-    f2->halfedge = h7;
-    f3->halfedge = h9;
-
-    // set halfedges edges
-    h0->edge = e;
-    h1->edge = e2;
-    h2->edge = e1;
-    h3->edge = e;
-    h4->edge = e4;
-    h5->edge = e3;
-    h6->edge = e5;
-    h7->edge = e5;
-    h8->edge = e6;
-    h9->edge = e6;
-    h10->edge = e7;
-    h11->edge = e7;
-
-    Vertex* v4 =
-        new Vertex(new_vert.position, new_vert.normal, new_vert.text_coords);
-    v4->halfedge = h10;
-    v0->halfedge = h0;
-    v1->halfedge = h7;
-    v2->halfedge = h9;
-    v3->halfedge = h5;
-
-    // vertices
-    // f0
-    h0->vert = v4;
-    h6->vert = v1;
-    h2->vert = v0;
-    // f1
-    h3->vert = v0;
-    h4->vert = v3;
-    h11->vert = v4;
-    //  f2
-    h7->vert = v4;
-    h8->vert = v2;
-    h1->vert = v1;
-    // f3
-    h9->vert = v4;
-    h10->vert = v3;
-    h5->vert = v2;
-    assert(t1->vert == v1);
-    assert(t2->vert == v2);
-    assert(t3->vert == v3);
-    assert(t4->vert == v0);
-
-    vertices_->push_back(v4);
-    faces_->push_back(f2);
-    faces_->push_back(f3);
-    half_edges_->push_back(h6);
-    half_edges_->push_back(h7);
-    half_edges_->push_back(h8);
-    half_edges_->push_back(h9);
-    half_edges_->push_back(h10);
-    half_edges_->push_back(h11);
-
-    // this edge is the other half of the original edge
-    edges_->push_back(e6);
-
-    // and these ones are new
-    edges_->push_back(e5);
-    edges_->push_back(e7);
-  }
+void TriMesh::AddVertex(Vertex* v) {
+  vertices_->push_back(v);
 }
 
-void Mesh::flip(const Edge* e) {
-  if (e->halfedge->IsBoundary()) {
-    LOG_ERROR("YOU CAN'T FLIP A BOUNDARY EDGE");
-    throw;
-  }
+void TriMesh::AddHalfedge(HalfEdge* he) {
+  half_edges_->push_back(he);
+}
 
-  // f0
-  HalfEdge* h0 = e->halfedge;
-  HalfEdge* h1 = e->halfedge->next;
-  HalfEdge* h2 = e->halfedge->next->next;
+void TriMesh::AddFace(Face* f) {
+  faces_->push_back(f);
+}
 
-  // f1
-  HalfEdge* h3 = e->halfedge->twin;
-  HalfEdge* h4 = e->halfedge->twin->next;
-  HalfEdge* h5 = e->halfedge->twin->next->next;
-
-  Face* f0 = e->halfedge->face;
-  Face* f1 = e->halfedge->twin->face;
-
-  Vertex* v0 = h0->vert;
-  Vertex* v1 = h1->vert;
-  Vertex* v2 = h2->vert;
-  Vertex* v3 = h4->vert;
-
-  // twins
-  HalfEdge* t1 = h1->twin;
-  HalfEdge* t2 = h2->twin;
-  HalfEdge* t3 = h4->twin;
-  HalfEdge* t4 = h5->twin;
-
-  // f0
-  h0->next = h5;
-  h5->next = h1;
-  h1->next = h0;
-
-  // f1
-  h3->next = h2;
-  h2->next = h4;
-  h4->next = h3;
-
-  // vertices
-  h0->vert = v3;
-  h3->vert = v1;
-
-  h1->vert = v1;
-  h5->vert = v0;
-
-  h2->vert = v2;
-  h4->vert = v3;
-
-  // faces
-  // f0
-  h0->face = f0;
-  h5->face = f0;
-  h1->face = f0;
-
-  // f1
-  h3->face = f1;
-  h2->face = f1;
-  h4->face = f1;
-
-  f0->halfedge = h0;
-  f1->halfedge = h3;
-
-  v0->halfedge = h1;
-  v1->halfedge = h2;
-  v2->halfedge = h4;
-  v3->halfedge = h5;
-
-  h4->twin = t3;
-  h5->twin = t4;
-  h1->twin = t1;
-  h2->twin = t2;
+void TriMesh::AddEdge(Edge* e) {
+  edges_->push_back(e);
 }
 
 // you have the responsibility to delete the vector
-std::vector<unsigned int>* Mesh::CreateIndexBuffer() const {
+std::vector<unsigned int>* TriMesh::CreateIndexBuffer() const {
   std::vector<unsigned int>* index_buffer = new std::vector<unsigned int>();
   index_buffer->reserve(faces_->size() * to_underlying(type_));
 
@@ -589,7 +287,7 @@ std::vector<unsigned int>* Mesh::CreateIndexBuffer() const {
 }
 
 // you have the responsibility to delete the vector
-std::vector<Vertex>* Mesh::CreateVertexBuffer() const {
+std::vector<Vertex>* TriMesh::CreateVertexBuffer() const {
   std::vector<Vertex>* vertex_buffer = new std::vector<Vertex>();
   vertex_buffer->reserve(vertices_->size());
 

@@ -22,6 +22,7 @@ set(Sources
 	./src/transform.cpp
 	./src/vertex.cpp
 	./src/subdiv/subdivision.cpp
+	./src/subdiv/loop.cpp
 )
 
 set(Headers 

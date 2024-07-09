@@ -23,23 +23,33 @@ enum class MESH_TYPE {
   QUADS = 4
 };
 
+class Mesh {
+ public:
+  virtual ~Mesh() = 0;
+};
+
+// we will have:
+// - Triangular meshes
+// - Quad meshes (rendered using tessellation shaders)
+// - Polygonal meshes (all non trig primitives will be triangulated)
+
 /**
  * @brief A mesh is saved in a renederable state for opengl
  *
  */
-class Mesh {
+class TriMesh {
  public:
-  Mesh() = delete;  // can't create an empty mesh
+  TriMesh() = delete;  // can't create an empty mesh
 
-  Mesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
-       std::vector<HalfEdge*>* halfedges, std::vector<Face*>* faces,
-       std::vector<Edge*>* edges, const Material& material);
-  ~Mesh();
+  TriMesh(const MESH_TYPE type, std::vector<Vertex*>* vertices,
+          std::vector<HalfEdge*>* halfedges, std::vector<Face*>* faces,
+          std::vector<Edge*>* edges, const Material& material);
+  ~TriMesh();
 
-  Mesh(const Mesh& other);
-  Mesh& operator=(const Mesh& other);
-  Mesh(Mesh&& other) = default;
-  Mesh& operator=(Mesh&& other) = default;
+  TriMesh(const TriMesh& other);
+  TriMesh& operator=(const TriMesh& other);
+  TriMesh(TriMesh&& other) = default;
+  TriMesh& operator=(TriMesh&& other) = default;
 
   const GLuint& vao() const;
   unsigned int num_indices() const;
@@ -54,16 +64,14 @@ class Mesh {
   const Material& material() const;
   void material(const Material& material);
 
-  /**
-   * @brief
-   * @param e edge to be split
-   * @param new_vert the position of the new vertex in the split (along the
-   * edge)
-   */
-  void split(Edge* e, const Vertex& new_vert);
-  void flip(const Edge* e);
-
   void GenerateOpenGLBuffers();
+
+  void AddVertex(Vertex* v);
+  void AddHalfedge(HalfEdge* he);
+  void AddFace(Face* f);
+  void AddEdge(Edge* e);
+
+  [[nodiscard]] bool IsValid();
 
  private:
   [[nodiscard]] std::vector<unsigned int>* CreateIndexBuffer() const;

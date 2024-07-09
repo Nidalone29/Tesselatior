@@ -43,6 +43,14 @@ struct HalfEdge {
   [[nodiscard]] bool IsBoundary() const {
     return (twin == nullptr);
   }
+
+  [[nodiscard]] HalfEdge* Previous() const {
+    HalfEdge* curr = next;
+    while (curr->next != this) {
+      curr = curr->next;
+    }
+    return curr;
+  }
 };
 
 // with one of the halfedge we iterate in halfedge->next (3/4 times) for the
