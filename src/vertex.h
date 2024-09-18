@@ -22,10 +22,10 @@ struct Vertex {
   Vertex(const glm::vec3& xyz, const glm::vec3& norm, const glm::vec2& txt);
   Vertex(const glm::vec3& xyz, const glm::vec2& txt);
 
-  [[nodiscard]] inline bool IsEven() const;
-  [[nodiscard]] inline bool IsOdd() const;
+  [[nodiscard]] bool IsEven() const;
+  [[nodiscard]] bool IsOdd() const;
   [[nodiscard]] int Valence() const;
-  [[nodiscard]] inline bool IsBoundary() const;
+  [[nodiscard]] bool IsBoundary() const;
 };
 
 struct HalfEdge {

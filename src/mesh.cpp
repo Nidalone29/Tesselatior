@@ -33,6 +33,38 @@ AbstractMesh::~AbstractMesh() {
   ClearOpenGLBuffers();
 }
 
+const GLuint& AbstractMesh::vao() const {
+  return VAO_;
+}
+
+unsigned int AbstractMesh::num_indices() const {
+  return num_indices_;
+}
+
+const HalfEdgeData* AbstractMesh::half_edge_data() const {
+  return hf_data_;
+}
+
+const Material& AbstractMesh::material() const {
+  return material_;
+}
+
+void AbstractMesh::material(const Material& m) {
+  material_ = m;
+}
+
+int AbstractMesh::num_vertices() const {
+  return hf_data_->vertices()->size();
+}
+
+int AbstractMesh::num_edges() const {
+  return hf_data_->edges()->size();
+}
+
+int AbstractMesh::num_faces() const {
+  return hf_data_->faces()->size();
+}
+
 void AbstractMesh::ApplySmoothNormals() {
   hf_data_->ShadeSmooth();
 }
@@ -137,12 +169,49 @@ TriMesh::TriMesh(HalfEdgeData* hf_data, const Material& material)
   //
 }
 
+int TriMesh::PatchNumVertices() const {
+  return to_underlying(MESH_TYPE::TRI);
+}
+
+std::vector<sa::SubDiv> TriMesh::CompatibleSubdivs() {
+  return {sa::SubDiv::NONE, sa::SubDiv::LOOP, sa::SubDiv::SQRT3};
+}
+
+IMesh* TriMesh::clone() {
+  return new TriMesh(new HalfEdgeData(*this->hf_data_), this->material_);
+}
+
 QuadMesh::QuadMesh(HalfEdgeData* hf_data, const Material& material)
     : AbstractMesh(MESH_TYPE::QUAD, hf_data, material) {
   //
 }
 
+int QuadMesh::PatchNumVertices() const {
+  return to_underlying(MESH_TYPE::QUAD);
+}
+
+std::vector<sa::SubDiv> QuadMesh::CompatibleSubdivs() {
+  return {sa::SubDiv::NONE, sa::SubDiv::CATMULL};
+}
+
+IMesh* QuadMesh::clone() {
+  return new QuadMesh(new HalfEdgeData(*this->hf_data_), this->material_);
+}
+
 PolyMesh::PolyMesh(HalfEdgeData* hf_data, const Material& material)
     : AbstractMesh(MESH_TYPE::POLY, hf_data, material) {
   //
+}
+
+int PolyMesh::PatchNumVertices() const {
+  // NOTE this mesh binds a triangulated version of itself to the gpu
+  return to_underlying(MESH_TYPE::TRI);
+}
+
+std::vector<sa::SubDiv> PolyMesh::CompatibleSubdivs() {
+  return {sa::SubDiv::NONE};
+}
+
+IMesh* PolyMesh::clone() {
+  return new PolyMesh(new HalfEdgeData(*this->hf_data_), this->material_);
 }

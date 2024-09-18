@@ -65,8 +65,6 @@ class IMesh {
   virtual void GenerateOpenGLBufferWithFlatShading() = 0;
 
   virtual ~IMesh() = default;
-
- protected:
 };
 
 // abstract base class (for sharing implementation across the derived classes
@@ -87,38 +85,16 @@ class AbstractMesh : public IMesh {
   AbstractMesh(AbstractMesh&& other) = delete;
   AbstractMesh& operator=(AbstractMesh&& other) = delete;
 
-  [[nodiscard]] const GLuint& vao() const override {
-    return VAO_;
-  }
-
-  [[nodiscard]] unsigned int num_indices() const override {
-    return num_indices_;
-  }
-
-  [[nodiscard]] const HalfEdgeData* half_edge_data() const {
-    return hf_data_;
-  }
-
-  [[nodiscard]] const Material& material() const {
-    return material_;
-  }
-
-  void material(const Material& m) {
-    material_ = m;
-  }
+  [[nodiscard]] const GLuint& vao() const override;
+  [[nodiscard]] unsigned int num_indices() const override;
+  [[nodiscard]] const HalfEdgeData* half_edge_data() const;
+  [[nodiscard]] const Material& material() const;
+  void material(const Material& m);
 
   // This is additional debug info
-  [[nodiscard]] int num_vertices() const override {
-    return hf_data_->vertices()->size();
-  }
-
-  [[nodiscard]] int num_edges() const override {
-    return hf_data_->edges()->size();
-  }
-
-  [[nodiscard]] int num_faces() const override {
-    return hf_data_->faces()->size();
-  }
+  [[nodiscard]] int num_vertices() const override;
+  [[nodiscard]] int num_edges() const override;
+  [[nodiscard]] int num_faces() const override;
   // it generates smooth normals for the mesh
   void ApplySmoothNormals() override;
 
@@ -156,50 +132,25 @@ class AbstractMesh : public IMesh {
 class TriMesh final : public AbstractMesh {
  public:
   TriMesh(HalfEdgeData* hf_data, const Material& material);
-  [[nodiscard]] int PatchNumVertices() const override {
-    return to_underlying(MESH_TYPE::TRI);
-  }
-
-  [[nosdiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override {
-    return {sa::SubDiv::NONE, sa::SubDiv::LOOP, sa::SubDiv::SQRT3};
-  }
-
-  [[nodiscard]] IMesh* clone() override {
-    return new TriMesh(new HalfEdgeData(*this->hf_data_), this->material_);
-  }
+  [[nodiscard]] int PatchNumVertices() const override;
+  [[nodiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override;
+  [[nodiscard]] IMesh* clone() override;
 };
 
 class QuadMesh final : public AbstractMesh {
  public:
   QuadMesh(HalfEdgeData* hf_data, const Material& material);
-  [[nodiscard]] int PatchNumVertices() const override {
-    return to_underlying(MESH_TYPE::QUAD);
-  }
-
-  [[nosdiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override {
-    return {sa::SubDiv::NONE, sa::SubDiv::CATMULL};
-  }
-
-  [[nodiscard]] IMesh* clone() override {
-    return new QuadMesh(new HalfEdgeData(*this->hf_data_), this->material_);
-  }
+  [[nodiscard]] int PatchNumVertices() const override;
+  [[nodiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override;
+  [[nodiscard]] IMesh* clone() override;
 };
 
 class PolyMesh final : public AbstractMesh {
  public:
   PolyMesh(HalfEdgeData* hf_data, const Material& material);
-  [[nodiscard]] int PatchNumVertices() const override {
-    // NOTE this mesh binds a triangulated version of itself to the gpu
-    return to_underlying(MESH_TYPE::TRI);
-  }
-
-  [[nosdiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override {
-    return {sa::SubDiv::NONE};
-  }
-
-  [[nodiscard]] IMesh* clone() override {
-    return new PolyMesh(new HalfEdgeData(*this->hf_data_), this->material_);
-  }
+  [[nodiscard]] int PatchNumVertices() const override;
+  [[nodiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override;
+  [[nodiscard]] IMesh* clone() override;
 };
 
 #endif  // MESH_H

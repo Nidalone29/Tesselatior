@@ -5,6 +5,7 @@
 
 #include "logger.h"
 #include "utilities.h"
+#include "vertex.h"
 
 HalfEdgeData::HalfEdgeData(std::vector<Vertex*>* vertices,
                            std::vector<HalfEdge*>* halfedges,

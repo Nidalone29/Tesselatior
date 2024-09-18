@@ -9,12 +9,12 @@ class IRenderableObject {
  public:
   virtual ~IRenderableObject() = 0;
   virtual void Draw() const = 0;
-  [[nodiscrard]] virtual const Shader* GetShader() const = 0;
+  [[nodiscard]] virtual const Shader* GetShader() const = 0;
   virtual void SetRenderSettings() const = 0;
   virtual void ShowSettingsGUI() = 0;
-  [[nodiscrard]] virtual const Transform& transform() const = 0;
+  [[nodiscard]] virtual const Transform& transform() const = 0;
   virtual void transform(const Transform& transform) = 0;
-  [[nodiscrard]] virtual const std::string& name() const = 0;
+  [[nodiscard]] virtual const std::string& name() const = 0;
   virtual void name(const std::string& name) = 0;
 };
 
@@ -27,11 +27,11 @@ class Terrain final : public IRenderableObject {
   ~Terrain();
 
   void Draw() const override;
-  [[nodiscrard]] const Shader* GetShader() const override;
+  [[nodiscard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
   const Transform& transform() const override;
-  [[nodiscrard]] void transform(const Transform& transform) override;
+  void transform(const Transform& transform) override;
 
   const std::string& name() const override;
   void name(const std::string& name) override;
@@ -53,13 +53,13 @@ class StaticModel final : public IRenderableObject {
   ~StaticModel();
 
   void Draw() const override;
-  [[nodiscrard]] const Shader* GetShader() const override;
+  [[nodiscard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
-  [[nodiscrard]] const Transform& transform() const override;
-  [[nodiscrard]] void transform(const Transform& transform) override;
+  [[nodiscard]] const Transform& transform() const override;
+  void transform(const Transform& transform) override;
 
-  [[nodiscrard]] const std::string& name() const override;
+  [[nodiscard]] const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
@@ -81,14 +81,14 @@ class SubDivMesh final : public IRenderableObject {
   ~SubDivMesh();
 
   void Draw() const override;
-  [[nodiscrard]] const Shader* GetShader() const override;
+  [[nodiscard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
   void ApplySmoothShading();
-  [[nodiscrard]] const Transform& transform() const override;
-  [[nodiscrard]] void transform(const Transform&) override;
+  [[nodiscard]] const Transform& transform() const override;
+  void transform(const Transform&) override;
 
-  [[nodiscrard]] const std::string& name() const override;
+  [[nodiscard]] const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
