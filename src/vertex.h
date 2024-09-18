@@ -20,11 +20,12 @@ struct Vertex {
          float t);
 
   Vertex(const glm::vec3& xyz, const glm::vec3& norm, const glm::vec2& txt);
+  Vertex(const glm::vec3& xyz, const glm::vec2& txt);
 
-  [[nodiscard]] bool IsEven() const;
-  [[nodiscard]] bool IsOdd() const;
+  [[nodiscard]] inline bool IsEven() const;
+  [[nodiscard]] inline bool IsOdd() const;
   [[nodiscard]] int Valence() const;
-  [[nodiscard]] bool IsBoundary() const;
+  [[nodiscard]] inline bool IsBoundary() const;
 };
 
 struct HalfEdge {
@@ -35,28 +36,19 @@ struct HalfEdge {
   Face* face;
   Edge* edge;
 
-  explicit HalfEdge(Face* f)
-      : next(nullptr), twin(nullptr), vert(nullptr), face(f), edge(nullptr) {
-    //
-  }
+  HalfEdge() = default;
+  explicit HalfEdge(Face* f);
 
-  [[nodiscard]] bool IsBoundary() const {
-    return (twin == nullptr);
-  }
-
-  [[nodiscard]] HalfEdge* Previous() const {
-    HalfEdge* curr = next;
-    while (curr->next != this) {
-      curr = curr->next;
-    }
-    return curr;
-  }
+  [[nodiscard]] bool IsBoundary() const;
+  [[nodiscard]] HalfEdge* Previous() const;
 };
 
 // with one of the halfedge we iterate in halfedge->next (3/4 times) for the
 // vertices
 struct Face {
   HalfEdge* halfedge;
+
+  [[nodiscard]] glm::vec3 ComputeNormalWithArea() const;
 };
 
 struct Edge {

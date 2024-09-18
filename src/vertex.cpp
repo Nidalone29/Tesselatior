@@ -17,6 +17,12 @@ Vertex::Vertex(const glm::vec3& xyz, const glm::vec3& norm,
   //
 }
 
+// this is for initializing a vertex that will later have its normal recomputed
+Vertex::Vertex(const glm::vec3& xyz, const glm::vec2& txt)
+    : Vertex(xyz, {0.0F, 0.0F, 0.0F}, txt) {
+  //
+}
+
 bool Vertex::IsEven() const {
   return Valence() % 2 == 0;
 }
@@ -57,4 +63,45 @@ bool Vertex::IsBoundary() const {
   }
 
   return false;
+}
+
+HalfEdge::HalfEdge(Face* f)
+    : next(nullptr), twin(nullptr), vert(nullptr), face(f), edge(nullptr) {
+  //
+}
+
+bool HalfEdge::IsBoundary() const {
+  return (twin == nullptr);
+}
+
+HalfEdge* HalfEdge::Previous() const {
+  HalfEdge* curr = next;
+  while (curr->next != this) {
+    curr = curr->next;
+  }
+  return curr;
+}
+
+// https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal#Newell's_Method
+// using Newell's method this works on an arbitrary face
+// NOTE: the face normal here is NOT normalized because when you add it up to
+// vertex, the contribution given by the area (result of the cross product)
+// results in a better quality normal as explained in
+// https://iquilezles.org/articles/normals/
+glm::vec3 Face::ComputeNormalWithArea() const {
+  glm::vec3 normal = {0.0F, 0.0F, 0.0F};
+  const HalfEdge* start = halfedge;
+  HalfEdge* curr = halfedge;
+
+  do {
+    const glm::vec3& current_v = curr->vert->position;
+    const glm::vec3& next_v = curr->next->vert->position;
+    normal.x += (current_v.y - next_v.y) * (current_v.z + next_v.z);
+    normal.y += (current_v.z - next_v.z) * (current_v.x + next_v.x);
+    normal.z += (current_v.x - next_v.x) * (current_v.y + next_v.y);
+
+    curr = curr->next;
+  } while (start != curr);
+
+  return normal;
 }

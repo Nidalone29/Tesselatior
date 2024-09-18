@@ -36,7 +36,7 @@ class Renderer {
   int max_tessel_level_;
   float displacement_height_;
 
-  float alpha = 0.5;
+  float alpha_ = 0.5;
 };
 
 #endif  // RENDERER_H

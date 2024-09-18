@@ -28,7 +28,8 @@ Shader::~Shader() {
   LOG_TRACE("~Shader()");
 }
 
-void Shader::AddShader(const GLenum type, const std::filesystem::path& path) {
+void Shader::AddShaderFile(const GLenum type,
+                           const std::filesystem::path& path) {
   ShaderSource res;
   switch (type) {
     case GL_VERTEX_SHADER:
@@ -132,6 +133,8 @@ void Shader::Init() {
   }
 }
 
+// TODO maybe improvable with OpenGL 4.1
+// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glProgramUniform.xhtml
 void Shader::Enable() const {
   glUseProgram(program_);
 }
@@ -202,5 +205,34 @@ void Shader::SetUnifromSampler(const std::string& uniform_name,
     glUniform1i(uniform_location, to_underlying(id));
   } else {
     LOG_WARN("Error setting {} uniform", uniform_name);
+  }
+}
+
+ShaderManager& ShaderManager::Instance() {
+  static ShaderManager instance_;
+  return instance_;
+}
+
+Shader* ShaderManager::GetShader(const std::string& shader_id) {
+  if (shaders_.find(shader_id) == shaders_.end()) {
+    LOG_WARN("shader {} does not exists", shader_id);
+    return nullptr;
+  }
+  return shaders_.at(shader_id);
+}
+
+ShaderManager::~ShaderManager() {
+  for (auto [k, v] : shaders_) {
+    delete v;
+  }
+}
+
+void ShaderManager::AddShaders(
+    const std::initializer_list<std::pair<std::string, Shader*>> in_shaders) {
+  for (const auto& [shader_id, shader_ptr] : in_shaders) {
+    if (shaders_.find(shader_id) == shaders_.end()) {
+      // LOG OVERRITING SHADER
+    }
+    shaders_.insert({shader_id, shader_ptr});
   }
 }

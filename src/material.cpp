@@ -9,8 +9,8 @@
 
 Material::Material()
     : ambient_reflectivity_(glm::vec3(1.0F, 1.0F, 1.0F)),
-      diffuse_reflectivity_(glm::vec3(1.0F, 1.0F, 1.0F)),
-      specular_reflectivity_(glm::vec3(0.0F, 0.0F, 0.0F)),
+      diffuse_reflectivity_(glm::vec3(0.5F, 0.5F, 0.5F)),
+      specular_reflectivity_(glm::vec3(0.5F, 0.5F, 0.5F)),
       shininess_(30.0F) {
   LOG_TRACE("Material()");
 }

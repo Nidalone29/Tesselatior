@@ -10,7 +10,8 @@
 
 enum class TEXTURE_TYPE {
   DIFFUSE,
-  DISPLACEMENT
+  DISPLACEMENT,
+  NORMAL
 };
 
 class Texture {

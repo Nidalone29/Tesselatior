@@ -12,7 +12,7 @@ set(Sources
 	./src/main.cpp
 	./src/material.cpp
 	./src/mesh.cpp
-	./src/model.cpp
+	./src/model_importer.cpp
 	./src/object.cpp
 	./src/renderer.cpp
 	./src/scene.cpp
@@ -21,6 +21,10 @@ set(Sources
 	./src/texture.cpp
 	./src/transform.cpp
 	./src/vertex.cpp
+	./src/halfedge.cpp
+	./src/staticmodel.cpp
+	./src/subdivmesh.cpp
+	./src/terrain.cpp
 	./src/subdiv/subdivision.cpp
 	./src/subdiv/loop.cpp
 )

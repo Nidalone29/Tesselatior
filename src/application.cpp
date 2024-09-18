@@ -21,6 +21,8 @@
 #include "renderer.h"
 #include "shader.h"
 #include "logger.h"
+#include "model_importer.h"
+#include "object.h"
 #include "utilities.h"
 
 using namespace std::chrono_literals;
@@ -176,107 +178,93 @@ void Application::Init() {
 
   glfwSwapInterval(vsync_);
 
-  // TODO fix with std::make_unique and smart pointers
   renderer_ = new Renderer();
 
-  // pointers because if I copy to the vector then it's gonna destroy the local
-  // Shader in this scope, calling the destructor and deleting the shader
+  // pointers because if I copy to the vector then it's going to destroy the
+  // local Shader in this scope, calling the destructor and deleting the shader
   // program
   Shader* default_shader = new Shader();  // 3 patch
-  default_shader->AddShader(GL_VERTEX_SHADER, "shaders/pass_through.vert");
-  default_shader->AddShader(GL_TESS_CONTROL_SHADER,
-                            "shaders/pass_through_tri.tesc");
-  default_shader->AddShader(GL_TESS_EVALUATION_SHADER,
-                            "shaders/phong_tessellation.tese");
-  default_shader->AddShader(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+  default_shader->AddShaderFile(GL_VERTEX_SHADER, "shaders/pass_through.vert");
+  default_shader->AddShaderFile(GL_TESS_CONTROL_SHADER,
+                                "shaders/pass_through_tri.tesc");
+  default_shader->AddShaderFile(GL_TESS_EVALUATION_SHADER,
+                                "shaders/phong_tessellation.tese");
+  default_shader->AddShaderFile(GL_FRAGMENT_SHADER, "shaders/phong.frag");
 
   default_shader->Init();
-  shaders_.push_back(default_shader);
 
   Shader* terrain_shader = new Shader();  // 4 patch
-  terrain_shader->AddShader(GL_VERTEX_SHADER, "shaders/pass_through.vert");
-  terrain_shader->AddShader(GL_TESS_CONTROL_SHADER, "shaders/cameraLOD.tesc");
-  terrain_shader->AddShader(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tese");
-  terrain_shader->AddShader(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+  terrain_shader->AddShaderFile(GL_VERTEX_SHADER, "shaders/pass_through.vert");
+  terrain_shader->AddShaderFile(GL_TESS_CONTROL_SHADER,
+                                "shaders/cameraLOD.tesc");
+  terrain_shader->AddShaderFile(GL_TESS_EVALUATION_SHADER,
+                                "shaders/terrain.tese");
+  terrain_shader->AddShaderFile(GL_FRAGMENT_SHADER, "shaders/phong.frag");
 
   terrain_shader->Init();
-  shaders_.push_back(terrain_shader);
+
+  ShaderManager::Instance().AddShaders({{"TriangleShader", default_shader},  //
+                                        {"TerrainShader", terrain_shader}});
 
   // init scenes
   /*
   Scene* flower_scene = new Scene("Flower");
   Model* flower_object = new Model(
-      MESH_TYPE::TRIANGLES, "models/flower/flower.obj", aiProcess_Triangulate);
-  Transform flower_t;
-  flower_t.translate(0.0F, -4.0F, -15.0F);
-  flower_t.rotate(-90.0F, 0.0F, 0.0F);
+      MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
+  aiProcess_Triangulate); Transform flower_t; flower_t.translate(0.0F,
+  -4.0F, -15.0F); flower_t.rotate(-90.0F, 0.0F, 0.0F);
   flower_object->transform(flower_t);
-  StaticModel* sf = new StaticModel("flower", flower_object, default_shader);
-  flower_scene->AddObject(sf);
+  StaticModel* sf = new StaticModel("flower", flower_object,
+  default_shader); flower_scene->AddObject(sf);
 
   // if this stack allocated model gets deleteted everything messes up
   Model* dragon = new Model(MESH_TYPE::TRIANGLES, "models/dragon.obj");
-  SubDivMesh* dragon_model = new SubDivMesh("dragon", dragon, default_shader);
-  flower_scene->AddObject(dragon_model);
+  SubDivMesh* dragon_model = new SubDivMesh("dragon", dragon,
+  default_shader); flower_scene->AddObject(dragon_model);
 
   //  there is probably a more efficient way of doing this
   scenes_.push_back(flower_scene);
 
   Scene* teapot_scene = new Scene("Teapot");
-  Model* teapot_object = new Model(MESH_TYPE::TRIANGLES, "models/teapot.obj",
-                                   aiProcess_Triangulate);
-  Transform teapot_t;
+  Model* teapot_object = new Model(MESH_TYPE::TRIANGLES,
+  "models/teapot.obj", aiProcess_Triangulate); Transform teapot_t;
   teapot_t.translate(0.0F, -1.6F, -9.0F);
   teapot_t.rotate(0.0F, 0.0F, 0.0F);
   teapot_object->transform(teapot_t);
-  StaticModel* st = new StaticModel("teapot", teapot_object, default_shader);
-  teapot_scene->AddObject(st);
+  StaticModel* st = new StaticModel("teapot", teapot_object,
+  default_shader); teapot_scene->AddObject(st);
   // there is probably a more efficient way of doing this
   scenes_.push_back(teapot_scene);
   */
 
   Scene* cube_scene = new Scene("Cubes");
-
-  Model* cube_tri_model =
-      new Model(MESH_TYPE::TRIANGLES, "models/cube/cube.obj",
-                aiProcess_JoinIdenticalVertices);
+  StaticModelCreator smc;
+  StaticModel* cube_tri_model =
+      smc.CreateMesh("cube tri", "models/cube/cube.obj");
   Transform cube_tri_t;
   cube_tri_t.translate(5.0F, 0.0F, 0.0F);
   cube_tri_model->transform(cube_tri_t);
-  SubDivMesh* sf = new SubDivMesh("cube tri", cube_tri_model, default_shader);
-  cube_scene->AddObject(sf);
+  cube_scene->AddObject(cube_tri_model);
 
-  Model* new_cube = new Model(MESH_TYPE::TRIANGLES, "models/sphere2.obj");
-  Transform cube_tri_t2;
+  StaticModel* sfera2 = smc.CreateMesh("sfera", "models/sphere2.obj");
   cube_tri_t.translate(-5.0F, 0.0F, 0.0F);
-  new_cube->transform(cube_tri_t);
-  SubDivMesh* sf34 = new SubDivMesh("sfera", new_cube, default_shader);
-  cube_scene->AddObject(sf34);
+  sfera2->transform(cube_tri_t);
+  cube_scene->AddObject(sfera2);
 
-  Model* plane = new Model(MESH_TYPE::TRIANGLES, "models/plane_trig.obj",
-                           aiProcess_JoinIdenticalVertices);
-  SubDivMesh* plane_m = new SubDivMesh("plane", plane, default_shader);
-  cube_scene->AddObject(plane_m);
+  StaticModel* plane = smc.CreateMesh("plane", "models/plane_trig.obj");
+  cube_scene->AddObject(plane);
 
-  std::vector<Vertex> c_vertices = {
-      {glm::vec3(-2.0F, 2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(2.0F, 2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(2.0F, 2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(-2.0F, -2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(2.0F, -2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(-2.0F, 2.0F, 2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(-2.0F, -2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
-      {glm::vec3(2.0F, -2.0F, -2.0F), glm::vec3(1.0F, 1.0F, 1.0F),
-       glm::vec2(0.0F, 0.0F)},
+  const std::vector<Vertex> c_vertices = {
+      {glm::vec3(-2.0F, 2.0F, -2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, 2.0F, 2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, 2.0F, -2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(-2.0F, -2.0F, 2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, -2.0F, 2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(-2.0F, 2.0F, 2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(-2.0F, -2.0F, -2.0F), glm::vec2(0.0F, 0.0F)},
+      {glm::vec3(2.0F, -2.0F, -2.0F), glm::vec2(0.0F, 0.0F)},
   };
-  std::vector<unsigned int> c_indices = {
+  const std::vector<unsigned int> c_indices = {
       0, 1, 2,  //
       1, 3, 4,  //
       5, 6, 3,  //
@@ -291,10 +279,12 @@ void Application::Init() {
       0, 2, 7,  //
   };
 
+  SubDivMeshCreator sdmc;
+
   Scene* manifolds = new Scene("Manifolds");
-  Model* personal_cube = new Model(MESH_TYPE::TRIANGLES, c_vertices, c_indices);
   SubDivMesh* subdiv_cube =
-      new SubDivMesh("manifold_cube", personal_cube, default_shader);
+      sdmc.CreateMesh("cuboide", MESH_TYPE::TRI, c_vertices, c_indices);
+  subdiv_cube->ApplySmoothShading();
   manifolds->AddObject(subdiv_cube);
 
   scenes_.push_back(manifolds);
@@ -425,6 +415,18 @@ void Application::DrawControls() {
     scenes_[current_scene_index_]
         ->objects()[selected_obj_index_]
         ->ShowSettingsGUI();
+    /*
+    //  ImGui::DragFloat3("drag float3", vec4f, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat3("drag float3", vec4f, 0.01f, 0.0f, 1.0f);
+    float angle = 0.0F;
+    ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f, "ratio = %.2f");
+    // ImGui::DragFloat3(
+    //     "light direction",
+    //
+    scenes_[current_scene_index_]->objects()[selected_obj_index_]->model()->transform().matrix(),
+    //     0.01F,
+    //                   -1.0F, 1.0F, "%.2f", ImGuiSliderFlags_None);
+    */
   }
 
   ImGui::Spacing();
@@ -502,7 +504,7 @@ void Application::DrawImGuiLayer() {
     ImGui::EndMainMenuBar();
   }
 
-  // ImGui::ShowDemoWindow();
+  ImGui::ShowDemoWindow();
 
   DrawControls();
   DrawViewport();

@@ -2,6 +2,7 @@
 #define MATRIX_MATH_H
 
 // for PI
+// https://learn.microsoft.com/en-us/cpp/c-runtime-library/math-constants?view=msvc-170
 #define _USE_MATH_DEFINES
 #include <math.h>
 

@@ -22,7 +22,7 @@ Renderer::Renderer()
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(1.0F, 1.0F, 1.0F, 1.0F);
+  glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
 
   glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &max_tessel_level_);
 
@@ -54,27 +54,23 @@ void Renderer::Render(const Scene& scene, const Camera& camera) const {
   for (const IRenderableObject* o : scene.objects()) {
     const Shader* shader = o->GetShader();
     shader->Enable();
-
+    // clang-format off
     shader->SetUniformMat4("camera_view_matrix", camera.view_matrix());
-    shader->SetUniformMat4("camera_projection_matrix",
-                           camera.projection_matrix());
+    shader->SetUniformMat4("camera_projection_matrix", camera.projection_matrix());
 
     // this is for the fragment shader
     shader->SetUniformVec3("camera_position", camera.position());
 
     shader->SetUnifromSampler("ColorTextSampler", TEXTURE_TYPE::DIFFUSE);
-    shader->SetUnifromSampler("DisplacementTextSampler",
-                              TEXTURE_TYPE::DISPLACEMENT);
+    shader->SetUnifromSampler("DisplacementTextSampler", TEXTURE_TYPE::DISPLACEMENT);
 
-    o->SetRenderSettings();
-    shader->SetUniformFloat("alpha", alpha);
-    shader->SetUniformFloat("tessellation_level",
-                            static_cast<float>(tess_level_));
+    shader->SetUniformFloat("alpha", alpha_);
+    shader->SetUniformFloat("tessellation_level", static_cast<float>(tess_level_));
     shader->SetUniformFloat("displacement_height", displacement_height_);
 
-    shader->SetUniformMat4("Model2World", o->model()->transform().matrix());
+    shader->SetUniformMat4("Model2World", o->transform().matrix());
 
-    // clang-format off
+ 
     const AmbientLight& ambient_light = scene.ambient_light();
     shader->SetUniformVec3("ambient_light_color", ambient_light.color());
     shader->SetUniformVec3("ambient_light_intensity", ambient_light.intensity());
@@ -116,5 +112,5 @@ float* Renderer::displacement_height() {
 }
 
 float* Renderer::phong_alpha() {
-  return &alpha;
+  return &alpha_;
 }

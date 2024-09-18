@@ -2,111 +2,106 @@
 #define OBJECT_H
 
 #include "shader.h"
-#include "model.h"
+#include "transform.h"
 #include "./subdiv/subdivision.h"
 
 class IRenderableObject {
  public:
   virtual ~IRenderableObject() = 0;
   virtual void Draw() const = 0;
-  virtual const Shader* GetShader() const = 0;
+  [[nodiscrard]] virtual const Shader* GetShader() const = 0;
   virtual void SetRenderSettings() const = 0;
   virtual void ShowSettingsGUI() = 0;
-
-  virtual const Model* model() const = 0;
-  virtual const std::string& name() const = 0;
+  [[nodiscrard]] virtual const Transform& transform() const = 0;
+  virtual void transform(const Transform& transform) = 0;
+  [[nodiscrard]] virtual const std::string& name() const = 0;
   virtual void name(const std::string& name) = 0;
 };
 
-class Terrain : public IRenderableObject {
+// TODO
+class Terrain final : public IRenderableObject {
  public:
-  Terrain();
+  Terrain();  // default 10x10m?
+  explicit Terrain(int size /*, also path to heightmap */);
+  Terrain(int side_a, int side_b /*, also path to heightmap */);
   ~Terrain();
 
   void Draw() const override;
-  const Shader* GetShader() const override;
+  [[nodiscrard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
+  const Transform& transform() const override;
+  [[nodiscrard]] void transform(const Transform& transform) override;
 
-  const Model* model() const override;
   const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
   std::string name_;
-  Model* model_;
-  // Not owning
-  const Shader* shader_;
-};
-
-class ProgressiveMesh : public IRenderableObject {
- public:
-  ProgressiveMesh();
-  ~ProgressiveMesh();
-
-  void Draw() const override;
-  const Shader* GetShader() const override;
-  void SetRenderSettings() const override;
-  void ShowSettingsGUI() override;
-
-  const Model* model() const override;
-  const std::string& name() const override;
-  void name(const std::string& name) override;
-
- private:
-  std::string name_;
-  Model* model_;
+  QuadMesh* terrain_;
+  Transform transform_;
+  std::filesystem::path model_path_;
   // Not owning
   const Shader* shader_;
 };
 
 // A Static Model composed of multiple meshes
-class StaticModel : public IRenderableObject {
+class StaticModel final : public IRenderableObject {
  public:
-  StaticModel(const std::string& name, Model* model, const Shader* shader);
+  StaticModel(const std::string& name, const std::vector<IMesh*>& model,
+              const Shader* shader);
   ~StaticModel();
 
   void Draw() const override;
-  const Shader* GetShader() const override;
+  [[nodiscrard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
+  [[nodiscrard]] const Transform& transform() const override;
+  [[nodiscrard]] void transform(const Transform& transform) override;
 
-  const Model* model() const override;
-  const std::string& name() const override;
+  [[nodiscrard]] const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
   std::string name_;
-  Model* model_;
+  std::filesystem::path model_path_;
+  std::vector<IMesh*> model_;
+  Transform transform_;
   // Not owning
   const Shader* shader_;
+  unsigned int total_index_;
+  int total_verts_;
 };
 
 // A Model that also supports uniform subdivision (because there is only one
 // mesh). Owns and deletes a SubDiv Strategy
-class SubDivMesh : public IRenderableObject {
+class SubDivMesh final : public IRenderableObject {
  public:
-  SubDivMesh(const std::string& name, Model* model, const Shader* shader);
+  SubDivMesh(const std::string& name, IMesh* model, const Shader* shader);
   ~SubDivMesh();
 
   void Draw() const override;
-  const Shader* GetShader() const override;
+  [[nodiscrard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
+  void ApplySmoothShading();
+  [[nodiscrard]] const Transform& transform() const override;
+  [[nodiscrard]] void transform(const Transform&) override;
 
-  const Model* model() const override;
-  const std::string& name() const override;
+  [[nodiscrard]] const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
   std::string name_;
+  std::filesystem::path model_path_;
   // To submit to the subdivision algorithm (it always re-starts from the base
   // model because it's easier)
-  Model* base_model_;
+  IMesh* base_model_;
   // Not owning
   const Shader* shader_;
   // To be rendered
-  TriMesh* subdiv_model_;
+  IMesh* subdiv_model_;
+  Transform transform_;
   // To be submitted to subdivision algorithm
   int subdiv_level_;
   sa::SubDiv subdiv_algo_;
@@ -114,6 +109,16 @@ class SubDivMesh : public IRenderableObject {
   int current_subdiv_level_;
   sa::SubDiv current_subdiv_algo_;
   ISubdivision* subdiv_strategy_;
+  int shading_ui_;
 };
+
+// Unsupported for now
+// https://hhoppe.com/pvdrpm.pdf
+// Need to learn the method and try to adapt it to the modern rendering pipeline
+// (aka Tessellation shaders or Mesh shaders)
+/*
+class ProgressiveMesh : public IRenderableObject {
+};
+*/
 
 #endif  // OBJECT_H

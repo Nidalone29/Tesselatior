@@ -8,9 +8,9 @@
 // loosely inspired by https://github.com/cmu462/Scotty3D/wiki/Loop-Subdivision
 // and chapter 4.2 of
 // https://graphics.stanford.edu/courses/cs348a-09-fall/Papers/zorin-subdivision00.pdf
-TriMesh* LoopSubdiv::subdivide(const Model* in, int n_steps) {
-  TriMesh* subdivided = new TriMesh(in->meshes()[0]);
-  // TODO verify that the mesh is a triangle
+TriMesh* LoopSubdiv::subdivide(const TriMesh* in, int n_steps) {
+  const HalfEdgeData* hfd = in->half_edge_data();
+  HalfEdgeData* subdivided = new HalfEdgeData(*hfd);
 
   for (HalfEdge* he : *subdivided->half_edges()) {
     assert(he->Previous()->Previous()->Previous() == he);
@@ -43,11 +43,9 @@ TriMesh* LoopSubdiv::subdivide(const Model* in, int n_steps) {
 
         glm::vec3 new_pos = ((a->position + b->position) * 1.0F / 8.0F) +
                             (x->position * 3.0F / 4.0F);
-        glm::vec3 new_norm =
-            ((a->normal + b->normal) * 1.0F / 8.0F) + (x->normal * 3.0F / 4.0F);
         glm::vec2 new_uv = ((a->text_coords + b->text_coords) * 1.0F / 8.0F) +
                            (x->text_coords * 3.0F / 4.0F);
-        Vertex n_v = Vertex(new_pos, new_norm, new_uv);
+        Vertex n_v = Vertex(new_pos, new_uv);
 
         even_vertex_pos[x] = n_v;
       } else {  // I am inside
@@ -65,7 +63,6 @@ TriMesh* LoopSubdiv::subdivide(const Model* in, int n_steps) {
 
         glm::vec3 new_pos =
             (1.0F - (static_cast<float>(k) * beta)) * x->position;
-        glm::vec3 new_norm = x->normal * (1.0F - static_cast<float>(k) * beta);
         glm::vec2 new_uv =
             x->text_coords * (1.0F - static_cast<float>(k) * beta);
 
@@ -75,14 +72,14 @@ TriMesh* LoopSubdiv::subdivide(const Model* in, int n_steps) {
           Vertex* b = curr->vert;
           assert(b != x);
           new_pos += (b->position * beta);
-          new_norm += b->normal * beta;
+          // new_norm += b->normal * beta;
           new_uv += b->text_coords * beta;
           counter++;
           curr = curr->twin->next;
         } while (curr != x->halfedge);
         assert(counter == x->Valence());
 
-        even_vertex_pos[x] = Vertex(new_pos, new_norm, new_uv);
+        even_vertex_pos[x] = Vertex(new_pos, new_uv);
       }
     }
 
@@ -102,23 +99,21 @@ TriMesh* LoopSubdiv::subdivide(const Model* in, int n_steps) {
         glm::vec3 new_pos =
             v2->position * 3.0F / 8.0F + v0->position * 3.0F / 8.0F +
             v1->position * 1.0F / 8.0F + v3->position * 1.0F / 8.0F;
-        glm::vec3 new_norm =
-            v2->normal * 3.0F / 8.0F + v0->normal * 3.0F / 8.0F +
-            v1->normal * 1.0F / 8.0F + v3->normal * 1.0F / 8.0F;
         glm::vec2 new_uv =
             v2->text_coords * 3.0F / 8.0F + v0->text_coords * 3.0F / 8.0F +
             v1->text_coords * 1.0F / 8.0F + v3->text_coords * 1.0F / 8.0F;
-        odd_vertex_pos[e] = Vertex(new_pos, new_norm, new_uv);
+        odd_vertex_pos[e] = Vertex(new_pos, new_uv);
       } else {
         Vertex* a = e->halfedge->vert;
         Vertex* b = e->halfedge->next->next->vert;
 
         glm::vec3 new_pos =
             a->position * 1.0F / 2.0F + b->position * 1.0F / 2.0F;
-        glm::vec3 new_norm = a->normal * 1.0F / 2.0F + b->normal * 1.0F / 2.0F;
+        // glm::vec3 new_norm = a->normal * 1.0F / 2.0F + b->normal * 1.0F
+        // / 2.0F;
         glm::vec2 new_uv =
             a->text_coords * 1.0F / 2.0F + b->text_coords * 1.0F / 2.0F;
-        odd_vertex_pos[e] = Vertex(new_pos, new_norm, new_uv);
+        odd_vertex_pos[e] = Vertex(new_pos, new_uv);
       }
     }
 
@@ -159,21 +154,19 @@ TriMesh* LoopSubdiv::subdivide(const Model* in, int n_steps) {
     // repositioning the even vertices
     for (auto& [v, n_v] : even_vertex_pos) {
       v->position = n_v.position;
-      v->normal = n_v.normal;
+      // v->normal = n_v.normal;
       v->text_coords = n_v.text_coords;
     }
   }
 
-  subdivided->GenerateOpenGLBuffers();
-  return subdivided;
+  // computing flat normals
+
+  TriMesh* output = new TriMesh(subdivided, in->material());
+  output->GenerateOpenGLBuffers();
+  return output;
 }
 
-void LoopSubdiv::split(TriMesh* m, Edge* e, const Vertex& new_vert) {
-  if (m->type() == MESH_TYPE::QUADS) {
-    // TODO REFACTOR
-    throw;
-  }
-
+void LoopSubdiv::split(HalfEdgeData* m, Edge* e, const Vertex& new_vert) {
   if (e->halfedge->IsBoundary()) {
     Face* f0 = e->halfedge->face;
     HalfEdge* h0 = e->halfedge;  // this is the boundary 100%
@@ -426,13 +419,9 @@ void LoopSubdiv::split(TriMesh* m, Edge* e, const Vertex& new_vert) {
   }
 }
 
-void LoopSubdiv::flip(TriMesh* m, const Edge* e) {
+void LoopSubdiv::flip(HalfEdgeData* m, const Edge* e) {
   if (e->halfedge->IsBoundary()) {
     LOG_ERROR("YOU CAN'T FLIP A BOUNDARY EDGE");
-    throw;
-  }
-  if (m->type() == MESH_TYPE::QUADS) {
-    // TODO REFACTOR
     throw;
   }
 

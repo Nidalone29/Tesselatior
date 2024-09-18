@@ -4,13 +4,15 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <unordered_map>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "logger.h"
 #include "texture.h"
 
-// this actually rappresents a shader program (that can have multiple shaders
+// this actually represents a shader program (that can have multiple shaders
 // files maybe)
 class Shader {
  public:
@@ -23,7 +25,7 @@ class Shader {
    * @param type Vertex or Fragment shader
    * @param path path to the source code of the shader
    */
-  void AddShader(const GLenum type, const std::filesystem::path& path);
+  void AddShaderFile(const GLenum type, const std::filesystem::path& path);
 
   /**
    * @brief compiling and linking all the added shaders to a program
@@ -64,6 +66,29 @@ class Shader {
   std::vector<GLuint> compiled_shaders_;
 
   GLuint program_;
+};
+
+// singleton class that handles shaders
+// owns all the shaders it has
+class ShaderManager {
+ public:
+  ShaderManager(const ShaderManager&) = delete;
+  ShaderManager& operator=(const ShaderManager&) = delete;
+  ShaderManager(ShaderManager&&) = delete;
+  ShaderManager& operator=(ShaderManager&&) = delete;
+  ~ShaderManager();
+
+  static ShaderManager& Instance();
+
+  Shader* GetShader(const std::string& shader_id);
+
+  void AddShaders(
+      std::initializer_list<std::pair<std::string, Shader*>> in_shaders);
+
+ private:
+  ShaderManager() = default;
+  // ShaderID to Shader
+  std::unordered_map<std::string, Shader*> shaders_;
 };
 
 #endif  // SHADER_H

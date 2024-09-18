@@ -1,34 +1,7 @@
 #ifndef SUBDIVISION_H
 #define SUBDIVISION_H
 
-#include <map>
-#include <string>
-
-#include "../model.h"
-
-// sa stands for subdivision algorithms
-namespace sa {
-
-enum class SubDiv {
-  NONE,
-  // --
-  LOOP,
-  CATMULL,
-  SQRT3
-};
-
-// why inline and not static?
-// https://www.youtube.com/watch?v=QVHwOOrSh3w
-// https://www.youtube.com/watch?v=rQhBECyA6ew
-// string for displaying algorithms name to UI
-inline const std::map<SubDiv, std::string> kSubdivisions = {
-    {SubDiv::NONE, "none"},
-    {SubDiv::LOOP, "loop"},
-    {SubDiv::CATMULL, "catmull"},
-    {SubDiv::SQRT3, "sqrt3"},
-};
-
-};  // namespace sa
+#include "../mesh.h"
 
 // [chapter 17.5 in RealTimeRendering 4th edition]
 // Subdivision in two phases
@@ -39,7 +12,16 @@ class ISubdivision {
  public:
   virtual ~ISubdivision() = 0;
 
-  virtual TriMesh* subdivide(const Model* in, int n_steps) = 0;
+  [[nodiscard]] virtual IMesh* subdivide(IMesh* in, int n_steps) = 0;
+
+ private:
+};
+
+class NoneSubdiv final : public ISubdivision {
+ public:
+  virtual ~NoneSubdiv();
+
+  [[nodiscard]] IMesh* subdivide(IMesh* in, int n_steps) override;
 
  private:
 };
