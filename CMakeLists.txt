@@ -27,6 +27,7 @@ set(Sources
 	./src/terrain.cpp
 	./src/subdiv/subdivision.cpp
 	./src/subdiv/loop.cpp
+	./src/subdiv/sqrt3.cpp
 )
 
 set(Headers 

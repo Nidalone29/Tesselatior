@@ -6,6 +6,7 @@
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "logger.h"
 #include "utilities.h"
@@ -297,7 +298,8 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
 
   // flags set to 0 for now, probably have to set them at some point if ASSIMP
   // doesn't deal with different file formats
-  const aiScene* p_scene = importer.ReadFile(model_path_.string().c_str(), 0);
+  const aiScene* p_scene = importer.ReadFile(model_path_.string().c_str(),
+                                             aiProcess_JoinIdenticalVertices);
 
   if (!p_scene || p_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !p_scene->mRootNode) {

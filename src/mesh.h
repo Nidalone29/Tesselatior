@@ -57,6 +57,7 @@ class IMesh {
   [[nodiscard]] virtual int num_edges() const = 0;
   [[nodiscard]] virtual int num_faces() const = 0;
   [[nodiscard]] virtual std::vector<sa::SubDiv> CompatibleSubdivs() = 0;
+  [[nodiscard]] virtual bool IsManifold() const = 0;
   virtual void ApplySmoothNormals() = 0;
   virtual void GenerateOpenGLBuffers(
       std::vector<Vertex>* vertices = nullptr,
@@ -88,8 +89,10 @@ class AbstractMesh : public IMesh {
   [[nodiscard]] const GLuint& vao() const override;
   [[nodiscard]] unsigned int num_indices() const override;
   [[nodiscard]] const HalfEdgeData* half_edge_data() const;
-  [[nodiscard]] const Material& material() const;
+  [[nodiscard]] const Material& material() const override;
   void material(const Material& m);
+
+  [[nodiscard]] bool IsManifold() const override;
 
   // This is additional debug info
   [[nodiscard]] int num_vertices() const override;

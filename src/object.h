@@ -107,6 +107,7 @@ class SubDivMesh final : public IRenderableObject {
   sa::SubDiv subdiv_algo_;
   // To be shown in UI
   int current_subdiv_level_;
+  std::vector<sa::SubDiv> compatible_subdivs_;
   sa::SubDiv current_subdiv_algo_;
   ISubdivision* subdiv_strategy_;
   int shading_ui_;

@@ -49,6 +49,8 @@ class HalfEdgeData {
 
   void ShadeSmooth();
 
+  bool IsManifold() const;
+
  private:
   std::vector<Vertex*>* vertices_;
   std::vector<HalfEdge*>* half_edges_;

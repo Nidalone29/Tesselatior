@@ -22,6 +22,7 @@ AbstractMesh::AbstractMesh(const MESH_TYPE type, HalfEdgeData* hf_data,
   if (!hf_data->IsValidType(type)) {
     throw;
   }
+  // TODO FIX BAD CALL TO VIRTUAL FUNCTION IN CONSTRUCTOR
   GenerateOpenGLBuffers();
 }
 
@@ -51,6 +52,10 @@ const Material& AbstractMesh::material() const {
 
 void AbstractMesh::material(const Material& m) {
   material_ = m;
+}
+
+bool AbstractMesh::IsManifold() const {
+  return hf_data_->IsManifold();
 }
 
 int AbstractMesh::num_vertices() const {
@@ -174,7 +179,11 @@ int TriMesh::PatchNumVertices() const {
 }
 
 std::vector<sa::SubDiv> TriMesh::CompatibleSubdivs() {
-  return {sa::SubDiv::NONE, sa::SubDiv::LOOP, sa::SubDiv::SQRT3};
+  std::vector<sa::SubDiv> res = {sa::SubDiv::NONE, sa::SubDiv::LOOP};
+  if (IsManifold()) {
+    res.push_back(sa::SubDiv::SQRT3);
+  }
+  return res;
 }
 
 IMesh* TriMesh::clone() {

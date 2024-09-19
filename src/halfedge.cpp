@@ -1,5 +1,6 @@
 #include "halfedge.h"
 
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -43,7 +44,12 @@ HalfEdgeData::HalfEdgeData(const HalfEdgeData& other) {
   }
   for (auto [ohe, nhe] : OTN_halfedge) {
     nhe->next = OTN_halfedge[ohe->next];
-    nhe->twin = OTN_halfedge[ohe->twin];
+    if (!ohe->IsBoundary()) {
+      nhe->twin = OTN_halfedge[ohe->twin];
+    } else {
+      nhe->twin = nullptr;
+    }
+
     // we still don't have the other data
   }
 
@@ -187,6 +193,8 @@ const std::vector<Edge*>* HalfEdgeData::edges() const {
 // computing smooth normals using the optimization explained in
 // https://iquilezles.org/articles/normals/
 void HalfEdgeData::ShadeSmooth() {
+  // TODO probably set all normals to 0;
+
   for (const Face* f : *faces_) {
     const glm::vec3 face_normal = f->ComputeNormalWithArea();
 
@@ -205,13 +213,23 @@ void HalfEdgeData::ShadeSmooth() {
         while (!he->IsBoundary()) {
           he = he->twin->Previous();
         }
+        HalfEdge* left_he = he;
+        // now left_he is a boundary
+        if (left_he->next->IsBoundary()) {
+          // if also its successor is a boundary then we are on the same face
+          // therefore we are in a corner, and this assert must be true
+          assert(left_he->vert == v);
+          v->normal += face_normal;
+        }
 
         // and now we explore the faces from left to right (clockwise)
         HalfEdge* curr = he->next;
-        do {
+
+        while (!curr->IsBoundary()) {
           v->normal += face_normal;
           curr = curr->twin->next;
-        } while (!curr->IsBoundary());
+        }
+
       } else {  // I am inside
         HalfEdge* curr = v->halfedge;
 
@@ -229,6 +247,12 @@ void HalfEdgeData::ShadeSmooth() {
   for (Vertex* v : *vertices_) {
     v->normal = glm::normalize(v->normal);
   }
+}
+
+bool HalfEdgeData::IsManifold() const {
+  // thanks clang-tidy for teaching me this
+  return std::all_of(edges_->cbegin(), edges_->cend(),
+                     [](const Edge* e) { return !e->halfedge->IsBoundary(); });
 }
 
 // ---

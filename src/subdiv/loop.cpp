@@ -12,10 +12,6 @@ TriMesh* LoopSubdiv::subdivide(const TriMesh* in, int n_steps) {
   const HalfEdgeData* hfd = in->half_edge_data();
   HalfEdgeData* subdivided = new HalfEdgeData(*hfd);
 
-  for (HalfEdge* he : *subdivided->half_edges()) {
-    assert(he->Previous()->Previous()->Previous() == he);
-  }
-
   for (int i = 0; i < n_steps; i++) {
     LOG_INFO("loop subdiv {}", i + 1);
 
@@ -158,8 +154,6 @@ TriMesh* LoopSubdiv::subdivide(const TriMesh* in, int n_steps) {
       v->text_coords = n_v.text_coords;
     }
   }
-
-  // computing flat normals
 
   TriMesh* output = new TriMesh(subdivided, in->material());
   output->GenerateOpenGLBuffers();

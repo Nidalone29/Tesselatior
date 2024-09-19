@@ -280,10 +280,27 @@ void Application::Init() {
   };
 
   SubDivMeshCreator sdmc;
-
   Scene* manifolds = new Scene("Manifolds");
+  cube_tri_t.translate(-5.0F, 0.0F, 0.0F);
+
+  SubDivMesh* plane_sub = sdmc.CreateMesh("plane", "models/plane_trig.obj");
+  plane_sub->transform(cube_tri_t);
+  manifolds->AddObject(plane_sub);
+
+  cube_tri_t.translate(5.0F, 0.0F, 0.0F);
+  SubDivMesh* open_sphere =
+      sdmc.CreateMesh("open sphere", "models/opensphere.obj");
+  open_sphere->transform(cube_tri_t);
+  manifolds->AddObject(open_sphere);
+
+  cube_tri_t.translate(-10.0F, 0.0F, 0.0F);
+  SubDivMesh* triangle = sdmc.CreateMesh("triangle", "models/triangle.obj");
+  triangle->transform(cube_tri_t);
+  manifolds->AddObject(triangle);
+
   SubDivMesh* subdiv_cube =
       sdmc.CreateMesh("cuboide", MESH_TYPE::TRI, c_vertices, c_indices);
+
   subdiv_cube->ApplySmoothShading();
   manifolds->AddObject(subdiv_cube);
 

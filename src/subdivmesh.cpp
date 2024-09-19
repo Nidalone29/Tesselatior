@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "utilities.h"
 #include "subdiv/loop.h"
+#include "subdiv/sqrt3.h"
 
 SubDivMesh::SubDivMesh(const std::string& name, IMesh* model,
                        const Shader* shader)
@@ -16,6 +17,7 @@ SubDivMesh::SubDivMesh(const std::string& name, IMesh* model,
       subdiv_model_(nullptr),
       subdiv_strategy_(nullptr),
       current_subdiv_level_(0),
+      compatible_subdivs_(model->CompatibleSubdivs()),
       shading_ui_(1),  // default smooth shading
       current_subdiv_algo_(sa::SubDiv::NONE) {
   LOG_TRACE("SubDivMesh(const std::string&, const Model&, const Shader*)");
@@ -63,7 +65,7 @@ void SubDivMesh::ShowSettingsGUI() {
 
   if (ImGui::BeginCombo("subdivision algorithm",
                         sa::kSubdivisions.at(subdiv_algo_).c_str())) {
-    for (const sa::SubDiv subdiv_key : base_model_->CompatibleSubdivs()) {
+    for (const sa::SubDiv subdiv_key : compatible_subdivs_) {
       const bool is_selected = (subdiv_algo_ == subdiv_key);
       if (ImGui::Selectable(sa::kSubdivisions.at(subdiv_key).c_str(),
                             is_selected)) {
@@ -97,22 +99,29 @@ void SubDivMesh::ShowSettingsGUI() {
       case sa::SubDiv::LOOP:
         subdiv_strategy_ = new LoopSubdiv();
         break;
+      case sa::SubDiv::SQRT3:
+        subdiv_strategy_ = new Sqrt3Subdiv();
+        break;
       default:
         throw;
         break;
     }
-    subdiv_model_ =
-        subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
+    if (subdiv_model_ != nullptr) {
+      subdiv_model_ =
+          subdiv_strategy_->subdivide(base_model_, current_subdiv_level_);
 
-    switch (shading_ui_) {
-      case 1:
-        subdiv_model_->GenerateOpenGLBuffersWithSmoothShading();
-        break;
-      case 0:
-        subdiv_model_->GenerateOpenGLBufferWithFlatShading();
-        break;
-      default:
-        throw;  // invalid for some reason
+      switch (shading_ui_) {
+        case 1:
+          subdiv_model_->GenerateOpenGLBuffersWithSmoothShading();
+          break;
+        case 0:
+          subdiv_model_->GenerateOpenGLBufferWithFlatShading();
+          break;
+        default:
+          throw;  // invalid for some reason
+      }
+    } else {
+      subdiv_model_ = base_model_->clone();
     }
   }
 
