@@ -23,6 +23,26 @@ Vertex::Vertex(const glm::vec3& xyz, const glm::vec2& txt)
   //
 }
 
+Vertex::Vertex(const Vertex& other)
+    : position(other.position),
+      normal(other.normal),
+      text_coords(other.text_coords),
+      halfedge(nullptr) {
+  //
+}
+
+Vertex& Vertex::operator=(const Vertex& other) {
+  if (this != &other) {
+    Vertex temp(other);
+    std::swap(this->position, temp.position);
+    std::swap(this->normal, temp.normal);
+    std::swap(this->text_coords, temp.text_coords);
+    halfedge = nullptr;
+  }
+
+  return *this;
+}
+
 bool Vertex::IsEven() const {
   return Valence() % 2 == 0;
 }

@@ -28,6 +28,7 @@ set(Sources
 	./src/subdiv/subdivision.cpp
 	./src/subdiv/loop.cpp
 	./src/subdiv/sqrt3.cpp
+	./src/subdiv/catmullclark.cpp
 )
 
 set(Headers 

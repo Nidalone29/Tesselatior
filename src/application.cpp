@@ -298,6 +298,12 @@ void Application::Init() {
   triangle->transform(cube_tri_t);
   manifolds->AddObject(triangle);
 
+  cube_tri_t.translate(-15.0F, 0.0F, 0.0F);
+  SubDivMesh* qcube = sdmc.CreateMesh("QUADCUBE", "models/cube/cube_quad.obj");
+  qcube->ApplySmoothShading();
+  qcube->transform(cube_tri_t);
+  manifolds->AddObject(qcube);
+
   SubDivMesh* subdiv_cube =
       sdmc.CreateMesh("cuboide", MESH_TYPE::TRI, c_vertices, c_indices);
 

@@ -64,7 +64,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera) const {
     shader->SetUnifromSampler("ColorTextSampler", TEXTURE_TYPE::DIFFUSE);
     shader->SetUnifromSampler("DisplacementTextSampler", TEXTURE_TYPE::DISPLACEMENT);
 
-    shader->SetUniformFloat("alpha", alpha_);
+    // shader->SetUniformFloat("alpha", alpha_);
     shader->SetUniformFloat("tessellation_level", static_cast<float>(tess_level_));
     shader->SetUniformFloat("displacement_height", displacement_height_);
 

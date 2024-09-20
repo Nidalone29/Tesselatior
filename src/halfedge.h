@@ -30,6 +30,8 @@ class HalfEdgeData {
 
   ~HalfEdgeData();
 
+  void Clear();
+
   // expensive ([[nodiscard]] is necessary) function that checks if this
   // halfedge data is valid (meaning no dangling vertices, all halfedge setted
   // correctly...)
@@ -41,6 +43,7 @@ class HalfEdgeData {
   [[nodiscard]] std::vector<Vertex*>* vertices();
   [[nodiscard]] std::vector<HalfEdge*>* half_edges();
   [[nodiscard]] std::vector<Face*>* faces();
+  void faces(std::vector<Face*>* new_faces);
   [[nodiscard]] std::vector<Edge*>* edges();
   [[nodiscard]] const std::vector<Vertex*>* vertices() const;
   [[nodiscard]] const std::vector<HalfEdge*>* half_edges() const;

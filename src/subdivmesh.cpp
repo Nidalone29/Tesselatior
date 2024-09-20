@@ -6,6 +6,7 @@
 #include "utilities.h"
 #include "subdiv/loop.h"
 #include "subdiv/sqrt3.h"
+#include "subdiv/catmullclark.h"
 
 SubDivMesh::SubDivMesh(const std::string& name, IMesh* model,
                        const Shader* shader)
@@ -33,6 +34,7 @@ SubDivMesh::~SubDivMesh() {
 }
 
 void SubDivMesh::Draw() const {
+  SetRenderSettings();
   glBindVertexArray(subdiv_model_->vao());
 
   subdiv_model_->material().BindTextures();
@@ -57,7 +59,7 @@ void SubDivMesh::Draw() const {
 
 // TODO move to mesh
 void SubDivMesh::SetRenderSettings() const {
-  glPatchParameteri(GL_PATCH_VERTICES, 3);
+  glPatchParameteri(GL_PATCH_VERTICES, subdiv_model_->PatchNumVertices());
 }
 
 void SubDivMesh::ShowSettingsGUI() {
@@ -101,6 +103,9 @@ void SubDivMesh::ShowSettingsGUI() {
         break;
       case sa::SubDiv::SQRT3:
         subdiv_strategy_ = new Sqrt3Subdiv();
+        break;
+      case sa::SubDiv::CATMULL:
+        subdiv_strategy_ = new CatmullClarkSubdiv();
         break;
       default:
         throw;

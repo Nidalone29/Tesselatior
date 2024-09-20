@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -365,9 +366,12 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
   halfedges->reserve(to_underlying(current_mesh_type) * pai_mesh->mNumFaces);
   faces->reserve(pai_mesh->mNumFaces);
 
+  bool to_do_compute_normals = !pai_mesh->HasNormals();
+
   for (Uint j = 0; j < pai_mesh->mNumVertices; j++) {
     const aiVector3D* p_pos = &(pai_mesh->mVertices[j]);
-    const aiVector3D* p_normal = &(pai_mesh->mNormals[j]);
+    const aiVector3D* p_normal =
+        pai_mesh->HasNormals() ? &(pai_mesh->mNormals[j]) : &zero_3d;
     const aiVector3D* p_tex_coord = pai_mesh->HasTextureCoords(0)
                                         ? &(pai_mesh->mTextureCoords[0][j])
                                         : &zero_3d;
@@ -378,13 +382,13 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
 
     vertices->push_back(x);
   }
-
   // edges map
   std::map<std::pair<Uint, Uint>, HalfEdge*> edges_m;
 
   for (Uint j = 0; j < pai_mesh->mNumFaces; j++) {
     const aiFace& ai_face = pai_mesh->mFaces[j];
 
+    LOG_INFO("-------");
     std::pair<Uint, Uint> x;
     std::pair<Uint, Uint> s;  // swapped
     std::vector<Uint> current_indices;
@@ -398,19 +402,26 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
       case MESH_TYPE::QUAD:
         // For some reason the first 2 indices need to be swapped otherwise
         // the hardware tessellator does not triangulate the quad properly
-        current_indices = {1, 0, 2, 3};
+        current_indices = {0, 1, 2, 3};
         break;
       default:
         // TODO unsupported polygon type
         throw;
         break;
     }
+
     HalfEdge* current_hf;
     std::vector<HalfEdge*> faces_halfedges;
+
     for (int k = 0; k < current_indices.size(); k++) {
-      x = {ai_face.mIndices[k],
-           ai_face.mIndices[(k + 1) % to_underlying(current_mesh_type)]};
+      x = {ai_face.mIndices[current_indices[k]],
+           ai_face.mIndices[current_indices[(k + 1) %
+                                            to_underlying(current_mesh_type)]]};
+
       s = {x.second, x.first};
+
+      LOG_INFO("{} - {}", x.first, x.second);
+
       current_hf = new HalfEdge(f);
       faces_halfedges.push_back(current_hf);
       f->halfedge = current_hf;
@@ -419,6 +430,7 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
       current_hf->vert = vertices->at(x.second);
       vertices->at(x.first)->halfedge = current_hf;
 
+      // this doesn't work and I don't know why
       if (edges_m.find(s) != edges_m.end()) {
         current_hf->twin = edges_m[s];
         edges_m[s]->twin = current_hf;
@@ -428,7 +440,7 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
 
       halfedges->push_back(current_hf);
     }
-
+    LOG_INFO("-----");
     // setting the next
     for (int z = 0; z < faces_halfedges.size(); z++) {
       faces_halfedges[z]->next =
@@ -547,17 +559,24 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
     // Texture texture(Texture(TEXTURE_TYPE::DISPLACEMENT));
   }
 
+  const Shader* s;
   if (current_mesh_type == MESH_TYPE::TRI) {
     my_mesh = new TriMesh(curr_hfd, x);
+    s = ShaderManager::Instance().GetShader("TriangleShader");
   } else if (current_mesh_type == MESH_TYPE::QUAD) {
     my_mesh = new QuadMesh(curr_hfd, x);
+    s = ShaderManager::Instance().GetShader("TerrainShader");
   } else {
     // TODO mixed meshes
+    s = ShaderManager::Instance().GetShader("TriangleShader");
+  }
+
+  if (to_do_compute_normals) {
+    my_mesh->ApplySmoothNormals();
   }
 
   // TODO deal with shaders and shaders parameters
-  return new SubDivMesh(name, my_mesh,
-                        ShaderManager::Instance().GetShader("TriangleShader"));
+  return new SubDivMesh(name, my_mesh, s);
 }
 
 SubDivMesh* SubDivMeshCreator::CreateMesh(

@@ -21,6 +21,11 @@ struct Vertex {
 
   Vertex(const glm::vec3& xyz, const glm::vec3& norm, const glm::vec2& txt);
   Vertex(const glm::vec3& xyz, const glm::vec2& txt);
+  Vertex(const Vertex& other);
+  Vertex& operator=(const Vertex& other);
+  // TODO properly support move semantics
+  Vertex(Vertex&& other) = default;
+  Vertex& operator=(Vertex&& other) = default;
 
   [[nodiscard]] bool IsEven() const;
   [[nodiscard]] bool IsOdd() const;

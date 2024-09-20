@@ -24,10 +24,15 @@ HalfEdgeData::HalfEdgeData(std::vector<Vertex*>* vertices,
 HalfEdgeData::HalfEdgeData(const HalfEdgeData& other) {
   LOG_TRACE("HalfEdgeData::HalfEdgeData(const HalfEdgeData&)");
 
-  vertices_ = new std::vector<Vertex*>(/* other.vertices_->size() */);
-  half_edges_ = new std::vector<HalfEdge*>(/* other.half_edges_->size() */);
-  faces_ = new std::vector<Face*>(/* other.faces_->size() */);
-  edges_ = new std::vector<Edge*>(/* other.edges_->size() */);
+  vertices_ = new std::vector<Vertex*>();
+  half_edges_ = new std::vector<HalfEdge*>();
+  faces_ = new std::vector<Face*>();
+  edges_ = new std::vector<Edge*>();
+
+  vertices_->reserve(other.vertices_->size());
+  half_edges_->reserve(other.half_edges_->size());
+  faces_->reserve(other.faces_->size());
+  edges_->reserve(other.edges_->size());
 
   // we basically map the other data to the new one
   // OTN ===> old to new
@@ -108,6 +113,10 @@ HalfEdgeData& HalfEdgeData::operator=(const HalfEdgeData& other) {
 }
 
 HalfEdgeData::~HalfEdgeData() {
+  Clear();
+}
+
+void HalfEdgeData::Clear() {
   for (Vertex* x : *vertices_) {
     delete x;
   }
@@ -168,6 +177,10 @@ std::vector<HalfEdge*>* HalfEdgeData::half_edges() {
 
 std::vector<Face*>* HalfEdgeData::faces() {
   return faces_;
+}
+
+void HalfEdgeData::faces(std::vector<Face*>* new_faces) {
+  faces_ = new_faces;
 }
 
 std::vector<Edge*>* HalfEdgeData::edges() {
