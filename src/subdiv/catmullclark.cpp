@@ -42,55 +42,85 @@ QuadMesh* CatmullClarkSubdiv::subdivide(const QuadMesh* in, int n_steps) {
     for (Edge* e : *subdivided->edges()) {
       Vertex* new_v =
           new Vertex(glm::vec3(0.0F, 0.0F, 0.0F), glm::vec2(0.0F, 0.0F));
-      // the two edge points
-      Vertex* v_e1 = e->halfedge->vert;
-      Vertex* v_e2 = e->halfedge->twin->vert;
-      // the two face points
-      Vertex* v_f1 = new_face_points[e->halfedge->face];
-      Vertex* v_f2 = new_face_points[e->halfedge->twin->face];
-      new_v->position = (v_e1->position + v_e2->position +  //
-                         v_f1->position + v_f2->position) /
-                        4.0F;
-      new_v->text_coords = (v_e1->text_coords + v_e2->text_coords +
-                            v_f1->text_coords + v_f2->text_coords) /
-                           4.0F;
+      if (e->halfedge->IsBoundary()) {
+        Vertex* a = e->halfedge->vert;
+        Vertex* b = e->halfedge->Previous()->vert;
+        new_v->position = (a->position + a->position) / 2.0F;
+        new_v->text_coords = (a->text_coords + a->text_coords) / 2.0F;
+
+      } else {
+        // the two edge points
+        Vertex* v_e1 = e->halfedge->vert;
+        Vertex* v_e2 = e->halfedge->twin->vert;
+        // the two face points
+        Vertex* v_f1 = new_face_points[e->halfedge->face];
+        Vertex* v_f2 = new_face_points[e->halfedge->twin->face];
+        new_v->position = (v_e1->position + v_e2->position +  //
+                           v_f1->position + v_f2->position) /
+                          4.0F;
+        new_v->text_coords = (v_e1->text_coords + v_e2->text_coords +
+                              v_f1->text_coords + v_f2->text_coords) /
+                             4.0F;
+      }
       new_edge_points[e] = new_v;
     }
     // update old vertices positions
     for (Vertex* v : *subdivided->vertices()) {
-      const float n = static_cast<float>(v->Valence());
-      glm::vec3 f_pos = {0.0F, 0.0F, 0.0F};
-      glm::vec2 f_uv = {0.0F, 0.0F};
-      const HalfEdge* curr = v->halfedge;
-      // go around the face and avg the new points
-      do {
-        const Vertex* b = new_face_points[curr->face];
-        assert(b != v);
-        f_pos += b->position;
-        f_uv += b->text_coords;
-        curr = curr->twin->next;
-      } while (curr != v->halfedge);
-      f_pos /= n;
-      f_uv /= n;
+      if (v->IsBoundary()) {
+        Vertex* a = nullptr;
+        Vertex* b = nullptr;
+        // find the first one clockwise
+        HalfEdge* he = v->halfedge;
+        while (!he->IsBoundary()) {
+          he = he->twin->next;
+        }
+        a = he->vert;
+        // find the other one counter-clockwise
+        he = v->halfedge->Previous();
+        while (!he->IsBoundary()) {
+          he = he->twin->Previous();
+        }
+        b = he->Previous()->vert;
 
-      // go around and avg the midpoints of the edges (we are not using the new
-      // edgepoints for now)
-      glm::vec3 r_pos = {0.0F, 0.0F, 0.0F};
-      glm::vec2 r_uv = {0.0F, 0.0F};
-      curr = v->halfedge;
-      // go around the face and avg the new points
-      do {
-        const Vertex* a = curr->vert;
-        const Vertex* b = curr->twin->vert;
-        r_pos += (a->position + b->position) / 2.0F;
-        r_uv += (a->text_coords + b->text_coords) / 2.0F;
-        curr = curr->twin->next;
-      } while (curr != v->halfedge);
-      r_pos /= n;
-      r_uv /= n;
+        v->position = ((a->position + b->position) * 1.0F / 8.0F) +
+                      (v->position * 3.0F / 4.0F);
+        v->text_coords = ((a->text_coords + b->text_coords) * 1.0F / 8.0F) +
+                         (v->text_coords * 3.0F / 4.0F);
+      } else {
+        const float n = static_cast<float>(v->Valence());
+        glm::vec3 f_pos = {0.0F, 0.0F, 0.0F};
+        glm::vec2 f_uv = {0.0F, 0.0F};
+        const HalfEdge* curr = v->halfedge;
+        // go around the face and avg the new points
+        do {
+          const Vertex* b = new_face_points[curr->face];
+          assert(b != v);
+          f_pos += b->position;
+          f_uv += b->text_coords;
+          curr = curr->twin->next;
+        } while (curr != v->halfedge);
+        f_pos /= n;
+        f_uv /= n;
 
-      v->position = (f_pos + 2.0F * r_pos + (n - 3.0F) * v->position) / n;
-      v->text_coords = (f_uv + 2.0F * r_uv + (n - 3.0F) * v->text_coords) / n;
+        // go around and avg the midpoints of the edges (we are not using the
+        // new edgepoints for now)
+        glm::vec3 r_pos = {0.0F, 0.0F, 0.0F};
+        glm::vec2 r_uv = {0.0F, 0.0F};
+        curr = v->halfedge;
+        // go around the face and avg the new points
+        do {
+          const Vertex* a = curr->vert;
+          const Vertex* b = curr->twin->vert;
+          r_pos += (a->position + b->position) / 2.0F;
+          r_uv += (a->text_coords + b->text_coords) / 2.0F;
+          curr = curr->twin->next;
+        } while (curr != v->halfedge);
+        r_pos /= n;
+        r_uv /= n;
+
+        v->position = (f_pos + 2.0F * r_pos + (n - 3.0F) * v->position) / n;
+        v->text_coords = (f_uv + 2.0F * r_uv + (n - 3.0F) * v->text_coords) / n;
+      }
     }
 
     // first we split all the edges by the midpoints

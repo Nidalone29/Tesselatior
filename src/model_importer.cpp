@@ -565,7 +565,7 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
     s = ShaderManager::Instance().GetShader("TriangleShader");
   } else if (current_mesh_type == MESH_TYPE::QUAD) {
     my_mesh = new QuadMesh(curr_hfd, x);
-    s = ShaderManager::Instance().GetShader("TerrainShader");
+    s = ShaderManager::Instance().GetShader("QuadsShader");
   } else {
     // TODO mixed meshes
     s = ShaderManager::Instance().GetShader("TriangleShader");

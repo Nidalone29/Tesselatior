@@ -59,9 +59,6 @@ class IMesh {
   [[nodiscard]] virtual std::vector<sa::SubDiv> CompatibleSubdivs() = 0;
   [[nodiscard]] virtual bool IsManifold() const = 0;
   virtual void ApplySmoothNormals() = 0;
-  virtual void GenerateOpenGLBuffers(
-      std::vector<Vertex>* vertices = nullptr,
-      std::vector<unsigned int>* indices = nullptr) = 0;
   virtual void GenerateOpenGLBuffersWithSmoothShading() = 0;
   virtual void GenerateOpenGLBufferWithFlatShading() = 0;
 
@@ -101,11 +98,6 @@ class AbstractMesh : public IMesh {
   // it generates smooth normals for the mesh
   void ApplySmoothNormals() override;
 
-  // we generate the buffers, as is, without any modification to the underlying
-  // data, it overrides prev buffer
-  void GenerateOpenGLBuffers(
-      std::vector<Vertex>* vertices = nullptr,
-      std::vector<unsigned int>* indices = nullptr) override;
   // computes smooth normals on a copy of the halfedge data then calls
   // generatebuffer
   void GenerateOpenGLBuffersWithSmoothShading() override;
@@ -115,6 +107,10 @@ class AbstractMesh : public IMesh {
   void GenerateOpenGLBufferWithFlatShading() override;
 
  protected:
+  // we generate the buffers, as is, without any modification to the underlying
+  // data, it overrides prev buffer
+  void GenerateOpenGLBuffers(std::vector<Vertex>* vertices = nullptr,
+                             std::vector<unsigned int>* indices = nullptr);
   void ClearOpenGLBuffers();
 
   // OpenGL specific

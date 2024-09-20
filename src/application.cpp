@@ -193,6 +193,15 @@ void Application::Init() {
 
   default_shader->Init();
 
+  Shader* quad_shader = new Shader();  // 4 patch
+  quad_shader->AddShaderFile(GL_VERTEX_SHADER, "shaders/pass_through.vert");
+  quad_shader->AddShaderFile(GL_TESS_CONTROL_SHADER,
+                             "shaders/pass_through_quad.tesc");
+  quad_shader->AddShaderFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tese");
+  quad_shader->AddShaderFile(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+
+  quad_shader->Init();
+
   Shader* terrain_shader = new Shader();  // 4 patch
   terrain_shader->AddShaderFile(GL_VERTEX_SHADER, "shaders/pass_through.vert");
   terrain_shader->AddShaderFile(GL_TESS_CONTROL_SHADER,
@@ -204,6 +213,7 @@ void Application::Init() {
   terrain_shader->Init();
 
   ShaderManager::Instance().AddShaders({{"TriangleShader", default_shader},  //
+                                        {"QuadsShader", quad_shader},
                                         {"TerrainShader", terrain_shader}});
 
   // init scenes

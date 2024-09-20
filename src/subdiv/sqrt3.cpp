@@ -219,7 +219,6 @@ TriMesh* Sqrt3Subdiv::subdivide(const TriMesh* in, int n_steps) {
   }
 
   TriMesh* output = new TriMesh(subdivided, in->material());
-  output->GenerateOpenGLBuffers();
   return output;
 }
 
