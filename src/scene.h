@@ -1,7 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "object.h"
+#include "./mesh/object.h"
 #include "light.h"
 
 // a scene graph is not needed for this application

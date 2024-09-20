@@ -11,24 +11,25 @@ set(Sources
 	./src/light.cpp
 	./src/main.cpp
 	./src/material.cpp
-	./src/mesh.cpp
-	./src/model_importer.cpp
-	./src/object.cpp
+	./src/mesh/mesh.cpp
+	./src/mesh/model_importer.cpp
+	./src/mesh/object.cpp
 	./src/renderer.cpp
 	./src/scene.cpp
 	./src/shader.cpp
 	./src/framebuffer.cpp
 	./src/texture.cpp
 	./src/transform.cpp
-	./src/vertex.cpp
-	./src/halfedge.cpp
-	./src/staticmodel.cpp
-	./src/subdivmesh.cpp
-	./src/terrain.cpp
+	./src/mesh/vertex.cpp
+	./src/mesh/halfedge.cpp
+	./src/mesh/staticmodel.cpp
+	./src/mesh/subdivmesh.cpp
+	./src/mesh/terrain.cpp
 	./src/subdiv/subdivision.cpp
 	./src/subdiv/loop.cpp
 	./src/subdiv/sqrt3.cpp
 	./src/subdiv/catmullclark.cpp
+	
 )
 
 set(Headers 
@@ -72,19 +73,19 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 
-add_custom_target(copy_assets
+add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/models ${CMAKE_CURRENT_BINARY_DIR}/${PRESET_NAME}/models
 )
 # These should be in a shaders folder
-add_custom_target(copy_shaders
+add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/shaders ${CMAKE_CURRENT_BINARY_DIR}/${PRESET_NAME}/shaders
 )
 # These? it should depend of the model but maybe i have to clean the code because i do not see it used
-add_custom_target(copy_textures
+add_custom_target(copy_textures ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/texture ${CMAKE_CURRENT_BINARY_DIR}/${PRESET_NAME}
 )
 
-add_custom_target(copy_imgui_layout
+add_custom_target(copy_imgui_layout ALL
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/imgui-layout.ini ${CMAKE_CURRENT_BINARY_DIR}/${PRESET_NAME}
 )
 

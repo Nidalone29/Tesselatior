@@ -1,7 +1,7 @@
 #ifndef SUBDIVISION_H
 #define SUBDIVISION_H
 
-#include "../mesh.h"
+#include "../mesh/mesh.h"
 
 // [chapter 17.5 in RealTimeRendering 4th edition]
 // Subdivision in two phases

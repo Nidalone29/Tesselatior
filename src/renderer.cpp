@@ -4,7 +4,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-#include "mesh.h"
+#include "./mesh/mesh.h"
 #include "shader.h"
 #include "logger.h"
 #include "utilities.h"
@@ -22,7 +22,7 @@ Renderer::Renderer()
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(1.0F, 1.0F, 1.0, 1.0F);
+  glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
 
   glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &max_tessel_level_);
 
@@ -64,7 +64,7 @@ void Renderer::Render(const Scene& scene, const Camera& camera) const {
     shader->SetUnifromSampler("ColorTextSampler", TEXTURE_TYPE::DIFFUSE);
     shader->SetUnifromSampler("DisplacementTextSampler", TEXTURE_TYPE::DISPLACEMENT);
 
-    // shader->SetUniformFloat("alpha", alpha_);
+    shader->SetUniformFloat("alpha", alpha_);
     shader->SetUniformFloat("tessellation_level", static_cast<float>(tess_level_));
     shader->SetUniformFloat("displacement_height", displacement_height_);
 

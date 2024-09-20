@@ -21,9 +21,10 @@
 #include "renderer.h"
 #include "shader.h"
 #include "logger.h"
-#include "model_importer.h"
-#include "object.h"
+#include "./mesh/model_importer.h"
+#include "./mesh/object.h"
 #include "utilities.h"
+#include "assimp/postprocess.h"
 
 using namespace std::chrono_literals;
 using hr_clock = std::chrono::high_resolution_clock;
@@ -216,53 +217,27 @@ void Application::Init() {
                                         {"QuadsShader", quad_shader},
                                         {"TerrainShader", terrain_shader}});
 
-  // init scenes
-  /*
-  Scene* flower_scene = new Scene("Flower");
-  Model* flower_object = new Model(
-      MESH_TYPE::TRIANGLES, "models/flower/flower.obj",
-  aiProcess_Triangulate); Transform flower_t; flower_t.translate(0.0F,
-  -4.0F, -15.0F); flower_t.rotate(-90.0F, 0.0F, 0.0F);
-  flower_object->transform(flower_t);
-  StaticModel* sf = new StaticModel("flower", flower_object,
-  default_shader); flower_scene->AddObject(sf);
-
-  // if this stack allocated model gets deleteted everything messes up
-  Model* dragon = new Model(MESH_TYPE::TRIANGLES, "models/dragon.obj");
-  SubDivMesh* dragon_model = new SubDivMesh("dragon", dragon,
-  default_shader); flower_scene->AddObject(dragon_model);
-
-  //  there is probably a more efficient way of doing this
-  scenes_.push_back(flower_scene);
-
-  Scene* teapot_scene = new Scene("Teapot");
-  Model* teapot_object = new Model(MESH_TYPE::TRIANGLES,
-  "models/teapot.obj", aiProcess_Triangulate); Transform teapot_t;
-  teapot_t.translate(0.0F, -1.6F, -9.0F);
-  teapot_t.rotate(0.0F, 0.0F, 0.0F);
-  teapot_object->transform(teapot_t);
-  StaticModel* st = new StaticModel("teapot", teapot_object,
-  default_shader); teapot_scene->AddObject(st);
-  // there is probably a more efficient way of doing this
-  scenes_.push_back(teapot_scene);
-  */
-
-  Scene* cube_scene = new Scene("Cubes");
+  Scene* objects_scene = new Scene("Objects");
   StaticModelCreator smc;
-  StaticModel* cube_tri_model =
-      smc.CreateMesh("cube tri", "models/cube/cube.obj");
+
+  Transform mars_t;
+  StaticModel* mars =
+      smc.CreateMesh("Mars rover", "models/PerseveranceByNidal.glb",
+                     aiProcess_PreTransformVertices);
+  mars_t.translate(-5.0F, 0.0F, 0.0F);
+  mars->transform(mars_t);
+  objects_scene->AddObject(mars);
+
+  /*
+  // TODO debug weird light
+  mars_t.translate(0.0F, 0.0F, 0.0F);
+  StaticModel* katana =
+      smc.CreateMesh("Katana", "models/dragon_katana_oni_koroshi.glb");
+  katana->transform(mars_t);
+  objects_scene->AddObject(katana);
+  */
   Transform cube_tri_t;
-  cube_tri_t.translate(5.0F, 0.0F, 0.0F);
-  cube_tri_model->transform(cube_tri_t);
-  cube_scene->AddObject(cube_tri_model);
-
-  StaticModel* sfera2 = smc.CreateMesh("sfera", "models/sphere2.obj");
   cube_tri_t.translate(-5.0F, 0.0F, 0.0F);
-  sfera2->transform(cube_tri_t);
-  cube_scene->AddObject(sfera2);
-
-  StaticModel* plane = smc.CreateMesh("plane", "models/plane_trig.obj");
-  cube_scene->AddObject(plane);
 
   const std::vector<Vertex> c_vertices = {
       {glm::vec3(-2.0F, 2.0F, -2.0F), glm::vec2(0.0F, 0.0F)},
@@ -320,8 +295,50 @@ void Application::Init() {
   subdiv_cube->ApplySmoothShading();
   manifolds->AddObject(subdiv_cube);
 
+  Scene* t_scene_subdiv = new Scene("T Scene");
+
+  SubDivMesh* t_meshlab = sdmc.CreateMesh("T", "models/T.ply");
+  Transform t_tranform_matrix_cube;
+  t_tranform_matrix_cube.translate(0.0F, 0.0F, 0.0F);
+  t_meshlab->transform(t_tranform_matrix_cube);
+  t_scene_subdiv->AddObject(t_meshlab);
+
+  for (int i = 1; i < 5; i++) {
+    t_tranform_matrix_cube.translate(i * 10.0F, 0.0F, 0.0F);
+    SubDivMesh* to_add_t = t_meshlab->clone();
+    to_add_t->transform(t_tranform_matrix_cube);
+    t_scene_subdiv->AddObject(to_add_t);
+  }
+
+  Scene* bunny_scene_subdiv = new Scene("Bunny Scene");
+
+  SubDivMesh* bunny_meshlab = sdmc.CreateMesh("Bunny", "models/bunny2.ply");
+  Transform bunny_tranform_matrix_cube;
+
+  bunny_tranform_matrix_cube.translate(0.0F, 0.0F, 0.0F);
+
+  bunny_meshlab->transform(bunny_tranform_matrix_cube);
+  bunny_scene_subdiv->AddObject(bunny_meshlab);
+
+  for (int i = 1; i < 5; i++) {
+    bunny_tranform_matrix_cube.translate(i * 5.0F, 0.0F, 0.0F);
+    SubDivMesh* to_add_bunny = bunny_meshlab->clone();
+    to_add_bunny->transform(bunny_tranform_matrix_cube);
+    bunny_scene_subdiv->AddObject(to_add_bunny);
+  }
+
+  Scene* monster_frog = new Scene("MonsterFrog");
+  StaticModel* monster_frog_model = smc.CreateMesh(
+      "Monster", "models/monsterfrog.obj",
+      aiProcess_PreTransformVertices | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate);
+  monster_frog->AddObject(monster_frog_model);
+
   scenes_.push_back(manifolds);
-  scenes_.push_back(cube_scene);
+  scenes_.push_back(objects_scene);
+  scenes_.push_back(t_scene_subdiv);
+  scenes_.push_back(bunny_scene_subdiv);
+  scenes_.push_back(monster_frog);
 
   number_of_scenes_ = static_cast<int>(scenes_.size());
 

@@ -14,6 +14,8 @@ out TES_OUT {
   vec2 textcoord_;
 } tes_out;
 
+uniform float alpha;
+
 uniform mat4 Model2World;
 
 uniform mat4 camera_view_matrix;
@@ -40,7 +42,7 @@ void main() {
   vec2 texCoord = mix(t2, t1, gl_TessCoord.y);
 
   float Height = texture(DisplacementTextSampler, texCoord).y * displacement_height;
-  p.y += Height;
+  p.y += Height * alpha;
 
   gl_Position = camera_projection_matrix * camera_view_matrix * Model2World * p; 
 
