@@ -8,7 +8,7 @@ class LoopSubdiv final : public ISubdivision {
   // I can't specify the argument type because it violates the Liskov
   // Substitution Principle
   [[nodiscard]] TriMesh* subdivide(IMesh* in, int n_steps) override {
-    if (const TriMesh* d = dynamic_cast<TriMesh*>(in); d != nullptr) {
+    if (TriMesh* d = dynamic_cast<TriMesh*>(in); d != nullptr) {
       // the architecture of the program
       // (AvailableSubdivAlgosFactory::GetAvailableAlgos()) should guarantee
       // that this works
@@ -17,7 +17,7 @@ class LoopSubdiv final : public ISubdivision {
     return nullptr;
   }
 
-  [[nodiscard]] TriMesh* subdivide(const TriMesh* in, int n_steps);
+  [[nodiscard]] TriMesh* subdivide(TriMesh* in, int n_steps);
 
  private:
   /**

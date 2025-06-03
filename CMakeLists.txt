@@ -25,11 +25,12 @@ set(Sources
 	./src/mesh/staticmodel.cpp
 	./src/mesh/subdivmesh.cpp
 	./src/mesh/terrain.cpp
+	./src/mesh/importer.cpp
+	./src/mesh/assimp_importer.cpp
 	./src/subdiv/subdivision.cpp
 	./src/subdiv/loop.cpp
 	./src/subdiv/sqrt3.cpp
 	./src/subdiv/catmullclark.cpp
-	
 )
 
 set(Headers 

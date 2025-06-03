@@ -8,7 +8,7 @@
 // loosely inspired by https://github.com/cmu462/Scotty3D/wiki/Loop-Subdivision
 // and chapter 4.2 of
 // https://graphics.stanford.edu/courses/cs348a-09-fall/Papers/zorin-subdivision00.pdf
-TriMesh* LoopSubdiv::subdivide(const TriMesh* in, int n_steps) {
+TriMesh* LoopSubdiv::subdivide(TriMesh* in, int n_steps) {
   const HalfEdgeData* hfd = in->half_edge_data();
   HalfEdgeData* subdivided = new HalfEdgeData(*hfd);
 

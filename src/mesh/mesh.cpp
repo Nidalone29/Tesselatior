@@ -16,7 +16,7 @@
 #include "halfedge.h"
 
 AbstractMesh::AbstractMesh(const MESH_TYPE type, HalfEdgeData* hf_data,
-                           const Material& material)
+                           Material* material)
     : hf_data_(hf_data), material_(material) {
   LOG_TRACE("const MESH_TYPE , HalfEdgeData* , const Material& ");
   if (!hf_data->IsValidType(type)) {
@@ -46,11 +46,18 @@ const HalfEdgeData* AbstractMesh::half_edge_data() const {
   return hf_data_;
 }
 
-const Material& AbstractMesh::material() const {
+const Material* AbstractMesh::material() const {
   return material_;
 }
 
-void AbstractMesh::material(const Material& m) {
+Material* AbstractMesh::material() {
+  return material_;
+}
+
+void AbstractMesh::material(Material* m) {
+  if (material_ != nullptr) {
+    delete material_;
+  }
   material_ = m;
 }
 
@@ -169,7 +176,7 @@ void AbstractMesh::ClearOpenGLBuffers() {
   num_indices_ = 0;
 }
 
-TriMesh::TriMesh(HalfEdgeData* hf_data, const Material& material)
+TriMesh::TriMesh(HalfEdgeData* hf_data, Material* material)
     : AbstractMesh(MESH_TYPE::TRI, hf_data, material) {
   //
 }
@@ -190,7 +197,7 @@ IMesh* TriMesh::clone() {
   return new TriMesh(new HalfEdgeData(*this->hf_data_), this->material_);
 }
 
-QuadMesh::QuadMesh(HalfEdgeData* hf_data, const Material& material)
+QuadMesh::QuadMesh(HalfEdgeData* hf_data, Material* material)
     : AbstractMesh(MESH_TYPE::QUAD, hf_data, material) {
   //
 }
@@ -207,7 +214,7 @@ IMesh* QuadMesh::clone() {
   return new QuadMesh(new HalfEdgeData(*this->hf_data_), this->material_);
 }
 
-PolyMesh::PolyMesh(HalfEdgeData* hf_data, const Material& material)
+PolyMesh::PolyMesh(HalfEdgeData* hf_data, Material* material)
     : AbstractMesh(MESH_TYPE::POLY, hf_data, material) {
   //
 }

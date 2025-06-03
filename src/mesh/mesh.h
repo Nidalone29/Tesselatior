@@ -49,7 +49,9 @@ class IMesh {
   // opengl rendering
   [[nodiscard]] virtual const GLuint& vao() const = 0;
   [[nodiscard]] virtual unsigned int num_indices() const = 0;
-  [[nodiscard]] virtual const Material& material() const = 0;
+  [[nodiscard]] virtual const Material* material() const = 0;
+  [[nodiscard]] virtual Material* material() = 0;
+  virtual void material(Material* m) = 0;
   [[nodiscard]] virtual int PatchNumVertices() const = 0;
 
   [[nodiscard]] virtual IMesh* clone() = 0;
@@ -75,7 +77,7 @@ class AbstractMesh : public IMesh {
  public:
   AbstractMesh() = delete;  // can't create an empty mesh
 
-  AbstractMesh(MESH_TYPE type, HalfEdgeData* hf_data, const Material& material);
+  AbstractMesh(MESH_TYPE type, HalfEdgeData* hf_data, Material* material);
   virtual ~AbstractMesh();
 
   AbstractMesh(const AbstractMesh& other) = delete;
@@ -86,8 +88,9 @@ class AbstractMesh : public IMesh {
   [[nodiscard]] const GLuint& vao() const override;
   [[nodiscard]] unsigned int num_indices() const override;
   [[nodiscard]] const HalfEdgeData* half_edge_data() const;
-  [[nodiscard]] const Material& material() const override;
-  void material(const Material& m);
+  [[nodiscard]] const Material* material() const override;
+  [[nodiscard]] Material* material() override;
+  void material(Material* m) override;
 
   [[nodiscard]] bool IsManifold() const override;
 
@@ -121,7 +124,7 @@ class AbstractMesh : public IMesh {
 
   // Actual mesh data
   HalfEdgeData* hf_data_;
-  Material material_;
+  Material* material_;
 };
 
 // we will have:
@@ -130,7 +133,7 @@ class AbstractMesh : public IMesh {
 // - Polygonal meshes (all non trig primitives will be triangulated)
 class TriMesh final : public AbstractMesh {
  public:
-  TriMesh(HalfEdgeData* hf_data, const Material& material);
+  TriMesh(HalfEdgeData* hf_data, Material* material);
   [[nodiscard]] int PatchNumVertices() const override;
   [[nodiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override;
   [[nodiscard]] IMesh* clone() override;
@@ -138,7 +141,7 @@ class TriMesh final : public AbstractMesh {
 
 class QuadMesh final : public AbstractMesh {
  public:
-  QuadMesh(HalfEdgeData* hf_data, const Material& material);
+  QuadMesh(HalfEdgeData* hf_data, Material* material);
   [[nodiscard]] int PatchNumVertices() const override;
   [[nodiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override;
   [[nodiscard]] IMesh* clone() override;
@@ -146,7 +149,7 @@ class QuadMesh final : public AbstractMesh {
 
 class PolyMesh final : public AbstractMesh {
  public:
-  PolyMesh(HalfEdgeData* hf_data, const Material& material);
+  PolyMesh(HalfEdgeData* hf_data, Material* material);
   [[nodiscard]] int PatchNumVertices() const override;
   [[nodiscard]] std::vector<sa::SubDiv> CompatibleSubdivs() override;
   [[nodiscard]] IMesh* clone() override;

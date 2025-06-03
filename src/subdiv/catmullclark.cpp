@@ -5,7 +5,7 @@
 // TODO adapt for any mesh in input
 // based on
 // https://en.wikipedia.org/wiki/Catmull%E2%80%93Clark_subdivision_surface
-QuadMesh* CatmullClarkSubdiv::subdivide(const QuadMesh* in, int n_steps) {
+QuadMesh* CatmullClarkSubdiv::subdivide(QuadMesh* in, int n_steps) {
   if (!in->IsManifold()) {
     // TODO deal with boundaries
     // ideally you should never be here

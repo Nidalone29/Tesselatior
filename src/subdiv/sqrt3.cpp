@@ -8,7 +8,7 @@
 #include "../logger.h"
 
 // https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf
-TriMesh* Sqrt3Subdiv::subdivide(const TriMesh* in, int n_steps) {
+TriMesh* Sqrt3Subdiv::subdivide(TriMesh* in, int n_steps) {
   if (!in->IsManifold()) {
     // TODO deal with boundaries
     // ideally you should never be here

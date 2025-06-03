@@ -13,6 +13,8 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include <assimp/postprocess.h>
+
 #include "camera.h"
 #include "light.h"
 #include "transform.h"
@@ -24,7 +26,6 @@
 #include "./mesh/model_importer.h"
 #include "./mesh/object.h"
 #include "utilities.h"
-#include "assimp/postprocess.h"
 
 using namespace std::chrono_literals;
 using hr_clock = std::chrono::high_resolution_clock;
@@ -222,8 +223,7 @@ void Application::Init() {
 
   Transform mars_t;
   StaticModel* mars =
-      smc.CreateMesh("Mars rover", "models/PerseveranceByNidal.glb",
-                     aiProcess_PreTransformVertices);
+      smc.CreateMesh("Mars rover", "models/PerseveranceByNidal.glb");
   mars_t.translate(-5.0F, 0.0F, 0.0F);
   mars->transform(mars_t);
   objects_scene->AddObject(mars);
@@ -328,10 +328,10 @@ void Application::Init() {
   }
 
   Scene* monster_frog = new Scene("MonsterFrog");
-  StaticModel* monster_frog_model = smc.CreateMesh(
-      "Monster", "models/monsterfrog.obj",
-      aiProcess_PreTransformVertices | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate);
+  Options monster_opts;
+  monster_opts.triangulate = true;
+  StaticModel* monster_frog_model =
+      smc.CreateMesh("Monster", "models/monsterfrog.obj", monster_opts);
   monster_frog->AddObject(monster_frog_model);
 
   scenes_.push_back(manifolds);

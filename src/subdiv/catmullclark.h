@@ -8,7 +8,7 @@ class CatmullClarkSubdiv final : public ISubdivision {
   // I can't specify the argument type because it violates the Liskov
   // Substitution Principle
   [[nodiscard]] QuadMesh* subdivide(IMesh* in, int n_steps) override {
-    if (const QuadMesh* d = dynamic_cast<QuadMesh*>(in); d != nullptr) {
+    if (QuadMesh* d = dynamic_cast<QuadMesh*>(in); d != nullptr) {
       // the architecture of the program
       // (AvailableSubdivAlgosFactory::GetAvailableAlgos()) should guarantee
       // that this works
@@ -17,7 +17,7 @@ class CatmullClarkSubdiv final : public ISubdivision {
     return nullptr;
   }
 
-  [[nodiscard]] QuadMesh* subdivide(const QuadMesh* in, int n_steps);
+  [[nodiscard]] QuadMesh* subdivide(QuadMesh* in, int n_steps);
 
  private:
 };

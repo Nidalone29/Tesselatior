@@ -47,7 +47,7 @@ void StaticModel::Draw() const {
   for (const IMesh* mesh : model_) {
     glBindVertexArray(mesh->vao());
 
-    mesh->material().BindTextures();
+    mesh->material()->BindTextures();
 
     glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
     glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
@@ -55,11 +55,11 @@ void StaticModel::Draw() const {
 
     glPatchParameteri(GL_PATCH_VERTICES, mesh->PatchNumVertices());
     // clang-format off
-    const Material& material = mesh->material();
-    shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
-    shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
-    shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
-    shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
+    const Material* material = mesh->material();
+    shader_->SetUniformVec3("material_ambient_reflectivity", material->ambient_reflectivity());
+    shader_->SetUniformVec3("material_diffuse_reflectivity", material->diffuse_reflectivity());
+    shader_->SetUniformVec3("material_specular_reflectivity", material->specular_reflectivity());
+    shader_->SetUniformFloat("material_specular_glossiness_exponent", material->shininess());
     // clang-format on
 
     glDrawElements(GL_PATCHES, mesh->num_indices(), GL_UNSIGNED_INT, nullptr);
@@ -68,7 +68,9 @@ void StaticModel::Draw() const {
   }
 }
 
-void StaticModel::SetRenderSettings() const {}
+void StaticModel::SetRenderSettings() const {
+  //
+}
 
 void StaticModel::ShowSettingsGUI() {
   // TODO phong alpha

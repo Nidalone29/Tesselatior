@@ -231,7 +231,7 @@ void ShaderManager::AddShaders(
     const std::initializer_list<std::pair<std::string, Shader*>> in_shaders) {
   for (const auto& [shader_id, shader_ptr] : in_shaders) {
     if (shaders_.find(shader_id) == shaders_.end()) {
-      // LOG OVERRITING SHADER
+      // LOG OVERWRITING SHADER
     }
     shaders_.insert({shader_id, shader_ptr});
   }

@@ -45,18 +45,18 @@ void SubDivMesh::Draw() const {
   SetRenderSettings();
   glBindVertexArray(subdiv_model_->vao());
 
-  subdiv_model_->material().BindTextures();
+  subdiv_model_->material()->BindTextures();
 
   glEnableVertexAttribArray(to_underlying(ATTRIB_ID::POSITIONS));
   glEnableVertexAttribArray(to_underlying(ATTRIB_ID::NORMALS));
   glEnableVertexAttribArray(to_underlying(ATTRIB_ID::TEXTURE_COORDS));
 
   // clang-format off
-  const Material& material = subdiv_model_->material();
-  shader_->SetUniformVec3("material_ambient_reflectivity", material.ambient_reflectivity());
-  shader_->SetUniformVec3("material_diffuse_reflectivity", material.diffuse_reflectivity());
-  shader_->SetUniformVec3("material_specular_reflectivity", material.specular_reflectivity());
-  shader_->SetUniformFloat("material_specular_glossiness_exponent", material.shininess());
+  const Material* material = subdiv_model_->material();
+  shader_->SetUniformVec3("material_ambient_reflectivity", material->ambient_reflectivity());
+  shader_->SetUniformVec3("material_diffuse_reflectivity", material->diffuse_reflectivity());
+  shader_->SetUniformVec3("material_specular_reflectivity", material->specular_reflectivity());
+  shader_->SetUniformFloat("material_specular_glossiness_exponent", material->shininess());
   // clang-format on
 
   glDrawElements(GL_PATCHES, subdiv_model_->num_indices(), GL_UNSIGNED_INT,
