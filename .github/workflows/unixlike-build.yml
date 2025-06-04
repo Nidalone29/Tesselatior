@@ -39,13 +39,12 @@ jobs:
         path: vcpkg
 
     - name: Bootstrap vcpkg
-      shell: pwsh
+      shell: bash
       run: "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh -disableMetrics"
 
     - name: Set VCPKG_ROOT
-      shell: pwsh
+      shell: bash
       run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
-
 
     # https://github.com/actions/runner-images/issues/2924
     - name: "Run apt-get update"
@@ -67,7 +66,7 @@ jobs:
 
     - name: Set reusable strings
       id: strings
-      shell: pwsh
+      shell: bash
       run: echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.preset }}" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake

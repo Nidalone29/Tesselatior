@@ -33,16 +33,16 @@ jobs:
         path: vcpkg
 
     - name: Bootstrap vcpkg
-      shell: cmd
+      shell: pwsh
       run: "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh -disableMetrics"
 
     - name: Set VCPKG_ROOT
-      shell: cmd
+      shell: pwsh
       run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
 
     - name: Set reusable strings
       id: strings
-      shell: cmd
+      shell: pwsh
       run: echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.preset }}" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
