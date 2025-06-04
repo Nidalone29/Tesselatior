@@ -31,7 +31,7 @@ jobs:
 
     - name: Set VCPKG_ROOT
       shell: cmd
-      run: echo "${{ github.workspace }}/vcpkg" >> "$VCPKG_ROOT"
+      run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
 
     - name: Export GitHub Actions cache environment variables (for vcpkg)
       uses: actions/github-script@v7
