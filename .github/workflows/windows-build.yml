@@ -44,7 +44,7 @@ jobs:
     - name: Set reusable strings
       id: strings
       shell: pwsh
-      run: echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.preset }}" >> "$GITHUB_OUTPUT"
+      run: echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.preset }}" >> "$env:GITHUB_OUTPUT"
 
     - name: Configure CMake
       run: cmake --preset ${{ matrix.preset }}
