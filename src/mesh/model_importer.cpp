@@ -35,7 +35,7 @@ StaticModel* StaticModelCreator::CreateMesh(
 
 SubDivMesh* SubDivMeshCreator::CreateMesh(
     const std::string& name, const std::filesystem::path& model_path_,
-    Options& opts) {
+    Options opts) {
   opts.require_single_mesh = true;
 
   // For now this will by default use ASSIMP

@@ -32,7 +32,7 @@ class SubDivMeshCreator : public IMeshCreator {
 
   SubDivMesh* CreateMesh(const std::string& name,
                          const std::filesystem::path& model_path_,
-                         Options& opts = Options());
+                         Options opts = Options());
 
   SubDivMesh* CreateMesh(const std::string& name, const MESH_TYPE in_type,
                          const std::vector<Vertex>& in_vertices,
