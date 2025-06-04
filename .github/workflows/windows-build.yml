@@ -31,6 +31,7 @@ jobs:
       with:
         repository: microsoft/vcpkg
         path: vcpkg
+        fetch-depth: 0
 
     - name: Bootstrap vcpkg
       shell: pwsh
@@ -38,7 +39,7 @@ jobs:
 
     - name: Set VCPKG_ROOT
       shell: pwsh
-      run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
+      run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$env:GITHUB_ENV"
 
     - name: Set reusable strings
       id: strings
