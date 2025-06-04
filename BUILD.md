@@ -1,6 +1,6 @@
 # Building instuctions
 
-1) get inside the Tessellatior directory `cd Tesselatior`
+1) get inside the Tesselatior directory `cd Tesselatior`
 2) pull vcpkg with `git submodule update --init`
 3) install dependencies based on your system if you need them
    1) **glfw** system deps
@@ -19,11 +19,12 @@
       - More information on <https://www.glfw.org/docs/latest/compile_guide.html#compile_deps>
       - Debian: `sudo apt-get install libxmu-dev libxi-dev libgl-dev`
   
-4) run `cmake --list-presets` to check you available presets
+4) run `cmake --list-presets` to check your available presets
 5) execute your desired preset with `cmake --preset "your-preset-name"`
 6) build the project with `cmake --build "./build/your-preset-name"`
-   1) the build command should also compy every asset automaticcally
-7) the exeutable `Tesselatior.exe` is in the build directory
+   1) the build command should also copy every asset automatically. If not you can simply run the custom targets before.
+7) the executable `Tesselatior.exe` is in the build directory
 
  Cold Compilation time: ~8/10 min
+
  After initial CMake Cache build the compile time is a few seconds at max

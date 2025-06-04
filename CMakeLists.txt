@@ -39,6 +39,12 @@ set(Headers
 
 add_compile_definitions(IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/my_imguiconfig.h")
 
+if(NOT DEFINED ENV{VCPKG_ROOT})
+  message(FATAL_ERROR "VCPKG_ROOT is not set!")
+else()
+  message(STATUS "VCPKG_ROOT is set to: $ENV{VCPKG_ROOT}")
+endif()
+
 project(Tesselatior LANGUAGES CXX VERSION 0.0.1)
 
 find_package(OpenGL REQUIRED)
