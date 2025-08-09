@@ -10,23 +10,25 @@ Checks: "-*,
         readability-*,
         -llvm-header-guard,
         -modernize-use-trailing-return-type,
+        -modernize-use-auto,
         -readability-magic-numbers,
         -bugprone-easily-swappable-parameters,
         -cppcoreguidelines-avoid-magic-numbers,
         -cppcoreguidelines-pro-type-union-access,
         -cppcoreguidelines-pro-type-vararg,
+        -cppcoreguidelines-owning-memory,
         -google-readability-todo,
         -readability-implicit-bool-conversion,
         -llvm-include-order,
         -readability-isolate-declaration,
         -readability-redundant-member-init,
         -readability-identifier-length"
-        
+
 CheckOptions:
   - key: modernize-use-override.IgnoreDestructors
-    value: true
+    value: "true"
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
-    value: true
+    value: "true"
 
 WarningsAsErrors: ''
 HeaderFilterRegex: ''

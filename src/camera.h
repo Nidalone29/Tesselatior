@@ -42,13 +42,13 @@ class Camera {
    * Returns the current view_matrix
    * @return view_matrix
    */
-  const glm::mat4& view_matrix() const;
+  [[nodiscard]] const glm::mat4& view_matrix() const;
 
   /**
    * Returns the current projection_matrix
    * @return projection_matrix
    */
-  const glm::mat4& projection_matrix() const;
+  [[nodiscard]] const glm::mat4& projection_matrix() const;
 
   /**
    * Resets the view the yaw to -90deg, the pitch to 0deg and the view matrix
@@ -56,9 +56,9 @@ class Camera {
    */
   void ResetView();
 
-  const glm::vec3& position() const;
-  const glm::vec3& look_at() const;
-  const glm::vec3& up() const;
+  [[nodiscard]] const glm::vec3& position() const;
+  [[nodiscard]] const glm::vec3& look_at() const;
+  [[nodiscard]] const glm::vec3& up() const;
 
   float speed() const;
   float* speed();  // useful for imgui

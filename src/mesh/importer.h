@@ -6,14 +6,9 @@
 #include "mesh.h"
 
 struct Options {
-  bool triangulate;
-  bool pre_transform;
-  bool require_single_mesh;
-
-  Options()
-      : triangulate(false), pre_transform(true), require_single_mesh(false) {
-    //
-  }
+  bool triangulate{false};
+  bool pre_transform{true};
+  bool require_single_mesh{false};
 };
 
 class IImporter {
@@ -27,7 +22,7 @@ class IImporter {
   virtual ~IImporter() = 0;
 
   virtual std::vector<IMesh*> import(const std::filesystem::path& filepath,
-                                     const Options& opts = Options()) = 0;
+                                     const Options& opts) = 0;
 
  private:
 };

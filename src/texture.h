@@ -20,15 +20,16 @@ class Texture {
    * @brief Construct a new Texture object from a given path
    *
    * @param path
+   * @param type
    */
-  Texture(const std::filesystem::path& path, const TEXTURE_TYPE type);
-  Texture(const aiTexture* embedded, const TEXTURE_TYPE type);
+  Texture(const std::filesystem::path& path, TEXTURE_TYPE type);
+  Texture(const aiTexture* embedded, TEXTURE_TYPE type);
   /**
    * @brief default texture
    *
    * @param type the TEXTURE_TYPE of the default texture to creade
    */
-  Texture(const TEXTURE_TYPE type);
+  explicit Texture(TEXTURE_TYPE type);
 
   ~Texture();
   Texture(const Texture& other) = default;
@@ -36,9 +37,9 @@ class Texture {
   Texture(Texture&& other) = default;
   Texture& operator=(Texture&& other) = default;
 
-  TEXTURE_TYPE type() const;
+  [[nodiscard]] TEXTURE_TYPE type() const;
 
-  GLuint id() const;
+  [[nodiscard]] GLuint id() const;
 
  private:
   GLuint id_;

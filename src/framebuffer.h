@@ -14,7 +14,7 @@
  */
 class FrameBuffer {
  public:
-  FrameBuffer(const int width, const int height);
+  FrameBuffer(int width, int height);
   ~FrameBuffer();
 
   /**
@@ -29,10 +29,10 @@ class FrameBuffer {
    *
    * @return const GLuint
    */
-  GLuint color_attachment_id() const;
-  glm::vec2 size_vector() const;
+  [[nodiscard]] GLuint color_attachment_id() const;
+  [[nodiscard]] glm::vec2 size_vector() const;
 
-  void Resize(const int new_width, const int new_height);
+  void Resize(int new_width, int new_height);
 
  private:
   void Check() const;

@@ -29,16 +29,16 @@ class Material {
   void BindTextures() const;
 
   void ambient_reflectivity(const glm::vec3& in);
-  const glm::vec3& ambient_reflectivity() const;
+  [[nodiscard]] const glm::vec3& ambient_reflectivity() const;
 
   void diffuse_reflectivity(const glm::vec3& in);
-  const glm::vec3& diffuse_reflectivity() const;
+  [[nodiscard]] const glm::vec3& diffuse_reflectivity() const;
 
   void specular_reflectivity(const glm::vec3& in);
-  const glm::vec3& specular_reflectivity() const;
+  [[nodiscard]] const glm::vec3& specular_reflectivity() const;
 
-  void shininess(const float in);
-  const float shininess() const;
+  void shininess(float in);
+  [[nodiscard]] float shininess() const;
 
  private:
   std::vector<Texture> textures_;

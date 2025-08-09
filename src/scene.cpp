@@ -29,7 +29,7 @@ void Scene::AddObject(IRenderableObject* to_add) {
   objects_.push_back(to_add);
 }
 
-const std::vector<IRenderableObject*> Scene::objects() const {
+const std::vector<IRenderableObject*>& Scene::objects() const {
   return objects_;
 }
 

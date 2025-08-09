@@ -38,7 +38,7 @@ class Application {
   static Camera& GetCamera();
   static Renderer& GetRenderer();
   static APP_STATE GetAppState();
-  static void SetAppState(const APP_STATE to_add);
+  static void SetAppState(APP_STATE to_add);
   void Run();
 
  private:
@@ -47,8 +47,7 @@ class Application {
 
   void Init();
   void CleanUp();
-  void CameraControl(const double xpos, const double ypos,
-                     const float delta_time);
+  void CameraControl(double xpos, double ypos, float delta_time);
 
   void DrawImGuiLayer();
   void DrawControls();

@@ -16,13 +16,13 @@ class Renderer {
 
   void ToggleWireframe();
   const FrameBuffer& target();
-  void ResizeTarget(const int width, const int height);
-  void ResizeTarget(const float width, const float height);
-  void SetClearColor(const float r, const float g, const float b);
+  void ResizeTarget(int width, int height);
+  void ResizeTarget(float width, float height);
+  void SetClearColor(float r, float g, float b);
 
   int* tess_level();
   float* displacement_height();
-  int max_tessel_level() const;
+  [[nodiscard]] int max_tessel_level() const;
 
   float* phong_alpha();
 

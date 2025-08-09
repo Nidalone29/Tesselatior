@@ -44,18 +44,20 @@ SubDivMesh* SubDivMeshCreator::CreateMesh(
   AssimpImporter a;
   IMesh* result = a.import(model_path_, opts).at(0);
 
-  const Shader* s;
-  if (TriMesh* d = dynamic_cast<TriMesh*>(result); d != nullptr) {
-    s = ShaderManager::Instance().GetShader("TriangleShader");
-  } else if (QuadMesh* d = dynamic_cast<QuadMesh*>(result); d != nullptr) {
-    s = ShaderManager::Instance().GetShader("QuadsShader");
+  const Shader* shader;
+  if (const TriMesh* tri_mesh = dynamic_cast<TriMesh*>(result);
+      tri_mesh != nullptr) {
+    shader = ShaderManager::Instance().GetShader("TriangleShader");
+  } else if (const QuadMesh* quad_mesh = dynamic_cast<QuadMesh*>(result);
+             quad_mesh != nullptr) {
+    shader = ShaderManager::Instance().GetShader("QuadsShader");
   } else {
     // TODO mixed meshes
-    s = ShaderManager::Instance().GetShader("TriangleShader");
+    shader = ShaderManager::Instance().GetShader("TriangleShader");
   }
 
   // TODO deal with shaders and shaders parameters
-  return new SubDivMesh(name, result, s);
+  return new SubDivMesh(name, result, shader);
 }
 
 SubDivMesh* SubDivMeshCreator::CreateMesh(

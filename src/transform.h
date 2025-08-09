@@ -8,8 +8,8 @@
 class Transform {
  public:
   Transform();
-  Transform(const glm::mat4 scale, const glm::mat4 rotation,
-            const glm::mat4 translation);
+  Transform(const glm::mat4& scale, const glm::mat4& rotation,
+            const glm::mat4& translation);
 
   ~Transform() = default;
   Transform(const Transform& other) = default;
@@ -18,7 +18,8 @@ class Transform {
   Transform& operator=(Transform&& other) = default;
 
   /**
-   * @brief Applica la rotazione alla matrice corrente. Gli angoli sono ingradi.
+   * @brief Applica la rotazione alla matrice corrente. Gli angoli sono in
+   * gradi.
    *
    * @param degX angolo di rotazione rispetto all'asse X
    * @param degY angolo di rotazione rispetto all'asse Y
@@ -75,7 +76,7 @@ class Transform {
    */
   Transform operator*(const glm::mat4& matrix);
 
-  const glm::mat4& matrix() const;
+  [[nodiscard]] const glm::mat4& matrix() const;
 
  private:
   void Update();

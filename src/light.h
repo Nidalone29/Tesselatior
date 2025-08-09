@@ -14,11 +14,11 @@ class Light {
   Light(const glm::vec3& color, const glm::vec3& intensity);
   virtual ~Light() = 0;
 
-  const glm::vec3& color() const;
+  [[nodiscard]] const glm::vec3& color() const;
   float* color();
   void color(const glm::vec3& color);
 
-  const glm::vec3& intensity() const;
+  [[nodiscard]] const glm::vec3& intensity() const;
   float* intensity();
   void intensity(const glm::vec3& intensity);
 
@@ -41,7 +41,7 @@ class DirectionalLight : public Light {
                    const glm::vec3& direction);
 
   void direction(const glm::vec3& in);
-  const glm::vec3& direction() const;
+  [[nodiscard]] const glm::vec3& direction() const;
   float* direction();
 
  private:

@@ -33,10 +33,10 @@ class Terrain final : public IRenderableObject {
   [[nodiscard]] const Shader* GetShader() const override;
   void SetRenderSettings() const override;
   void ShowSettingsGUI() override;
-  const Transform& transform() const override;
+  [[nodiscard]] const Transform& transform() const override;
   void transform(const Transform& transform) override;
 
-  const std::string& name() const override;
+  [[nodiscard]] const std::string& name() const override;
   void name(const std::string& name) override;
 
  private:
@@ -91,7 +91,7 @@ class SubDivMesh final : public IRenderableObject {
   void ShowSettingsGUI() override;
   void ApplySmoothShading();
   [[nodiscard]] const Transform& transform() const override;
-  void transform(const Transform&) override;
+  void transform(const Transform& transform) override;
 
   [[nodiscard]] const std::string& name() const override;
   void name(const std::string& name) override;

@@ -53,7 +53,6 @@ std::vector<IMesh*> AssimpImporter::import(
     IMesh* my_mesh;
 
     const MESH_TYPE current_mesh_type = DetectMeshType(pai_mesh);
-    bool to_do_compute_normals = !pai_mesh->HasNormals();
 
     HalfEdgeData* curr_hfd = GenerateHalfedgeData(pai_mesh, current_mesh_type);
 
@@ -77,7 +76,7 @@ std::vector<IMesh*> AssimpImporter::import(
       // TODO mixed meshes
     }
 
-    if (to_do_compute_normals) {
+    if (!pai_mesh->HasNormals()) {
       my_mesh->ApplySmoothNormals();
     }
     out_meshes.push_back(my_mesh);
@@ -96,7 +95,7 @@ MESH_TYPE AssimpImporter::DetectMeshType(const aiMesh* pai_mesh) {
   } else if (pai_mesh->mPrimitiveTypes == aiPrimitiveType_POLYGON) {
     // code to autodetect type
     const aiFace& first_ai_face = pai_mesh->mFaces[0];
-    unsigned int current_index_num = first_ai_face.mNumIndices;
+    const unsigned int current_index_num = first_ai_face.mNumIndices;
     for (unsigned int j = 1; j < pai_mesh->mNumFaces; j++) {
       const aiFace& ai_face = pai_mesh->mFaces[j];
       if (ai_face.mNumIndices != current_index_num) {

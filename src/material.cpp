@@ -63,6 +63,6 @@ void Material::shininess(const float in) {
   shininess_ = in;
 }
 
-const float Material::shininess() const {
+float Material::shininess() const {
   return shininess_;
 }

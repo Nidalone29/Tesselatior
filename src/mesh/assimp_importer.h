@@ -17,18 +17,18 @@ class AssimpImporter : public IImporter {
   AssimpImporter& operator=(const AssimpImporter& other) = delete;
   AssimpImporter(AssimpImporter&& other) = delete;
   AssimpImporter&& operator=(AssimpImporter&& other) = delete;
-  ~AssimpImporter();
+  ~AssimpImporter() override;
 
   std::vector<IMesh*> import(const std::filesystem::path& filepath,
-                             const Options& opts = Options()) override;
+                             const Options& opts) override;
 
  private:
   MESH_TYPE DetectMeshType(const aiMesh* pai_mesh);
   HalfEdgeData* GenerateHalfedgeData(const aiMesh* pai_mesh,
-                                     const MESH_TYPE current_mesh_type);
+                                     MESH_TYPE current_mesh_type);
 
   Material* ProcessMaterial(const aiMaterial* material, const aiScene* p_scene,
-                            const std::filesystem::path filepath);
+                            std::filesystem::path filepath);
 
   Assimp::Importer* importer_;
 };

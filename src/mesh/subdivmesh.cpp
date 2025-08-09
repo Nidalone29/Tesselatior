@@ -13,17 +13,15 @@ SubDivMesh::SubDivMesh(const std::string& name, IMesh* model,
     : name_("SubDiv | " + name),
       base_model_(model),
       shader_(shader),
+      subdiv_model_(model->clone()),
       subdiv_level_(0),
       subdiv_algo_(sa::SubDiv::NONE),
-      subdiv_model_(nullptr),
-      subdiv_strategy_(nullptr),
       current_subdiv_level_(0),
       compatible_subdivs_(model->CompatibleSubdivs()),
-      shading_ui_(1),  // default smooth shading
-      current_subdiv_algo_(sa::SubDiv::NONE) {
+      current_subdiv_algo_(sa::SubDiv::NONE),
+      subdiv_strategy_(nullptr),  // default smooth shading
+      shading_ui_(1) {
   LOG_TRACE("SubDivMesh(const std::string&, const Model&, const Shader*)");
-
-  subdiv_model_ = model->clone();
 }
 
 SubDivMesh::~SubDivMesh() {

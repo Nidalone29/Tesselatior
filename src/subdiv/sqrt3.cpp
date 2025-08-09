@@ -36,27 +36,27 @@ TriMesh* Sqrt3Subdiv::subdivide(TriMesh* in, int n_steps) {
       if (v->IsBoundary()) {
         // unsupported
         throw;
-      } else {  // I am inside
-        glm::vec3 new_pos = v->position;
-        glm::vec2 new_uv = v->text_coords;  // idk if uv will work with sqrt3...
-        const int valence = v->Valence();
-        const float alpha = (4.0F - (2.0F * cos(2.0F * M_PI / valence))) / 9.0F;
-        new_pos = (1 - alpha) * new_pos;
-        new_uv = (1 - alpha) * new_uv;
-        const HalfEdge* curr = v->halfedge;
-        int counter = 0;
-        do {
-          Vertex* b = curr->vert;
-          assert(b != v);
-          new_pos += alpha * b->position * (1.0F / valence);
-          // new_norm += b->normal * beta;
-          new_uv += alpha * b->text_coords * (1.0F / valence);
-          counter++;
-          curr = curr->twin->next;
-        } while (curr != v->halfedge);
-        assert(counter == v->Valence());
-        even_vertex_pos[v] = Vertex(new_pos, new_uv);
       }
+      // I am inside
+      glm::vec3 new_pos = v->position;
+      glm::vec2 new_uv = v->text_coords;  // idk if uv will work with sqrt3...
+      const int valence = v->Valence();
+      const float alpha = (4.0F - (2.0F * cos(2.0F * M_PI / valence))) / 9.0F;
+      new_pos = (1 - alpha) * new_pos;
+      new_uv = (1 - alpha) * new_uv;
+      const HalfEdge* curr = v->halfedge;
+      int counter = 0;
+      do {
+        Vertex* b = curr->vert;
+        assert(b != v);
+        new_pos += alpha * b->position * (1.0F / valence);
+        // new_norm += b->normal * beta;
+        new_uv += alpha * b->text_coords * (1.0F / valence);
+        counter++;
+        curr = curr->twin->next;
+      } while (curr != v->halfedge);
+      assert(counter == v->Valence());
+      even_vertex_pos[v] = Vertex(new_pos, new_uv);
     }
 
     for (Face* f : *subdivided->faces()) {

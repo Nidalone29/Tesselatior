@@ -6,8 +6,8 @@ Transform::Transform() {
   scaling_ = translation_ = rotation_ = transform_ = glm::mat4(1.0F);
 }
 
-Transform::Transform(const glm::mat4 scale, const glm::mat4 rotation,
-                     const glm::mat4 translation)
+Transform::Transform(const glm::mat4& scale, const glm::mat4& rotation,
+                     const glm::mat4& translation)
     : rotation_(rotation), translation_(translation), scaling_(scale) {
   Update();
 }

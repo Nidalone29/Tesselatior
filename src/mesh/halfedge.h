@@ -38,7 +38,7 @@ class HalfEdgeData {
   // Intended for use for debug purposes
   [[nodiscard]] bool IsValid() const;
   // validate mesh in O(n)
-  bool IsValidType(MESH_TYPE type = MESH_TYPE::POLY) const;
+  [[nodiscard]] bool IsValidType(MESH_TYPE type = MESH_TYPE::POLY) const;
 
   [[nodiscard]] std::vector<Vertex*>* vertices();
   [[nodiscard]] std::vector<HalfEdge*>* half_edges();

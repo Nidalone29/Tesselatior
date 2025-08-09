@@ -17,7 +17,7 @@ class Scene {
   Scene& operator=(Scene&& other) = default;
 
   void AddObject(IRenderableObject* to_add);
-  const std::vector<IRenderableObject*> objects() const;
+  const std::vector<IRenderableObject*>& objects() const;
 
   const AmbientLight& ambient_light() const;
   AmbientLight* ambient_light();

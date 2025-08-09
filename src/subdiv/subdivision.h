@@ -19,7 +19,7 @@ class ISubdivision {
 
 class NoneSubdiv final : public ISubdivision {
  public:
-  virtual ~NoneSubdiv();
+  ~NoneSubdiv();
 
   [[nodiscard]] IMesh* subdivide(IMesh* in, int n_steps) override;
 
